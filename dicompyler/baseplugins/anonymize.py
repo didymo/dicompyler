@@ -257,6 +257,7 @@ class plugin:
         self.updateElement(data, 'RequestedProcedureCodeSequence', '')
         self.updateElement(data, 'PatientState', '')
         self.updateElement(data, 'ResponsibleOrganization', '')
+        self.updateElement(data, 'PhysiciansOfRecord', '')
 
 
 class AnonymizeDialog(wx.Dialog):
