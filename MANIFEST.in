@@ -1,5 +1,0 @@
-include distribute_setup.py
-include dicompyler_app.py
-include dicompyler/*.txt
-include dicompyler/baseplugins/*.xrc
-include dicompyler/resources/*
