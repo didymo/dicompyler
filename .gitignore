@@ -1,2 +1,5 @@
 # Ignore venv
 venv/
+
+# Ignore .idea
+.idea/
