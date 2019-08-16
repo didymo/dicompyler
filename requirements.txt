@@ -3,4 +3,6 @@ matplotlib==2.1.0
 numpy>=1.13.1
 https://github.com/darcymason/pydicom/archive/master.zip
 Pypubsub==4.0.3
+SimpleITK>=1.2.0
+pyradiomics>=2.2.0
 Plastimatch>=1.7.0
