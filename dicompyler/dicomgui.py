@@ -804,7 +804,8 @@ class DicomImporterDialog(wx.Dialog):
             if (self.import_location_setting == "Remember Last Used"):
                 pub.sendMessage('preferences.updated.value',
                     msg={'general.dicom.import_location':self.path})
-
+                pub.sendMessage('preferences.requested.values', msg='general.dicom')
+                
             # Since we have updated the search subfolders setting,
             # update the setting in preferences
             pub.sendMessage('preferences.updated.value',

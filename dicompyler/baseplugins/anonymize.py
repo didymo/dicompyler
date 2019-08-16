@@ -301,8 +301,6 @@ class AnonymizeDialog(wx.Dialog):
             self.lblDescription.SetFont(font)
 
         # Initialize the import location via pubsub
-        # Changed the topic in the function subscribe() to 'preferences.requested.value'
-        # Then export anonymized file will work
         pub.subscribe(self.OnImportPrefsChange, 'general.dicom')
         pub.sendMessage('preferences.requested.values', msg = 'general.dicom')
 
@@ -325,7 +323,7 @@ class AnonymizeDialog(wx.Dialog):
         if (topic[1] == 'import_location'):
             self.path = str(msg)
             self.txtDICOMFolder.SetValue(self.path)
-
+            
     def OnFolderBrowse(self, evt):
         """Get the directory selected by the user."""
 
