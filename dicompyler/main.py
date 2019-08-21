@@ -502,8 +502,8 @@ class MainFrame(wx.Frame):
                     dvh_roi_list.append(dvh_roiVolume)
                     # 
                     dvh_roiDose = dvh.relative_volume.counts
-
-                    for i in range(0, len(dvh_roiDose)+1, 10):
+                    
+                    for i in range(0, len(dvh_roiDose), 10):
                         dvh_roi_list.append(dvh_roiDose[i])
                         if i > max_roi_dose:
                             max_roi_dose = i
