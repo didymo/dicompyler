@@ -9,7 +9,7 @@
 #    available at https://github.com/bastula/dicompyler/
 
 import logging
-logger = logging.getLogger('dicompyler.quickimport')
+logger = logging.getLogger('dicompyler.pipeline')
 import wx
 import os
 from pubsub import pub
