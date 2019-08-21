@@ -35,7 +35,6 @@ def get_np_pixeldata(img_list, dict_ds):
     return dict_pixel_data
 
 
-
 if __name__ == "__main__":
     path = '/home/xudong/dicom_sample'
     dict_datasets = get_datasets_dict(path)
