@@ -7,6 +7,7 @@ import sys
 
 import pydicom
 
+
 # QImage is designed and optimized for I/O,
 # and for direct pixel access and manipulation,
 # while QPixmap is designed and optimized for showing images on screen.

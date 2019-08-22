@@ -92,13 +92,13 @@ def get_img_list(namelist, path):
 """
 Codes below is for testing only.
 """
-if __name__ == '__main__':
-    path = '/home/xudong/dicom_sample'
-    # datasets = get_datasets(path)
-    dict_datasets = get_datasets_dict(path)
-    namelist = get_namelist(dict_datasets)
-    img_list = get_img_list(namelist, path)
-    print(img_list)
+# if __name__ == '__main__':
+#     path = '/home/xudong/dicom_sample'
+#     # datasets = get_datasets(path)
+#     dict_datasets = get_datasets_dict(path)
+#     namelist = get_namelist(dict_datasets)
+#     img_list = get_img_list(namelist, path)
+#     print(img_list)
 
 """
 End of Testing
