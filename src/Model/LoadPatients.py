@@ -62,6 +62,9 @@ def get_datasets(path):
     return datasets
 
 
+# Get datasets from dcm file
+# Return a dicitonary
+# Key: full path, Value: dataset
 def get_datasets_dict(path):
     dict_datasets = {}
     dcm_file_names = glob.glob(path + "/*.dcm")
@@ -71,6 +74,7 @@ def get_datasets_dict(path):
     return dict_datasets
 
 
+# Get
 def get_namelist(dict_ds):
     name_list = list(dict_ds.keys())
     name_list = natural_sort(name_list)

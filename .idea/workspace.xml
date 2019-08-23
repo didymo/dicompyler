@@ -5,7 +5,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Model/CalculateImages.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Model/CalculateImages.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Model/LoadPatients.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Model/LoadPatients.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Model/ViewTest.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Model/ViewTest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/View/mainPage.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/View/mainPage.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -50,7 +50,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.CalculateImages">
+  <component name="RunManager" selected="Python.main">
     <configuration name="CalculateImages" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Onko" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -72,7 +72,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="LoadPatients" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Onko" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -80,11 +80,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/Model" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/Model/LoadPatients.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/main.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -93,7 +93,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="ViewTest" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="mainPage" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Onko" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -101,11 +101,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/Model" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/View" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/Model/ViewTest.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/View/mainPage.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -158,11 +158,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.main" />
+        <item itemvalue="Python.mainPage" />
         <item itemvalue="Python.CalculateImages" />
         <item itemvalue="Python.view_test" />
         <item itemvalue="Python.test" />
-        <item itemvalue="Python.ViewTest" />
-        <item itemvalue="Python.LoadPatients" />
       </list>
     </recent_temporary>
   </component>
