@@ -410,6 +410,10 @@ class MainFrame(wx.Frame):
                 msg = 'plugin.loaded.' + props['plugin_type'] + '.' +s.__name__
                 pub.sendMessage(msg, msg=s)
 
+        # Initialize the import location via pubsub
+        pub.subscribe(self.OnImportPrefsChange, 'general.dicom')
+        pub.sendMessage('preferences.requested.values', msg = 'general.dicom')
+
         dlgProgress = guiutil.get_progress_dialog(self, "Loading Patient Data...")
         self.t=threading.Thread(target=self.LoadPatientDataThread,
             args=(self, self.ptdata, dlgProgress.OnUpdateProgress,
@@ -492,6 +496,7 @@ class MainFrame(wx.Frame):
                                  '...')
                     # Limit DVH bins to 500 Gy due to high doses in brachy
                     dvh = dvhcalc.get_dvh(ptdata['rtss'], patient['dose'].ds, key, 50000)
+                    
                     # Retrieve roi name
                     dvh_roiName = dvh.name
                     # Retrieve roi dvh volume
@@ -518,16 +523,19 @@ class MainFrame(wx.Frame):
             csv_header.append('ROI')
             csv_header.append('Volume (mL)')
 
-            print(max_roi_dose)
-
             for i in range(0, max_roi_dose+1, 10):
                 csv_header.append(str(i)+'cGy')
             
             pddf_csv = pd.DataFrame(dvh_csv_list, columns=csv_header).round(2)
             pddf_csv.fillna(0.0, inplace=True)
 
-            pddf_csv.to_csv(csv_filename)
-                
+            pddf_csv.set_index('Hash ID', inplace=True)
+
+            if not os.path.exists(self.path + '/CSV'):
+                os.makedirs(self.path + '/CSV')
+
+            pddf_csv.to_csv(self.path + '/CSV/' + 'DVH_' + csv_filename)
+
             for key, dvh in patient['dvhs'].items():
                 dvh.rx_dose = patient['plan']['rxdose'] / 100
 
@@ -631,6 +639,12 @@ class MainFrame(wx.Frame):
         else:
             self.lblPlanName.SetLabel('-')
             self.lblRxDose.SetLabel('-')
+
+    def OnImportPrefsChange(self, topic, msg):
+        """When the import preferences change, update the values."""
+        topic = topic.split('.')
+        if (topic[1] == 'import_location'):
+            self.path = str(msg)
 
 ############################## Structure Functions #############################
 

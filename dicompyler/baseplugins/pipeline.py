@@ -16,7 +16,7 @@ from pubsub import pub
 from dicompylercore import dicomparser
 from dicompyler import util
 import SimpleITK as sitk
-import radiomics
+from pydicom import dcmread
 from radiomics import featureextractor
 import pandas as pd
 
@@ -28,7 +28,7 @@ def pluginProperties():
     props['menuname'] = "&Analyze...\tCtrl-Shift-P"
     props['description'] = "Start pyradiomics analysis"
     props['author'] = 'Sohaib Shahid'
-    props['version'] = "0.5.0"
+    props['version'] = "0.1.0"
     props['plugin_type'] = 'import'
     props['plugin_version'] = 1
     props['min_dicom'] = []
@@ -59,7 +59,13 @@ class plugin:
     def pluginMenu(self, evt):
         """Generate pyradiomics spreadsheet."""
 
-        converted_file_name = os.path.basename(self.path) + '.nrrd' # Name of nrrd file
+        patient_hash = ''
+        if 'rtdose.dcm' in os.listdir(self.path):
+            rtdose_file = dcmread(self.path + '/rtdose.dcm')
+            patient_hash = os.path.basename(rtdose_file.PatientID)
+        else:
+            patient_hash = os.path.basename(self.path)
+        converted_file_name = patient_hash + '.nrrd' # Name of nrrd file
         converted_file_location = self.path + '/nrrd/' # Location of folder where nrrd file saved
         converted_file_path = converted_file_location + converted_file_name # Complete path of converted file
         if not os.path.exists(converted_file_location): # If folder does not exist
@@ -89,18 +95,16 @@ class plugin:
             print('Error getting testcase!')
             exit()
        
-        # Define settings for signature calculation
-        # These are currently set equal to the respective default values
-        settings = {}
-        settings['binWidth'] = 25
-        settings['resampledPixelSpacing'] = None  # [3,3,3] is an example for defining resampling (voxels with size 3x3x3mm)
-        settings['interpolator'] = sitk.sitkBSpline
-        settings['correctMask'] = True
-
-        # Initialize feature extractor
-        extractor = featureextractor.RadiomicsFeatureExtractor(**settings)
-        extractor.disableAllFeatures()
-        extractor.enableFeatureClassByName('firstorder') # Only first order features
+        # Initialize feature extractor using default pyradiomics settings
+        # Default features: 
+        #   first order, glcm, gldm, glrlm, glszm, ngtdm, shape
+        # Default settings:
+        #   'minimumROIDimensions': 2, 'minimumROISize': None, 'normalize': False, 
+        #   'normalizeScale': 1, 'removeOutliers': None, 'resampledPixelSpacing': None, 
+        #   'interpolator': 'sitkBSpline', 'preCrop': False, 'padDistance': 5, 'distances': [1], 
+        #   'force2D': False, 'force2Ddimension': 0, 'resegmentRange': None, 'label': 1, 
+        #   'additionalInfo': True 
+        extractor = featureextractor.RadiomicsFeatureExtractor()
 
         print("Calculating features")
         
@@ -110,6 +114,8 @@ class plugin:
 
         for file in os.listdir(converted_struct_location):
             roi_features = [] # Contains features for current ROI
+            roi_features.append(patient_hash)
+            roi_features.append(self.path)
             mask_name = converted_struct_location + '/' + file # Full path of ROI nrrd file
             image_id = file.split('.')[0] # Name of ROI
             feature_vector = extractor.execute(converted_file_path, mask_name)
@@ -120,7 +126,9 @@ class plugin:
             
             all_features.append(roi_features) 
         
-        radiomics_headers.append('ID') 
+        radiomics_headers.append('Hash ID')
+        radiomics_headers.append('Directory Path')
+        radiomics_headers.append('ROI') 
 
         # Extract column/feature names
         for feature_name in feature_vector.keys():
@@ -130,28 +138,13 @@ class plugin:
         radiomics_df = pd.DataFrame(all_features, columns = radiomics_headers)
         
         # Format dataframe to resemble that produced by Slicer3D
-        radiomics_df.set_index('ID', inplace=True)
-        radiomics_df = radiomics_df.transpose()
-
-        #Splitting first column into three separate ones
-        radiomics_df = radiomics_df.reset_index()
-        new_split = radiomics_df[radiomics_df.columns[0]].str.split('_', expand=True)
-        image_type_col = new_split[0]
-        feature_class_col = new_split[1]
-        feature_name_col = new_split[2]
-
-        # Adding new columns to start of dataframe
-        radiomics_df.drop(columns = radiomics_df.columns[0], inplace = True)
-        radiomics_df.insert(0, "Feature Name", feature_name_col)
-        radiomics_df.insert(0, "Feature Class", feature_class_col)
-        radiomics_df.insert(0, "Image Type", image_type_col)
-        radiomics_df.set_index('Image Type', inplace=True)
+        radiomics_df.set_index('Hash ID', inplace=True)
 
         if not os.path.exists(self.path + '/CSV'): # If folder does not exist
             os.makedirs(self.path + '/CSV') # Create folder
         
         # Export dataframe as csv
-        radiomics_df.to_csv(self.path + '/CSV/' + os.path.basename(self.path) + '.csv')
+        radiomics_df.to_csv(self.path + '/CSV/' + 'Pyradiomics_' + patient_hash + '.csv')
 
         print('\n' + 'Done')
 
