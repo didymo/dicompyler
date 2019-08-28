@@ -625,7 +625,7 @@ import src.View.resources_rc
 
 def DICOM_Image_processing():
     path = '/home/xudong/dicom_sample'
-    filename = path + "/ct.150.dcm"
+    filename = path + "/ct.75.dcm"
     ds = pydicom.dcmread(filename)
     ds.convert_pixel_data()
     np_pixel = ds._pixel_array

@@ -1,5 +1,9 @@
-from src.Model.LoadPatients import *
 import numpy as np
+from src.Model.LoadPatients import *
+
+
+def get_img():
+
 
 
 # This is for getting the raw data from dcm file
@@ -50,21 +54,4 @@ def get_np_pixeldata(img_list, dict_ds):
             print("Missing PixelData in " + img)
 
     return dict_pixel_data
-
-
-# if __name__ == "__main__":
-#     path = '/home/xudong/dicom_sample'
-#     dict_datasets = get_datasets_dict(path)
-#     namelist = get_namelist(dict_datasets)
-#     image_file_list = get_img_list(namelist, path)
-#
-#     dict_raw_pixel_data = get_raw_pixeldata(image_file_list, dict_datasets)
-#     dict_np_pixel_data = get_np_pixeldata(image_file_list, dict_datasets)
-#
-#     print(dict_raw_pixel_data.keys())
-#     print(type(dict_raw_pixel_data['/home/xudong/dicom_sample/ct.0.dcm']))
-#
-#     print(dict_np_pixel_data.keys())
-#     print(type(dict_np_pixel_data['/home/xudong/dicom_sample/ct.0.dcm']))
-#     print(dict_np_pixel_data['/home/xudong/dicom_sample/ct.0.dcm'])
 
