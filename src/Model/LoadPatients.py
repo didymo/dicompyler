@@ -39,7 +39,6 @@ def get_datasets(path):
             img_file_name = os.path.basename(dcm_files[i])
             img_index = int(''.join(list(filter(str.isdigit, img_file_name))))
             dict_ds[img_index] = ds_tmp
-            print(img_index)
         elif ds_tmp.SOPClassUID == '1.2.840.10008.5.1.4.1.1.481.3':
             dict_ds['rtss'] = ds_tmp
         elif ds_tmp.SOPClassUID == '1.2.840.10008.5.1.4.1.1.481.2':
@@ -47,9 +46,3 @@ def get_datasets(path):
         elif ds_tmp.SOPClassUID == '1.2.840.10008.5.1.4.1.1.481.5':
             dict_ds['rtplan'] = ds_tmp
     return dict_ds
-
-
-if __name__ == "__main__":
-    datasets = get_datasets(path)
-    for key in datasets.keys():
-        print(key)
