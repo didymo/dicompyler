@@ -684,8 +684,8 @@ import src.View.resources_rc
 #     self.DICOM_view.setScene(DICOM_image_scene)
 
 def DICOM_Image_processing():
-    path = '../0B8E114C0271B6D1E8DB33C721F4833D'
-    filename = path + "/ct.100.dcm"
+    path = '/home/xudong/dicom_sample'
+    filename = path + "/ct.75.dcm"
     ds = pydicom.dcmread(filename)
     ds.convert_pixel_data()
     np_pixel = ds._pixel_array  # shape (512, 512)
