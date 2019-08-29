@@ -3,8 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="8607728d-6aa1-478d-af4c-bfd7fb963cc6" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Model/CalculateImages.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Model/CalculateImages.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Model/LoadPatients.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Model/LoadPatients.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -49,7 +47,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.CalculateImages">
+  <component name="RunManager" selected="Python.CalculateDVHs">
     <configuration name="CalculateDVHs" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Onko" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -157,9 +155,9 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.CalculateDVHs" />
         <item itemvalue="Python.CalculateImages" />
         <item itemvalue="Python.LoadPatients" />
-        <item itemvalue="Python.CalculateDVHs" />
         <item itemvalue="Python.main" />
         <item itemvalue="Python.mainPage" />
       </list>
