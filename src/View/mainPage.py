@@ -673,7 +673,6 @@ class Ui_MainWindow(object):
         self.DICOM_view.setScene(DICOM_image_scene)
         pass
 
-
 import src.View.resources_rc
 
 
@@ -703,6 +702,7 @@ def DVH():
     plt.ylabel('Volume [%s]' % dvh.volume_units)
     if dvh.name:
         plt.legend(loc='best')
+
 
     fig.canvas.draw()
     data = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
