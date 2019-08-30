@@ -68,14 +68,13 @@ class Ui_MainWindow(object):
         # p = self.slider.palette()
         # p.setColor(self.slider.backgroundRole(), QtCore.Qt.black)
         # self.slider.setPalette(p)
-        self.slider.valueChanged.connect(self.valueChange)
+        self.slider.valueChanged.connect(self.valueChangeSlider)
         self.slider.setGeometry(QtCore.QRect(0, 0, 50, 500))
         self.gridLayout_view.addWidget(self.slider, 0, 1, 1, 1)
 
         # DICOM image processing
         id = self.slider.value()
         DICOM_image = getDICOMImage(self, id, img_dict)
-        # DICOM_image = DICOM_Image_processing()
         DICOM_image_label = QtWidgets.QLabel()
         DICOM_image_label.setPixmap(DICOM_image)
         DICOM_image_scene = QtWidgets.QGraphicsScene()
@@ -660,18 +659,20 @@ class Ui_MainWindow(object):
         self.actionClinical_Data.setText(_translate("MainWindow", "Clinical Data"))
         self.actionPyradiomics.setText(_translate("MainWindow", "Pyradiomics"))
 
-    def valueChange(self, img_dict):
+    # When the value of the slider in the DICOM View changes
+    def valueChangeSlider(self):
         id = self.slider.value()
+        path = '../dicom_sample'
+        dataset = get_datasets(path)
+        img_dict = get_img(dataset)
         pixmap = getDICOMImage(self, id, img_dict)
         DICOM_image_label = QtWidgets.QLabel()
         DICOM_image_label.setPixmap(pixmap)
         DICOM_image_scene = QtWidgets.QGraphicsScene()
         DICOM_image_scene.addWidget(DICOM_image_label)
-        self.DICOM_view = QtWidgets.QGraphicsView(self.tab2_view)
         self.DICOM_view.setScene(DICOM_image_scene)
-        self.gridLayout_view.addWidget(self.DICOM_view, 0, 0, 1, 1)
-        self.tab2.addTab(self.tab2_view, "")
-        # self.patient_name_box.setFont(QtGui.QFont("Laksaman", id))
+        pass
+
 
 import src.View.resources_rc
 
@@ -684,23 +685,6 @@ def getDICOMImage(self, id, img_dict):
     pixmap = pixmap.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
     return pixmap
 
-def DICOM_Image_processing():
-    path = '../dicom_sample'
-    filename = path + "/ct.75.dcm"
-    ds = pydicom.dcmread(filename)
-    ds.convert_pixel_data()
-    np_pixel = ds._pixel_array  # shape (512, 512)
-    max = np.amax(np_pixel)
-    min = np.amin(np_pixel)
-    data = (np_pixel - min) / (max - min) * 256
-    data[data < 0] = 0
-    data[data > 255] = 255
-    data = data.astype("int8")
-    qimage = QtGui.QImage(data, data.shape[1], data.shape[0],
-                          QtGui.QImage.Format_Indexed8)
-    pixmap = QtGui.QPixmap(qimage)
-    pixmap = pixmap.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
-    return pixmap
 
 def DVH():
     path = '../dicom_sample'
