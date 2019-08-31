@@ -5,11 +5,12 @@ import numpy as np
 from dicompylercore import dvhcalc
 from src.Model.CalculateImages import *
 from src.Model.LoadPatients import *
+from src.Model.CalculateDVHs import *
 
 
 class Ui_MainWindow(object):
 
-    def setupUi(self, MainWindow):
+    def setupUi(self, MainWindow, img_dict):
         # Main Window
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1080, 700)
@@ -67,14 +68,13 @@ class Ui_MainWindow(object):
         # p = self.slider.palette()
         # p.setColor(self.slider.backgroundRole(), QtCore.Qt.black)
         # self.slider.setPalette(p)
-        # self.slider.valueChanged.connect(self.valueChange)
+        self.slider.valueChanged.connect(self.valueChangeSlider)
         self.slider.setGeometry(QtCore.QRect(0, 0, 50, 500))
         self.gridLayout_view.addWidget(self.slider, 0, 1, 1, 1)
 
         # DICOM image processing
-        # id = self.slider.value()
-        # # getDICOMImage(self, id)
-        DICOM_image = DICOM_Image_processing()
+        id = self.slider.value()
+        DICOM_image = getDICOMImage(self, id, img_dict)
         DICOM_image_label = QtWidgets.QLabel()
         DICOM_image_label.setPixmap(DICOM_image)
         DICOM_image_scene = QtWidgets.QGraphicsScene()
@@ -110,7 +110,7 @@ class Ui_MainWindow(object):
         self.button_exportDVH = QtWidgets.QPushButton(self.tab2_DVH)
         self.button_exportDVH.setGeometry(QtCore.QRect(760, 358, 97, 39))
         self.button_exportDVH.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-        self.button_exportDVH.setStyleSheet("background-color: rgb(147, 112, 219);\n""color: rgb(255, 255, 255);")
+        self.button_exportDVH.setStyleSheet("background-color: rgb(147, 112, 219);\n""color: rgb(0, 0, 0);")
         self.button_exportDVH.setObjectName("button_exportDVH")
         self.tab2.addTab(self.tab2_DVH, "")
 
@@ -659,62 +659,51 @@ class Ui_MainWindow(object):
         self.actionClinical_Data.setText(_translate("MainWindow", "Clinical Data"))
         self.actionPyradiomics.setText(_translate("MainWindow", "Pyradiomics"))
 
-    # def valueChange(self):
-    #     id = self.slider.value()
-    #     getDICOMImage(self, id)
-        # self.patient_name_box.setFont(QtGui.QFont("Laksaman", id))
+
+    # When the value of the slider in the DICOM View changes
+    def valueChangeSlider(self):
+        id = self.slider.value()
+        path = '../dicom_sample'
+        dataset = get_datasets(path)
+        img_dict = get_img(dataset)
+        pixmap = getDICOMImage(self, id, img_dict)
+        DICOM_image_label = QtWidgets.QLabel()
+        DICOM_image_label.setPixmap(pixmap)
+        DICOM_image_scene = QtWidgets.QGraphicsScene()
+        DICOM_image_scene.addWidget(DICOM_image_label)
+        self.DICOM_view.setScene(DICOM_image_scene)
+        pass
 
 import src.View.resources_rc
 
 
-# def getDICOMImage(self, id):
-#     path = '../0B8E114C0271B6D1E8DB33C721F4833D'
-#     filename = path + "/ct." + str(id) + ".dcm"
-#     data = get_np_pixeldata(get_img_list(get_namelist(get_datasets_dict(path)),path), get_datasets_dict(path))
-#     image_dcm = data[filename]
-#     qImage = QtGui.QImage(image_dcm, image_dcm.shape[1], image_dcm.shape[0],
-#                           QtGui.QImage.Format_Indexed8)
-#     pixmap = QtGui.QPixmap(qImage)
-#     pixmap = pixmap.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
-#     DICOM_image_label = QtWidgets.QLabel()
-#     DICOM_image_label.setPixmap(pixmap)
-#     DICOM_image_scene = QtWidgets.QGraphicsScene()
-#     DICOM_image_scene.addWidget(DICOM_image_label)
-#     self.DICOM_view = QtWidgets.QGraphicsView(self.tab2_view)
-#     self.DICOM_view.setScene(DICOM_image_scene)
-
-def DICOM_Image_processing():
-    path = '/home/xudong/dicom_sample'
-    filename = path + "/ct.75.dcm"
-    ds = pydicom.dcmread(filename)
-    ds.convert_pixel_data()
-    np_pixel = ds._pixel_array  # shape (512, 512)
-    max = np.amax(np_pixel)
-    min = np.amin(np_pixel)
-    data = (np_pixel - min) / (max - min) * 256
-    data[data < 0] = 0
-    data[data > 255] = 255
-    data = data.astype("int8")
-    qimage = QtGui.QImage(data, data.shape[1], data.shape[0],
+def getDICOMImage(self, id, img_dict):
+    image_dcm = img_dict[id]
+    qImage = QtGui.QImage(image_dcm, image_dcm.shape[1], image_dcm.shape[0],
                           QtGui.QImage.Format_Indexed8)
-    pixmap = QtGui.QPixmap(qimage)
+    pixmap = QtGui.QPixmap(qImage)
     pixmap = pixmap.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
     return pixmap
 
+
 def DVH():
-    path = '../0B8E114C0271B6D1E8DB33C721F4833D'
+    path = '../dicom_sample'
     file_rtss = path + "/rtss.dcm"
     file_rtdose = path + "/rtdose.dcm"
     ds_rtss = pydicom.dcmread(file_rtss)
     ds_rtdose = pydicom.dcmread(file_rtdose)
-    dvh = dvhcalc.get_dvh(ds_rtss, ds_rtdose, 14)
-    nd_array = np.array(dvh.bins)
+    dvh = dvhcalc.get_dvh(ds_rtss, ds_rtdose, 13)
 
     fig = plt.figure()
     ax = fig.subplots()
-    ax.plot(nd_array)
+    ax.plot(dvh.bincenters, dvh.counts, label=dvh.name,
+             color=None if not isinstance(dvh.color, np.ndarray) else
+             (dvh.color / 255))
+    plt.xlabel('Dose [%s]' % dvh.dose_units)
+    plt.ylabel('Volume [%s]' % dvh.volume_units)
+    if dvh.name:
+        plt.legend(loc='best')
 
-    # fig = plt.plot(nd_array)
     fig.canvas.draw()
     data = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
     data = data.reshape(fig.canvas.get_width_height()[::-1] + (3,))

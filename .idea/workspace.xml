@@ -5,8 +5,8 @@
       <change beforePath="$PROJECT_DIR$/.idea/Onko.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Onko.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/View/mainPage.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/View/mainPage.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/View/resources_rc.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/View/resources_rc.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Model/CalculateDVHs.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Model/CalculateDVHs.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Model/CalculateImages.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Model/CalculateImages.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -30,8 +30,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../Helene/dicompyler" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -56,8 +55,8 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.main">
-    <configuration name="CalculateImages" type="PythonConfigurationType" factoryName="Python" temporary="true">
+  <component name="RunManager" selected="Python.CalculateDVHs">
+    <configuration name="CalculateDVHs" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Onko" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -164,10 +163,12 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.main" />
-        <item itemvalue="Python.test_DVH" />
+        <item itemvalue="Python.CalculateDVHs" />
         <item itemvalue="Python.CalculateImages" />
-        <item itemvalue="Python.test" />
+        <item itemvalue="Python.LoadPatients" />
+        <item itemvalue="Python.main" />
+        <item itemvalue="Python.mainPage" />
+
       </list>
     </recent_temporary>
   </component>
