@@ -15,10 +15,10 @@ def dvh_plot(dvh):
     return dvh
 
 
-def get_dvhs(ds):
-    dvhs = {}
-    if 'DVHSequence' in ds:
-        for item in ds.DVH
+# def get_dvhs(ds):
+#     dvhs = {}
+#     if 'DVHSequence' in ds:
+#         for item in ds.DVH
 
 
 if __name__ == '__main__':
