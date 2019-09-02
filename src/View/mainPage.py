@@ -660,13 +660,16 @@ class Ui_MainWindow(object):
         self.actionPyradiomics.setText(_translate("MainWindow", "Pyradiomics"))
 
     # When the value of the slider in the DICOM View changes
+    # Xudong: I think there might be some better ways to do the image changing
     def valueChangeSlider(self):
         id = self.slider.value()
+        # ======
         path = '../dicom_sample'
         dataset = get_datasets(path)
         img_dict = get_img(dataset)
         pixmap = getDICOMImage(self, id, img_dict)
         DICOM_image_label = QtWidgets.QLabel()
+        # ======
         DICOM_image_label.setPixmap(pixmap)
         DICOM_image_scene = QtWidgets.QGraphicsScene()
         DICOM_image_scene.addWidget(DICOM_image_label)

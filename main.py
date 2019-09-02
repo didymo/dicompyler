@@ -1,5 +1,6 @@
-from src.Controller.mainPageController import *
 import sys
+from src.Controller.mainPageController import *
+
 
 
 if __name__ == "__main__":
