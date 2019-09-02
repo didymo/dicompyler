@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8607728d-6aa1-478d-af4c-bfd7fb963cc6" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/Onko.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Onko.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Model/CalculateDVHs.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Model/CalculateDVHs.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/View/mainPage.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/View/mainPage.py" afterDir="false" />
@@ -36,6 +38,10 @@
       <recent name="$PROJECT_DIR$/src/View" />
       <recent name="$PROJECT_DIR$/src/Model" />
       <recent name="$PROJECT_DIR$/src/Icon" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/View" />
+      <recent name="$PROJECT_DIR$/src" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -72,7 +78,11 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+<<<<<<< HEAD
     <configuration name="TreeTest" type="PythonConfigurationType" factoryName="Python">
+=======
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
+>>>>>>> 8fd811d61a678d01ec2337ca45e3d47de6b13276
       <module name="Onko" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -80,11 +90,15 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/Model" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
+<<<<<<< HEAD
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/Model/TreeTest.py" />
+=======
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/main.py" />
+>>>>>>> 8fd811d61a678d01ec2337ca45e3d47de6b13276
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -93,7 +107,11 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+<<<<<<< HEAD
     <configuration name="main (1)" type="PythonConfigurationType" factoryName="Python" temporary="true">
+=======
+    <configuration name="mainPage" type="PythonConfigurationType" factoryName="Python" temporary="true">
+>>>>>>> 8fd811d61a678d01ec2337ca45e3d47de6b13276
       <module name="Onko" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -101,11 +119,19 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
+<<<<<<< HEAD
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
+=======
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/View" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/View/mainPage.py" />
+>>>>>>> 8fd811d61a678d01ec2337ca45e3d47de6b13276
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -114,7 +140,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Onko" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -122,11 +148,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../qt_test" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/main.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../qt_test/test.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -135,7 +161,11 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+<<<<<<< HEAD
     <configuration name="test_tree" type="PythonConfigurationType" factoryName="Python" temporary="true">
+=======
+    <configuration name="test_DVH" type="PythonConfigurationType" factoryName="Python" temporary="true">
+>>>>>>> 8fd811d61a678d01ec2337ca45e3d47de6b13276
       <module name="Onko" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -147,7 +177,11 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
+<<<<<<< HEAD
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/test_tree.py" />
+=======
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/View/test_DVH.py" />
+>>>>>>> 8fd811d61a678d01ec2337ca45e3d47de6b13276
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -161,7 +195,12 @@
         <item itemvalue="Python.main (1)" />
         <item itemvalue="Python.test_tree" />
         <item itemvalue="Python.main" />
+<<<<<<< HEAD
         <item itemvalue="Python.CalculateDVHs" />
+=======
+        <item itemvalue="Python.mainPage" />
+
+>>>>>>> 8fd811d61a678d01ec2337ca45e3d47de6b13276
       </list>
     </recent_temporary>
   </component>

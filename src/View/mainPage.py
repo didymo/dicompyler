@@ -59,7 +59,7 @@ class Ui_MainWindow(object):
         self.slider = QtWidgets.QSlider(QtCore.Qt.Vertical)
         self.slider.setMinimum(0)
         self.slider.setMaximum(137)
-        self.slider.setValue(90)
+        self.slider.setValue(55)
         self.slider.setTickPosition(QtWidgets.QSlider.TicksLeft)
         self.slider.setTickInterval(1)
         self.slider.setStyleSheet("QSlider::handle:vertical:hover {background: qlineargradient(x1:0, y1:0, x2:1, "
@@ -659,12 +659,12 @@ class Ui_MainWindow(object):
         self.actionClinical_Data.setText(_translate("MainWindow", "Clinical Data"))
         self.actionPyradiomics.setText(_translate("MainWindow", "Pyradiomics"))
 
+
     # When the value of the slider in the DICOM View changes
     # Xudong: I think there might be some better ways to do the image changing
     def valueChangeSlider(self):
         id = self.slider.value()
-        # ======
-        path = '../dicom_sample'
+        path = 'dicom_sample'
         dataset = get_datasets(path)
         img_dict = get_img(dataset)
         pixmap = getDICOMImage(self, id, img_dict)
@@ -675,7 +675,6 @@ class Ui_MainWindow(object):
         DICOM_image_scene.addWidget(DICOM_image_label)
         self.DICOM_view.setScene(DICOM_image_scene)
         pass
-
 
 import src.View.resources_rc
 
@@ -690,7 +689,7 @@ def getDICOMImage(self, id, img_dict):
 
 
 def DVH():
-    path = '../dicom_sample'
+    path = 'dicom_sample'
     file_rtss = path + "/rtss.dcm"
     file_rtdose = path + "/rtdose.dcm"
     ds_rtss = pydicom.dcmread(file_rtss)

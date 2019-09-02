@@ -5,7 +5,7 @@ from src.Model.CalculateImages import *
 
 class MainPage(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
-        path = '../dicom_sample'
+        path = 'dicom_sample'
         dataset = get_datasets(path)
         img_dict = get_img(dataset)
 
