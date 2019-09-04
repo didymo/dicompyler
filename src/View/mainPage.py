@@ -1,11 +1,12 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import pydicom
-import matplotlib.pyplot as plt
+import matplotlib.pylab as plt
 import numpy as np
 from dicompylercore import dvhcalc
 from src.Model.CalculateImages import *
 from src.Model.LoadPatients import *
 from src.Model.CalculateDVHs import *
+from matplotlib.backends.backend_qt5agg import FigureCanvas
 
 
 class Ui_MainWindow(object):
@@ -77,7 +78,6 @@ class Ui_MainWindow(object):
 
         # DICOM image processing
         id = self.slider.value()
-        print(len(self.pixmaps))
         DICOM_image = self.pixmaps[id]
         DICOM_image = DICOM_image.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
         DICOM_image_label = QtWidgets.QLabel()
@@ -100,24 +100,29 @@ class Ui_MainWindow(object):
         # Main view: DVH
         self.tab2_DVH = QtWidgets.QWidget()
         self.tab2_DVH.setObjectName("tab2_DVH")
+        # DVH layout
+        self.widget_DVH = QtWidgets.QWidget(self.tab2_DVH)
+        self.widget_DVH.setGeometry(QtCore.QRect(0, 0, 877, 400))
+        self.widget_DVH.setObjectName("widget_DVH")
+        self.gridLayout_DVH = QtWidgets.QGridLayout(self.widget_DVH)
+        self.gridLayout_DVH.setObjectName("gridLayout_DVH")
+
         # DVH Processing
         DVH_file = getDVH(path)
-        DVH_image = DVH_view(DVH_file)
-        DVH_image_label = QtWidgets.QLabel()
-        DVH_image_label.setPixmap(DVH_image)
-        DVH_image_scene = QtWidgets.QGraphicsScene()
-        DVH_image_scene.addWidget(DVH_image_label)
-        # Introduce DVH image into DVH tab
-        self.DVH_view = QtWidgets.QGraphicsView(self.tab2_DVH)
-        self.DVH_view.setScene(DVH_image_scene)
-        self.DVH_view.setGeometry(QtCore.QRect(0, 0, 750, 400))
-        self.DVH_view.setObjectName("DVH_view")
+        fig = DVH_view(DVH_file)
+        self.plotWidget = FigureCanvas(fig)
+        self.gridLayout_DVH.addWidget(self.plotWidget, 1, 0, 1, 1)
+
         # DVH: Export DVH Button
         self.button_exportDVH = QtWidgets.QPushButton(self.tab2_DVH)
-        self.button_exportDVH.setGeometry(QtCore.QRect(760, 358, 97, 39))
+        self.button_exportDVH.move(15,10)
+        self.button_exportDVH.setFixedSize(QtCore.QSize(100, 39))
         self.button_exportDVH.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.button_exportDVH.setStyleSheet("background-color: rgb(147, 112, 219);\n""color: rgb(0, 0, 0);")
         self.button_exportDVH.setObjectName("button_exportDVH")
+
+        self.gridLayout_DVH.addWidget(self.button_exportDVH, 1, 1, 1, 1)
+
         self.tab2.addTab(self.tab2_DVH, "")
 
         # Main view: DICOM Tree
@@ -668,13 +673,11 @@ class Ui_MainWindow(object):
 
 
     # When the value of the slider in the DICOM View changes
-    # Xudong: I think there might be some better ways to do the image changing
     def valueChangeSlider(self):
         id = self.slider.value()
         pixmap = self.pixmaps[id]
         pixmap = pixmap.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
         DICOM_image_label = QtWidgets.QLabel()
-        # ======
         DICOM_image_label.setPixmap(pixmap)
         DICOM_image_scene = QtWidgets.QGraphicsScene()
         DICOM_image_scene.addWidget(DICOM_image_label)
@@ -690,26 +693,19 @@ def getDVH(path):
     file_rtdose = path + "/rtdose.dcm"
     ds_rtss = pydicom.dcmread(file_rtss)
     ds_rtdose = pydicom.dcmread(file_rtdose)
-    return dvhcalc.get_dvh(ds_rtss, ds_rtdose, 13)
+    rois = get_roi_info(ds_rtss)
+    return calc_dvhs(ds_rtss, ds_rtdose, rois)
 
 
 # In the View directory
 def DVH_view(dvh_file):
-    fig = plt.figure()
-    ax = fig.subplots()
-    ax.plot(dvh_file.bincenters, dvh_file.counts, label=dvh_file.name,
-             color=None if not isinstance(dvh_file.color, np.ndarray) else
-             (dvh_file.color / 255))
-    plt.xlabel('Dose [%s]' % dvh_file.dose_units)
-    plt.ylabel('Volume [%s]' % dvh_file.volume_units)
-    if dvh_file.name:
-        plt.legend(loc='best')
-
-    fig.canvas.draw()
-    data = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
-    data = data.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-    qimage = QtGui.QImage(data, data.shape[1], data.shape[0],
-                          QtGui.QImage.Format_RGB888)
-    pixmap = QtGui.QPixmap(qimage)
-    pixmap = pixmap.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
-    return pixmap
+    fig, ax = plt.subplots()
+    for roi, dvh in dvh_file.items():
+        ax.plot(dvh.bincenters, 100*dvh.counts/dvh.volume, label=dvh.name,
+                 color=None if not isinstance(dvh.color, np.ndarray) else
+                 (dvh.color / 255))
+        plt.xlabel('Dose [%s]' % dvh.dose_units)
+        plt.ylabel('Volume [%s]' % '%')
+        if dvh.name:
+            plt.legend(loc='best')
+    return fig
