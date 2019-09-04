@@ -668,11 +668,13 @@ class Ui_MainWindow(object):
 
 
     # When the value of the slider in the DICOM View changes
+    # Xudong: I think there might be some better ways to do the image changing
     def valueChangeSlider(self):
         id = self.slider.value()
         pixmap = self.pixmaps[id]
         pixmap = pixmap.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
         DICOM_image_label = QtWidgets.QLabel()
+        # ======
         DICOM_image_label.setPixmap(pixmap)
         DICOM_image_scene = QtWidgets.QGraphicsScene()
         DICOM_image_scene.addWidget(DICOM_image_label)
