@@ -35,13 +35,14 @@ def calc_dvhs(rtss, dose, dict_roi):
         dict_dvh[roi] = dvhcalc.get_dvh(rtss, dose, roi)
     return dict_dvh
 
+
 # For the demo example
 def dvh_plot(dvh):
-    plt.plot(dvh.bincenters, dvh.counts, label=dvh.name,
+    plt.plot(dvh.bincenters, 100*dvh.counts/dvh.volume, label=dvh.name,
              color=None if not isinstance(dvh.color, np.ndarray) else
              (dvh.color / 255))
     plt.xlabel('Dose [%s]' % dvh.dose_units)
-    plt.ylabel('Volume [%s]' % dvh.volume_units)
+    plt.ylabel('Volume [%s]' % '%')
     if dvh.name:
         plt.legend(loc='best')
     plt.show()
