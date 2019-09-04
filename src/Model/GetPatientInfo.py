@@ -12,6 +12,7 @@ def get_tree(ds, label=0):
             # Has Child?
             curr_row.append(label)
             curr_row.append(repr(elem.name))
+            curr_row.append("")
             curr_row.append(repr(elem.tag))
             curr_row.append(repr(elem.VM))
             curr_row.append(repr(elem.VR))
