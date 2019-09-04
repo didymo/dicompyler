@@ -15,14 +15,20 @@ def dvh_plot(dvh):
     return dvh
 
 
-# if __name__ == '__main__':
-#     path = '/home/xudong/dicom_sample/'
-#     rtss_path = path + 'rtss.dcm'
-#     rtdose_path = path + 'rtdose.dcm'
-#
-#     ds_rtdose = pydicom.dcmread(rtdose_path)
-#     ds_rtss = pydicom.dcmread(rtss_path)
-#
-#     dvh = dvhcalc.get_dvh(ds_rtss, ds_rtdose, 13)
-#     dvh_plot(dvh)
-#     plt.show()
+# def get_dvhs(ds):
+#     dvhs = {}
+#     if 'DVHSequence' in ds:
+#         for item in ds.DVH
+
+
+if __name__ == '__main__':
+    path = '/home/xudong/dicom_sample/'
+    rtss_path = path + 'rtss.dcm'
+    rtdose_path = path + 'rtdose.dcm'
+
+    ds_rtdose = pydicom.dcmread(rtdose_path)
+    ds_rtss = pydicom.dcmread(rtss_path)
+
+    dvh = dvhcalc.get_dvh(ds_rtss, ds_rtdose, 13)
+    dvh_plot(dvh)
+    plt.show()

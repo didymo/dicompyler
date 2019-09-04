@@ -1,14 +1,17 @@
 from src.View.mainPage import *
-from src.Model.LoadPatients import *
+
+
 from src.Model.CalculateImages import *
+from src.Model.LoadPatients import *
 
 
 class MainPage(QtWidgets.QMainWindow):
-    def __init__(self, parent=None):
-        path = '../dicom_sample'
+    def __init__(self):
+        path = 'dicom_sample'
         dataset = get_datasets(path)
-        img_dict = get_img(dataset)
+        pixmaps = get_pixmaps(dataset)
 
-        QtWidgets.QWidget.__init__(self, parent)
+        QtWidgets.QWidget.__init__(self)
         self.ui = Ui_MainWindow()
-        self.ui.setupUi(self, img_dict)
+        self.ui.setupUi(self, pixmaps, path)
+

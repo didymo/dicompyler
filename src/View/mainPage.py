@@ -10,7 +10,10 @@ from src.Model.CalculateDVHs import *
 
 class Ui_MainWindow(object):
 
-    def setupUi(self, MainWindow, img_dict):
+    def setupUi(self, MainWindow, pixmap_dict, path):
+        # Load DICOM image dictionary
+        self.pixmaps = pixmap_dict
+
         # Main Window
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1080, 700)
@@ -58,8 +61,8 @@ class Ui_MainWindow(object):
         # Vertical Slider
         self.slider = QtWidgets.QSlider(QtCore.Qt.Vertical)
         self.slider.setMinimum(0)
-        self.slider.setMaximum(137)
-        self.slider.setValue(90)
+        self.slider.setMaximum(len(self.pixmaps)-1)
+        self.slider.setValue(int(len(self.pixmaps)/2))
         self.slider.setTickPosition(QtWidgets.QSlider.TicksLeft)
         self.slider.setTickInterval(1)
         self.slider.setStyleSheet("QSlider::handle:vertical:hover {background: qlineargradient(x1:0, y1:0, x2:1, "
@@ -74,7 +77,9 @@ class Ui_MainWindow(object):
 
         # DICOM image processing
         id = self.slider.value()
-        DICOM_image = getDICOMImage(self, id, img_dict)
+        print(len(self.pixmaps))
+        DICOM_image = self.pixmaps[id]
+        DICOM_image = DICOM_image.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
         DICOM_image_label = QtWidgets.QLabel()
         DICOM_image_label.setPixmap(DICOM_image)
         DICOM_image_scene = QtWidgets.QGraphicsScene()
@@ -96,7 +101,8 @@ class Ui_MainWindow(object):
         self.tab2_DVH = QtWidgets.QWidget()
         self.tab2_DVH.setObjectName("tab2_DVH")
         # DVH Processing
-        DVH_image = DVH()
+        DVH_file = getDVH(path)
+        DVH_image = DVH_view(DVH_file)
         DVH_image_label = QtWidgets.QLabel()
         DVH_image_label.setPixmap(DVH_image)
         DVH_image_scene = QtWidgets.QGraphicsScene()
@@ -631,6 +637,7 @@ class Ui_MainWindow(object):
         # Set menu labels
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.menuEdit.setTitle(_translate("MainWindow", "Edit"))
+        self.menuEdit.setTitle(_translate("MainWindow", "Edit"))
         self.menuTools.setTitle(_translate("MainWindow", "Tools"))
         self.menuROI_Creation.setTitle(_translate("MainWindow", "ROI Creation"))
         self.menuExport.setTitle(_translate("MainWindow", "Export"))
@@ -659,13 +666,12 @@ class Ui_MainWindow(object):
         self.actionClinical_Data.setText(_translate("MainWindow", "Clinical Data"))
         self.actionPyradiomics.setText(_translate("MainWindow", "Pyradiomics"))
 
+
     # When the value of the slider in the DICOM View changes
     def valueChangeSlider(self):
         id = self.slider.value()
-        path = '../dicom_sample'
-        dataset = get_datasets(path)
-        img_dict = get_img(dataset)
-        pixmap = getDICOMImage(self, id, img_dict)
+        pixmap = self.pixmaps[id]
+        pixmap = pixmap.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
         DICOM_image_label = QtWidgets.QLabel()
         DICOM_image_label.setPixmap(pixmap)
         DICOM_image_scene = QtWidgets.QGraphicsScene()
@@ -676,33 +682,26 @@ class Ui_MainWindow(object):
 import src.View.resources_rc
 
 
-def getDICOMImage(self, id, img_dict):
-    image_dcm = img_dict[id]
-    qImage = QtGui.QImage(image_dcm, image_dcm.shape[1], image_dcm.shape[0],
-                          QtGui.QImage.Format_Indexed8)
-    pixmap = QtGui.QPixmap(qImage)
-    pixmap = pixmap.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
-    return pixmap
-
-
-def DVH():
-    path = '../dicom_sample'
+# In the Model directory
+def getDVH(path):
     file_rtss = path + "/rtss.dcm"
     file_rtdose = path + "/rtdose.dcm"
     ds_rtss = pydicom.dcmread(file_rtss)
     ds_rtdose = pydicom.dcmread(file_rtdose)
-    dvh = dvhcalc.get_dvh(ds_rtss, ds_rtdose, 13)
+    return dvhcalc.get_dvh(ds_rtss, ds_rtdose, 13)
 
+
+# In the View directory
+def DVH_view(dvh_file):
     fig = plt.figure()
     ax = fig.subplots()
-    ax.plot(dvh.bincenters, dvh.counts, label=dvh.name,
-             color=None if not isinstance(dvh.color, np.ndarray) else
-             (dvh.color / 255))
-    plt.xlabel('Dose [%s]' % dvh.dose_units)
-    plt.ylabel('Volume [%s]' % dvh.volume_units)
-    if dvh.name:
+    ax.plot(dvh_file.bincenters, dvh_file.counts, label=dvh_file.name,
+             color=None if not isinstance(dvh_file.color, np.ndarray) else
+             (dvh_file.color / 255))
+    plt.xlabel('Dose [%s]' % dvh_file.dose_units)
+    plt.ylabel('Volume [%s]' % dvh_file.volume_units)
+    if dvh_file.name:
         plt.legend(loc='best')
-
 
     fig.canvas.draw()
     data = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
