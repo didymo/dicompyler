@@ -3,6 +3,8 @@ from src.View.mainPage import *
 
 from src.Model.CalculateImages import *
 from src.Model.LoadPatients import *
+from PyQt5 import QtWidgets
+
 
 
 class MainPage(QtWidgets.QMainWindow):
@@ -17,3 +19,6 @@ class MainPage(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self, self.pixmaps, self.path)
 
+    def openPatient(self):
+        self.path = QtWidgets.QFileDialog.getExistingDirectory(None, 'Select patient folder...')
+        print(self.path)

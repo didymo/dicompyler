@@ -1,3 +1,4 @@
+import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 import pydicom
 import matplotlib.pyplot as plt
@@ -6,6 +7,7 @@ from dicompylercore import dvhcalc
 from src.Model.CalculateImages import *
 from src.Model.LoadPatients import *
 from src.Model.CalculateDVHs import *
+from src.Controller.mainPageController import *
 
 
 class Ui_MainWindow(object):
@@ -402,6 +404,7 @@ class Ui_MainWindow(object):
         self.actionOpen.setIcon(icon)
         self.actionOpen.setIconVisibleInMenu(True)
         self.actionOpen.setObjectName("actionOpen")
+        self.actionOpen.triggered.connect(self.PatientHandler)
 
         # Import Action
         self.actionImport = QtWidgets.QAction(MainWindow)
@@ -680,6 +683,10 @@ class Ui_MainWindow(object):
         DICOM_image_scene.addWidget(DICOM_image_label)
         self.DICOM_view.setScene(DICOM_image_scene)
         pass
+
+    def PatientHandler(self):
+        callClass = src.Controller.mainPageController.MainPage()
+        return callClass.openPatient()
 
 import src.View.resources_rc
 
