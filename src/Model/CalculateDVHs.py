@@ -1,9 +1,41 @@
 import numpy as np
-from dicompylercore import dvhcalc
+from dicompylercore import dvhcalc, dicomparser
 import pydicom
 import matplotlib.pyplot as plt
+from dicompylercore.dicomparser import DicomParser
 
 
+# Retrieve a dictionary of basic info of all ROIs
+# Return value: dict
+# {"1": {'uid': '1.3.12.2.1107.5.1.4.100020.30000018082923183405900000003', 'name': 'MQ', 'algorithm': 'SEMIAUTOMATIC'}
+# "1" is the ROINumber of the roi (ID)
+# 'uid' is ReferencedFrameOfReferenceUID
+# 'name' is ROIName (Name of the ROI)
+# 'algorithm' is ROIGenerationAlgorithm
+def get_roi_info(ds_rtss):
+    dict_roi = {}
+    for sequence in ds_rtss.StructureSetROISequence:
+        dict_temp = {}
+        dict_temp['uid'] = sequence.ReferencedFrameOfReferenceUID
+        dict_temp['name'] = sequence.ROIName
+        dict_temp['algorithm'] = sequence.ROIGenerationAlgorithm
+        dict_roi[sequence.ROINumber] = dict_temp
+    return dict_roi
+
+
+# Return a dictionary of all the DVHs of all the ROIs of the patient
+# Return value: dict
+# {"1": dvh}
+# "1" is the ID of the ROI
+# dvh is a data type defined in dicompyler-core
+# For dvh plotting example with matplotlib, see: dvh_plot()
+def calc_dvhs(rtss, dose, dict_roi):
+    dict_dvh = {}
+    for roi in dict_roi:
+        dict_dvh[roi] = dvhcalc.get_dvh(rtss, dose, roi)
+    return dict_dvh
+
+# For the demo example
 def dvh_plot(dvh):
     plt.plot(dvh.bincenters, dvh.counts, label=dvh.name,
              color=None if not isinstance(dvh.color, np.ndarray) else
@@ -12,15 +44,10 @@ def dvh_plot(dvh):
     plt.ylabel('Volume [%s]' % dvh.volume_units)
     if dvh.name:
         plt.legend(loc='best')
-    return dvh
+    plt.show()
 
 
-# def get_dvhs(ds):
-#     dvhs = {}
-#     if 'DVHSequence' in ds:
-#         for item in ds.DVH
-
-
+# Example of usage
 if __name__ == '__main__':
     path = '/home/xudong/dicom_sample/'
     rtss_path = path + 'rtss.dcm'
@@ -29,6 +56,13 @@ if __name__ == '__main__':
     ds_rtdose = pydicom.dcmread(rtdose_path)
     ds_rtss = pydicom.dcmread(rtss_path)
 
-    dvh = dvhcalc.get_dvh(ds_rtss, ds_rtdose, 13)
-    dvh_plot(dvh)
-    plt.show()
+    rois = get_roi_info(ds_rtss)
+    print(rois)
+
+    # for roi in rois:
+    #     print(rois[roi]['name'])
+
+    dvhs = calc_dvhs(ds_rtss, ds_rtdose, rois)
+    for i in dvhs:
+        print(i)
+        dvh_plot(dvhs[i])
