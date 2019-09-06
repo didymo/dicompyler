@@ -9,7 +9,10 @@ from matplotlib.backends.backend_qt5agg import FigureCanvas
 
 class Ui_MainWindow(object):
 
-    def setupUi(self, MainWindow, pixmap_dict, path):
+    def setupUi(self, MainWindow, pixmap_dict, dirPath):
+        self.callClass = src.Controller.mainPageController.MainPage()
+        self.path = dirPath
+
         # Load DICOM image dictionary
         self.pixmaps = pixmap_dict
 
@@ -74,23 +77,24 @@ class Ui_MainWindow(object):
         self.slider.setGeometry(QtCore.QRect(0, 0, 50, 500))
         self.gridLayout_view.addWidget(self.slider, 0, 1, 1, 1)
 
-        # DICOM image processing
-        id = self.slider.value()
-        DICOM_image = self.pixmaps[id]
-        DICOM_image = DICOM_image.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
-        DICOM_image_label = QtWidgets.QLabel()
-        DICOM_image_label.setPixmap(DICOM_image)
-        DICOM_image_scene = QtWidgets.QGraphicsScene()
-        DICOM_image_scene.addWidget(DICOM_image_label)
-        # Introduce DICOM image into DICOM View tab
-        self.DICOM_view = QtWidgets.QGraphicsView(self.tab2_view)
-        self.DICOM_view.setScene(DICOM_image_scene)
-        background_brush = QtGui.QBrush(QtGui.QColor(0, 0, 0), QtCore.Qt.SolidPattern)
-        self.DICOM_view.setBackgroundBrush(background_brush)
-        self.DICOM_view.setGeometry(QtCore.QRect(0, 0, 877, 517))
-        self.DICOM_view.setObjectName("DICOM_view")
+        if len(self.pixmaps) != 0:
+            # DICOM image processing
+            id = self.slider.value()
+            DICOM_image = self.pixmaps[id]
+            DICOM_image = DICOM_image.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
+            DICOM_image_label = QtWidgets.QLabel()
+            DICOM_image_label.setPixmap(DICOM_image)
+            DICOM_image_scene = QtWidgets.QGraphicsScene()
+            DICOM_image_scene.addWidget(DICOM_image_label)
+            # Introduce DICOM image into DICOM View tab
+            self.DICOM_view = QtWidgets.QGraphicsView(self.tab2_view)
+            self.DICOM_view.setScene(DICOM_image_scene)
+            background_brush = QtGui.QBrush(QtGui.QColor(0, 0, 0), QtCore.Qt.SolidPattern)
+            self.DICOM_view.setBackgroundBrush(background_brush)
+            self.DICOM_view.setGeometry(QtCore.QRect(0, 0, 877, 517))
+            self.DICOM_view.setObjectName("DICOM_view")
 
-        self.gridLayout_view.addWidget(self.DICOM_view, 0, 0, 1, 1)
+            self.gridLayout_view.addWidget(self.DICOM_view, 0, 0, 1, 1)
 
 
         self.tab2.addTab(self.tab2_view, "")
@@ -105,11 +109,12 @@ class Ui_MainWindow(object):
         self.gridLayout_DVH = QtWidgets.QGridLayout(self.widget_DVH)
         self.gridLayout_DVH.setObjectName("gridLayout_DVH")
 
-        # DVH Processing
-        DVH_file = getDVH(path)
-        fig = DVH_view(DVH_file)
-        self.plotWidget = FigureCanvas(fig)
-        self.gridLayout_DVH.addWidget(self.plotWidget, 1, 0, 1, 1)
+        if self.path != '':
+            # DVH Processing
+            DVH_file = getDVH(self.path)
+            fig = DVH_view(DVH_file)
+            self.plotWidget = FigureCanvas(fig)
+            self.gridLayout_DVH.addWidget(self.plotWidget, 1, 0, 1, 1)
 
         # DVH: Export DVH Button
         self.button_exportDVH = QtWidgets.QPushButton(self.tab2_DVH)
@@ -514,7 +519,7 @@ class Ui_MainWindow(object):
         # Export Pyradiomics Action
         self.actionPyradiomics = QtWidgets.QAction(MainWindow)
         self.actionPyradiomics.setObjectName("actionPyradiomics")
-
+        self.actionPyradiomics.triggered.connect(self.pyradiomicsHandler)
 
         # Build menu bar
         self.menuFile.addAction(self.actionOpen)
@@ -684,14 +689,17 @@ class Ui_MainWindow(object):
         pass
 
     def PatientHandler(self):
-        callClass = src.Controller.mainPageController.MainPage()
-        return callClass.openPatient()
+        self.callClass.openPatient()
+
+    def pyradiomicsHandler(self):
+        self.callClass.runPyradiomics(self.path)
 
 import src.View.resources_rc
 
 
 # In the Model directory
 def getDVH(path):
+    print(path)
     file_rtss = path + "/rtss.dcm"
     file_rtdose = path + "/rtdose.dcm"
     ds_rtss = pydicom.dcmread(file_rtss)
