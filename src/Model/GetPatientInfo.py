@@ -38,6 +38,16 @@ def get_tree(ds, label=0):
     return tree
 
 
+# Get patient name, ID, gender and DOB
+def get_basic_info(ds):
+    dict_basic_info = {}
+    dict_basic_info['name'] = repr(ds.PatientName)
+    dict_basic_info['id'] = repr(ds.PatientID)
+    dict_basic_info['gender'] = repr(ds.PatientSex)
+    dict_basic_info['dob'] = repr(ds.PatientBirthDate)
+    return dict_basic_info
+
+
 if __name__ == '__main__':
     path = '../../dicom_sample/ct.0.dcm'
     ds = pydicom.dcmread(path)
@@ -46,3 +56,4 @@ if __name__ == '__main__':
         print(i)
 
     print(ds)
+
