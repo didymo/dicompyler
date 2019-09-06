@@ -76,9 +76,11 @@ class DicomImporterDialog(wx.Dialog):
         # Bind interface events to the proper methods
         # wx.EVT_BUTTON(self, XRCID('btnDicomImport'), self.OnBrowseDicomImport)
         self.Bind(wx.EVT_BUTTON, self.OnBrowseDicomImport, id=XRCID('btnDicomImport'))
+        print("Found the Browser++++++++++++++++++++++++++++++++++++")
         # wx.EVT_CHECKBOX(self, XRCID('checkSearchSubfolders'),
         #                             self.OnCheckSearchSubfolders)
         self.Bind(wx.EVT_CHECKBOX, self.OnCheckSearchSubfolders, id=XRCID('checkSearchSubfolders'))
+        print("CHECK box found +++++++++++++++")
         # wx.EVT_TREE_SEL_CHANGED(self, XRCID('tcPatients'), self.OnSelectTreeItem)
         self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnSelectTreeItem, id=XRCID('tcPatients'))
         # wx.EVT_TREE_ITEM_ACTIVATED(self, XRCID('tcPatients'), self.OnOK)
