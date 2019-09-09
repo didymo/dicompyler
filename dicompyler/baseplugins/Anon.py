@@ -88,15 +88,12 @@ class plugin:
             if 'PatientName' in ds_rtss:
                 patient_name = str(ds_rtss.PatientName)
                 print("Patient name - ", patient_name)
-
+                # MD 5 hashing
                 hash_patient_name_MD5 = uuid.uuid5(uuid.NAMESPACE_URL, patient_name)
-                print("MD5 patient name:----", hash_patient_name_MD5)
+                # Hashing the MD5 haah again using SHA1
                 hash_patient_name_sha1 = uuid.uuid3(uuid.NAMESPACE_URL, str(hash_patient_name_MD5))
-                print("Sha1 patient name:----", hash_patient_name_sha1)
+                # storing the hash to dataset
                 ds_rtss.PatientName = str(hash_patient_name_sha1)
-                print("Class of Patientname is: ", type(ds_rtss.PatientName))
-                print("Hash changed in dataset for patient name:---- ", ds_rtss.PatientName)
-
                 print("\n\n")
             else:
                 print("NO patient Name found")
@@ -107,14 +104,12 @@ class plugin:
             if hasattribute("PatientID", ds_rtss):
                 patient_ID = str(ds_rtss.PatientID)
                 print("Patient ID - ", patient_ID)
-
+                # MD 5 hashing
                 hash_patient_ID_MD5 = uuid.uuid5(uuid.NAMESPACE_URL, patient_ID)
-                print("MD5 patient ID:----", hash_patient_ID_MD5)
+                # Hashing the MD5 haah again using SHA1
                 hash_patient_ID_sha1 = uuid.uuid3(uuid.NAMESPACE_URL, str(hash_patient_ID_MD5))
-                print("Sha1 patient ID:----", hash_patient_ID_sha1)
+                # storing the hash to dataset
                 ds_rtss.PatientID = str(hash_patient_ID_sha1)
-                print("Class of PatientID is: ", type(ds_rtss.PatientID))
-                print("Hash changed in Dataset for patient ID: ", ds_rtss.PatientID)
                 print("\n\n")
             else:
                 print("NO patient ID not found")
@@ -122,10 +117,8 @@ class plugin:
             #  storing patient_name and ID in one variable
             if hasattribute("PatientID", ds_rtss):
                 P_name_ID = patient_name + " + " + patient_ID
-                print("Pname and ID=   ", P_name_ID)
             else:
                 P_name_ID = patient_name + " + " + "PID_empty"
-                print("Pname and ID=   ", P_name_ID)
 
             print("\n\n")
             # ----------------------------------------------sha1 hash for patient DOB---------------------------------------
@@ -133,14 +126,12 @@ class plugin:
             if 'PatientBirthDate' in ds_rtss:
                 patient_DOB = str(ds_rtss.PatientBirthDate)
                 print("Patient DOB - ", patient_DOB)
-
+                # MD 5 hashing
                 hash_patient_DOB_MD5 = uuid.uuid5(uuid.NAMESPACE_URL, patient_DOB)
-                print("MD5 patient DOB:----", hash_patient_DOB_MD5)
+                # Hashing the MD5 haah again using SHA1
                 hash_patient_DOB_sha1 = uuid.uuid3(uuid.NAMESPACE_URL, str(hash_patient_DOB_MD5))
-                print("Sha1 patient DOB:----", hash_patient_DOB_sha1)
+                # storing the hash to dataset
                 ds_rtss.PatientBirthDate = str(hash_patient_DOB_sha1)
-                print("Class of DOB is: ", type(ds_rtss.PatientBirthDate))
-                print("Hash changed in Dataset for patient DOB: ", ds_rtss.PatientBirthDate)
                 print("\n\n")
             else:
                 print("Patient BirthDate not found")
@@ -150,14 +141,13 @@ class plugin:
             if 'PatientSex' in ds_rtss:
                 patient_sex = str(ds_rtss.PatientSex)
                 print("Patient Sex - ", patient_sex)
-
+                # MD 5 hashing
                 hash_patient_Sex_MD5 = uuid.uuid5(uuid.NAMESPACE_URL, patient_sex)
-                print("MD5 patient SEX:----", hash_patient_Sex_MD5)
+                # Hashing the MD5 haah again using SHA1
                 hash_patient_Sex_sha1 = uuid.uuid3(uuid.NAMESPACE_URL, str(hash_patient_Sex_MD5))
-                print("Sha1 patient SEX:----", hash_patient_Sex_sha1)
+
+                # storing the hash to dataset
                 ds_rtss.PatientSex = str(hash_patient_Sex_sha1)
-                print("Class of Sex is: ", type(ds_rtss.PatientSex))
-                print("hash changed in Dataset for patient sex: ", ds_rtss.PatientSex)
                 print('\n\n')
             else:
                 print("Patient Sex not found")
@@ -201,10 +191,10 @@ class plugin:
                 # print("dictionary values",hash_dictionary)
 
                 df_identifier_csv = pd.DataFrame(columns=csv_header).round(2)
-                df_identifier_csv.to_csv(csv_filename, index=False)
+                df_identifier_csv.to_csv(csv_filename, index=False) # creating the CVS
 
                 row = [pname, sha1_pname]
-                with open(csv_filename, 'a') as csvFile:
+                with open(csv_filename, 'a') as csvFile:  # inserting the hash values
                     writer = csv.writer(csvFile)
                     writer.writerow(row)
                     csvFile.close()
@@ -216,27 +206,12 @@ class plugin:
             else:
                 print("updating csv")
                 row = [pname, sha1_pname]
-                with open(csv_filename, 'a') as csvFile:
+                with open(csv_filename, 'a') as csvFile: # updating the CVS with hash values
                     writer = csv.writer(csvFile)
                     writer.writerow(row)
                     csvFile.close()
                 print("------CSV updated -----")
                 # options()
-
-        def options():
-            print("\nPLease specify the task by selecting from OPTIONS:--\n\n")
-            print("----OPTIONS----\n")
-            print(" 1. Hash the identifiers\n", "2. Create Hashed CSV\n", "3. Exit \n")
-            action = int(input("Select the task (1 or 2 or 3) ::: value:-- \n"))
-            if (action == 1):
-                print("hashing identifiers")
-                Hash_identifiers()
-                # options()
-            if (action == 2):
-                print("creating or updation CSV")
-                create_hash_csv()
-            if (action == 3):
-                exit(0)
 
 
         ## ===================================PRINTING THE HASH VALUES================================================
