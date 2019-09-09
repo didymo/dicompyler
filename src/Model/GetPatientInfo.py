@@ -76,12 +76,13 @@ class DicomTree(object):
             # If the value is a dictionary
             if isinstance(value, type(dict)):
                 # Recurse until leaf
-                item = QtGui.QStandardItem(key + ': ' + str(value))
+                item = QtGui.QStandardItem(key)
                 parent.appendRow(self.recurse_dict_to_item(value, item))
             else:
                 # If the value is a simple item
                 # Append it.
-                item = QtGui.QStandardItem(key + ': ' + str(value))
+                item = QtGui.QStandardItem(key + ': ' + str(value[0]) + " "+ str(value[1]) + " " + str(value[2]) \
+                                           + " " + str(value[3]))
                 parent.appendRow(item)
         return parent
 
@@ -116,7 +117,12 @@ class DicomTree(object):
         # If current data element is not pixel data element
         elif data_element.name != 'Pixel Data':
             # Key: name, value: value of the element
-            dict[data_element.name] = data_element.value
+            temp_list = []
+            temp_list.append(data_element.value)
+            temp_list.append(repr(data_element.tag))
+            temp_list.append(data_element.VM)
+            temp_list.append(data_element.VR)
+            dict[data_element.name] = temp_list
         return dict
 
     # Convert the dataset to an ordered dictionary
