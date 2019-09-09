@@ -8,8 +8,12 @@ from matplotlib.backends.backend_qt5agg import FigureCanvas
 
 class Ui_MainWindow(object):
 
-    def setupUi(self, MainWindow, pixmap_dict, path):
+    def setupUi(self, MainWindow, pixmap_dict, dirPath):
+        self.callClass = src.Controller.mainPageController.MainPage()
+        self.path = dirPath
+
         # Load DICOM image dictionary
+        # self.refresh()
         self.pixmaps = pixmap_dict
 
         # Main Window
@@ -71,7 +75,8 @@ class Ui_MainWindow(object):
         self.slider.setGeometry(QtCore.QRect(0, 0, 50, 500))
         self.gridLayout_view.addWidget(self.slider, 0, 1, 1, 1)
 
-        # DICOM image processing
+        if len(self.pixmaps) != 0:
+        #DICOM image processing
         id = self.slider.value()
         DICOM_image = self.pixmaps[id]
         DICOM_image = DICOM_image.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
@@ -94,6 +99,32 @@ class Ui_MainWindow(object):
         # Main view: DVH
         self.tab2_DVH = QtWidgets.QWidget()
         self.tab2_DVH.setObjectName("tab2_DVH")
+        # DVH Processing
+        DVH_file = getDVH(path)
+        DVH_image = DVH_view(DVH_file)
+        DVH_image_label = QtWidgets.QLabel()
+        DVH_image_label.setPixmap(DVH_image)
+        DVH_image_scene = QtWidgets.QGraphicsScene()
+        DVH_image_scene.addWidget(DVH_image_label)
+        # Introduce DVH image into DVH tab
+        self.DVH_view = QtWidgets.QGraphicsView(self.tab2_DVH)
+        self.DVH_view.setScene(DVH_image_scene)
+        self.DVH_view.setGeometry(QtCore.QRect(0, 0, 750, 400))
+        self.DVH_view.setObjectName("DVH_view")
+        # DVH: Export DVH Button
+        self.button_exportDVH = QtWidgets.QPushButton(self.tab2_DVH)
+        self.button_exportDVH.setGeometry(QtCore.QRect(760, 358, 97, 39))
+        self.button_exportDVH.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.button_exportDVH.setStyleSheet("background-color: rgb(147, 112, 219);\n""color: rgb(0, 0, 0);")
+        self.button_exportDVH.setObjectName("button_exportDVH")
+        self.tab2.addTab(self.tab2_DVH, "")
+
+
+        self.tab2.addTab(self.tab2_view, "")
+
+        # Main view: DVH
+        self.tab2_DVH = QtWidgets.QWidget()
+        self.tab2_DVH.setObjectName("tab2_DVH")
         # DVH layout
         self.widget_DVH = QtWidgets.QWidget(self.tab2_DVH)
         self.widget_DVH.setGeometry(QtCore.QRect(0, 0, 877, 400))
@@ -102,7 +133,7 @@ class Ui_MainWindow(object):
         self.gridLayout_DVH.setObjectName("gridLayout_DVH")
 
         # DVH Processing
-        DVH_file = getDVH(path)
+        DVH_file = getDVH(self.path)
         fig = DVH_view(DVH_file)
         self.plotWidget = FigureCanvas(fig)
         self.gridLayout_DVH.addWidget(self.plotWidget, 1, 0, 1, 1)
@@ -512,6 +543,7 @@ class Ui_MainWindow(object):
         # Export Pyradiomics Action
         self.actionPyradiomics = QtWidgets.QAction(MainWindow)
         self.actionPyradiomics.setObjectName("actionPyradiomics")
+        self.actionPyradiomics.triggered.connect(self.pyradiomicsHandler)
 
         # Build menu bar
         self.menuFile.addAction(self.actionOpen)
@@ -591,6 +623,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "Onko"))
 
         # Set tab labels
+
         self.tab1.setTabText(self.tab1.indexOf(self.tab1_structures), _translate("MainWindow", "Structures"))
         self.tab1.setTabText(self.tab1.indexOf(self.tab1_isodoses), _translate("MainWindow", "Isodoses"))
         self.tab2.setTabText(self.tab2.indexOf(self.tab2_view), _translate("MainWindow", "DICOM View"))
@@ -661,6 +694,8 @@ class Ui_MainWindow(object):
         self.actionClinical_Data.setText(_translate("MainWindow", "Clinical Data"))
         self.actionPyradiomics.setText(_translate("MainWindow", "Pyradiomics"))
 
+        MainWindow.update()
+
     # When the value of the slider in the DICOM View changes
     def valueChangeSlider(self):
         id = self.slider.value()
@@ -674,8 +709,12 @@ class Ui_MainWindow(object):
         pass
 
     def PatientHandler(self):
-        callClass = src.Controller.mainPageController.MainPage()
-        return callClass.openPatient()
+        self.callClass.openPatient()
+
+    def pyradiomicsHandler(self):
+        self.callClass.runPyradiomics(self.path)
+
+
 
     def createModelTree(self):
         model = QtGui.QStandardItemModel(0, 5, parent=None)
@@ -700,6 +739,7 @@ import src.View.resources_rc
 
 # In the Model directory
 def getDVH(path):
+    print(path)
     file_rtss = path + "/rtss.dcm"
     file_rtdose = path + "/rtdose.dcm"
     ds_rtss = pydicom.dcmread(file_rtss)
