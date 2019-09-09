@@ -69,43 +69,34 @@ class plugin:
         def hasattribute(keyword, ds):
             return keyword in ds
 
-        # Import rtss.dcm. Only rtss is related to the ROI info, according to my research so far.
-
-        ds_rtss = pydicom.dcmread("rtss.dcm")
+        Dicom_folder_path = self.path  # Getting and storing the Folder path of rtss.dcm file
+        print("PATH of the dicom file is:-----", Dicom_folder_path, "\n\n")
+        # creating the .dcm filename variable that we wnat to load in dataframe
+        Dicom_filename = "rtss.dcm"
+        # concatinating the folder path and the filename
+        Full_dicom_filepath = (Dicom_folder_path + "/" + Dicom_filename)
+        print("FULL PATH of dicom file is:----", Full_dicom_filepath)
+        ds_rtss = pydicom.dcmread(Full_dicom_filepath)
         print("rtss.dcm loaded in ds_rtss")
-        patient_ID = str(ds_rtss.PatientID)
-        hash_patient_ID = str(uuid.uuid3(uuid.NAMESPACE_URL, patient_ID))
-        # print("printing hash",hash_patient_ID)
 
 
-        # ---------- This is for hashlib  Tried Ignore --------
-        # m = hashlib.sha256()
-        # u = unicode(patient_name, "utf-8")
-        # obj = str(patient_name).encode('utf8')
-        # hash_Pname = m.update(patient_name)
-        # m.digest()
-        # print("Hashlib Pname: ---- ",hash_Pname)
-        # print("Printingn dataset - ",ds_rtss)
-        # ----------------------------------
-
-
-        # Function to Hash Patient Name , ID , Sex , Date-0f-birth
+        ## ===================================HASH Function================================================
         def Hash_identifiers():
+
             # ------------------------------------Sha1 hash for patient name-------------------------------------
+
             if 'PatientName' in ds_rtss:
                 patient_name = str(ds_rtss.PatientName)
-
                 print("Patient name - ", patient_name)
 
-                hash_patient_name = uuid.uuid3(uuid.NAMESPACE_URL, patient_name)
-                print("Hash value for patient name : ", hash_patient_name)
-                # ds_rtss.patientName = hash_patient_name
-                ds_rtss.PatientName = str(hash_patient_name)
+                hash_patient_name_MD5 = uuid.uuid5(uuid.NAMESPACE_URL, patient_name)
+                print("MD5 patient name:----", hash_patient_name_MD5)
+                hash_patient_name_sha1 = uuid.uuid3(uuid.NAMESPACE_URL, str(hash_patient_name_MD5))
+                print("Sha1 patient name:----", hash_patient_name_sha1)
+                ds_rtss.PatientName = str(hash_patient_name_sha1)
                 print("Class of Patientname is: ", type(ds_rtss.PatientName))
                 print("Hash changed in dataset for patient name:---- ", ds_rtss.PatientName)
-                # print(" hash changed in Dataset for patient name: ",ds_rtss.Patientname)
-                # print("The SHA1 hash for patient name variable  is  : ",hash_patient_name)   # uuid.uuid3(uuid.NAMESPACE_URL, patient_name)
-                # print("Patient Name: " + str(ds_rtss.Patientname),'\n\n')
+
                 print("\n\n")
             else:
                 print("NO patient Name found")
@@ -117,26 +108,40 @@ class plugin:
                 patient_ID = str(ds_rtss.PatientID)
                 print("Patient ID - ", patient_ID)
 
-                hash_patient_ID = uuid.uuid3(uuid.NAMESPACE_URL, patient_ID)
-                ds_rtss.PatientID = str(hash_patient_ID)
-                print("Class of Patientid is: ", type(ds_rtss.PatientID))
-                print(" hash changed in Dataset for patient ID: ", ds_rtss.PatientID)
-                # print("The SHA1 hash for patient ID variable is  : ",hash_patient_ID)       #uuid.uuid3(uuid.NAMESPACE_URL, patient_ID))
-                print("Patient ID: " + str(ds_rtss.PatientID), '\n\n')
+                hash_patient_ID_MD5 = uuid.uuid5(uuid.NAMESPACE_URL, patient_ID)
+                print("MD5 patient ID:----", hash_patient_ID_MD5)
+                hash_patient_ID_sha1 = uuid.uuid3(uuid.NAMESPACE_URL, str(hash_patient_ID_MD5))
+                print("Sha1 patient ID:----", hash_patient_ID_sha1)
+                ds_rtss.PatientID = str(hash_patient_ID_sha1)
+                print("Class of PatientID is: ", type(ds_rtss.PatientID))
+                print("Hash changed in Dataset for patient ID: ", ds_rtss.PatientID)
+                print("\n\n")
             else:
                 print("NO patient ID not found")
 
+            #  storing patient_name and ID in one variable
+            if hasattribute("PatientID", ds_rtss):
+                P_name_ID = patient_name + " + " + patient_ID
+                print("Pname and ID=   ", P_name_ID)
+            else:
+                P_name_ID = patient_name + " + " + "PID_empty"
+                print("Pname and ID=   ", P_name_ID)
+
+            print("\n\n")
             # ----------------------------------------------sha1 hash for patient DOB---------------------------------------
 
             if 'PatientBirthDate' in ds_rtss:
                 patient_DOB = str(ds_rtss.PatientBirthDate)
                 print("Patient DOB - ", patient_DOB)
-                hash_patient_DOB = uuid.uuid3(uuid.NAMESPACE_URL, patient_DOB)
-                ds_rtss.PatientBirthDate = str(hash_patient_DOB)
+
+                hash_patient_DOB_MD5 = uuid.uuid5(uuid.NAMESPACE_URL, patient_DOB)
+                print("MD5 patient DOB:----", hash_patient_DOB_MD5)
+                hash_patient_DOB_sha1 = uuid.uuid3(uuid.NAMESPACE_URL, str(hash_patient_DOB_MD5))
+                print("Sha1 patient DOB:----", hash_patient_DOB_sha1)
+                ds_rtss.PatientBirthDate = str(hash_patient_DOB_sha1)
                 print("Class of DOB is: ", type(ds_rtss.PatientBirthDate))
-                print(" The hash changed in Dataset for patient DOB: ", ds_rtss.PatientBirthDate)
-                # print("The SHA1 hash for patient DOB is :",hash_patient_DOB)        # uuid.uuid3(uuid.NAMESPACE_URL,patient_DOB)
-                print("Patient Birth Date: " + str(ds_rtss.PatientBirthDate), '\n\n')
+                print("Hash changed in Dataset for patient DOB: ", ds_rtss.PatientBirthDate)
+                print("\n\n")
             else:
                 print("Patient BirthDate not found")
 
@@ -145,20 +150,79 @@ class plugin:
             if 'PatientSex' in ds_rtss:
                 patient_sex = str(ds_rtss.PatientSex)
                 print("Patient Sex - ", patient_sex)
-                hash_patient_Sex = uuid.uuid3(uuid.NAMESPACE_URL, patient_sex)
-                ds_rtss.PatientSex = str(hash_patient_Sex)
+
+                hash_patient_Sex_MD5 = uuid.uuid5(uuid.NAMESPACE_URL, patient_sex)
+                print("MD5 patient SEX:----", hash_patient_Sex_MD5)
+                hash_patient_Sex_sha1 = uuid.uuid3(uuid.NAMESPACE_URL, str(hash_patient_Sex_MD5))
+                print("Sha1 patient SEX:----", hash_patient_Sex_sha1)
+                ds_rtss.PatientSex = str(hash_patient_Sex_sha1)
                 print("Class of Sex is: ", type(ds_rtss.PatientSex))
                 print("hash changed in Dataset for patient sex: ", ds_rtss.PatientSex)
-                # print("The SHA1 hash for patient SEX is :",hash_patient_Sex)     #uuid.uuid3(uuid.NAMESPACE_URL,patient_sex))
-                print("Patient Sex: " + str(ds_rtss.PatientSex) + '\n')
+                print('\n\n')
             else:
                 print("Patient Sex not found")
 
+            return (P_name_ID, hash_patient_name_sha1)
             # Call options again for the user
             # options()
 
+         ## ===================================CHECK FILE EXIST================================================
+   
+        def checkFileExist(fileName):
+            print("file name:-- ", fileName)  # printing file name
 
-       ### OPTION USED JUSTED FOR TESTING IGNORE
+            if (fileName == "Hash_map.csv"):
+                cwd = os.getcwd()  # getting the current working directory
+                file_path = cwd + "/" + fileName  # concatenating the current working directory with the csv filename
+                print("Full path :  ===========", file_path)  # print the full csv file path
+                print("file exist: ", os.path.isfile(file_path))  # check if the file exist in the folder
+                if (os.path.isfile(file_path)) == True:  # if file exist return True
+                    print("returning true-----------------------")
+                    return True
+                else:
+                    print("returning false----------------------")  # if file not exist return false
+                    return False
+
+         ## ===================================CTEATE CSV FILE================================================
+
+        def create_hash_csv(pname, sha1_pname, csv_filename):
+
+            # print("Csv file name is : ",csv_filename)
+            # csv_filename = str("Hash_map") + ".csv"
+            if (checkFileExist(csv_filename)) == False:
+                print("-----Creating CSV------")
+
+                csv_header = []
+                csv_header.append('Pname and ID')
+                csv_header.append('Hashed_Pname')
+                print("the headers are:--", csv_header)
+
+                # hash_dictionary =  {patient_ID : hash_patient_ID}
+                # print("dictionary values",hash_dictionary)
+
+                df_identifier_csv = pd.DataFrame(columns=csv_header).round(2)
+                df_identifier_csv.to_csv(csv_filename, index=False)
+
+                row = [pname, sha1_pname]
+                with open(csv_filename, 'a') as csvFile:
+                    writer = csv.writer(csvFile)
+                    writer.writerow(row)
+                    csvFile.close()
+
+                # print("The dataframe",df_identifier_csv)
+                print("---------CSV created-----------")
+                # options()
+
+            else:
+                print("updating csv")
+                row = [pname, sha1_pname]
+                with open(csv_filename, 'a') as csvFile:
+                    writer = csv.writer(csvFile)
+                    writer.writerow(row)
+                    csvFile.close()
+                print("------CSV updated -----")
+                # options()
+
         def options():
             print("\nPLease specify the task by selecting from OPTIONS:--\n\n")
             print("----OPTIONS----\n")
@@ -167,13 +231,13 @@ class plugin:
             if (action == 1):
                 print("hashing identifiers")
                 Hash_identifiers()
-                # patient_ID,patient_ID_hash = Hash_identifiers()
                 # options()
             if (action == 2):
                 print("creating or updation CSV")
                 create_hash_csv()
             if (action == 3):
                 exit(0)
+
 
         ## ===================================PRINTING THE HASH VALUES================================================
 
@@ -184,63 +248,15 @@ class plugin:
             print("Patient SEX in dataset not hash: ", ds_rtss.PatientSex)
             print("\n\n")
 
-        ##==========================================CALLING HASHING ==========================================
+        ##==========================================CALLING HASHING ==========================================    
 
         Print_identifiers()
-        Hash_identifiers()
-        print("=========FINISHED HASHING in SHAI")
+        pname_ID, sha1_pname = Hash_identifiers()
+        print(" In main Pname and ID=  {} and SHA1_name: {}".format(pname_ID, sha1_pname))
+        csv_filename = str("Hash_map") + ".csv"
+        create_hash_csv(pname_ID, sha1_pname, csv_filename)
 
-
-
-
-
-
-
-
-
-
-        # dlg = wx.FileDialog(
-        #     self.parent, defaultDir=self.path,
-        #     wildcard="All Files (*.*)|*.*|DICOM File (*.dcm)|*.dcm",
-        #     message="Choose to ANON")
-        #
-        # patient = {}
-        # if dlg.ShowModal() == wx.ID_OK:
-        #     filename = dlg.GetPath()
-        #     # Try to parse the file if is a DICOM file
-        #     try:
-        #         logger.debug("Reading: %s", filename)
-        #         dp = dicomparser.DicomParser(filename)
-        #     # Otherwise show an error dialog
-        #     except (AttributeError, EOFError, IOError, KeyError):
-        #         logger.info("%s is not a valid DICOM file.", filename)
-        #         dlg = wx.MessageDialog(
-        #             self.parent, filename + " is not a valid DICOM file.",
-        #             "Invalid DICOM File", wx.OK | wx.ICON_ERROR)
-        #         dlg.ShowModal()
-        #     # If this is really a DICOM file, place it in the appropriate bin
-        #     else:
-        #         if (('ImageOrientationPatient' in dp.ds) and not (dp.ds.Modality in ['RTDOSE'])):
-        #             patient['images'] = []
-        #             patient['images'].append(dp.ds)
-        #         elif (dp.ds.Modality in ['RTSTRUCT']):
-        #             patient['rtss'] = dp.ds
-        #         elif (dp.ds.Modality in ['RTPLAN']):
-        #             patient['rtplan'] = dp.ds
-        #         elif (dp.ds.Modality in ['RTDOSE']):
-        #             patient['rtdose'] = dp.ds
-        #         else:
-        #             patient[dp.ds.Modality] = dp.ds
-        #         # Since we have decided to use this location to import from,
-        #         # update the location in the preferences for the next session
-        #         # if the 'import_location_setting' is "Remember Last Used"
-        #         if (self.import_location_setting == "Remember Last Used"):
-        #             pub.sendMessage('preferences.updated.value',
-        #                             msg={'general.dicom.import_location': dlg.GetDirectory()})
-        #             pub.sendMessage('preferences.requested.values', msg='general.dicom')
-        # pub.sendMessage('patient.updated.raw_data', msg=patient)
-        # dlg.Destroy()
-        # return
+        return
 
 
 
