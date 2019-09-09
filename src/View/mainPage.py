@@ -1,18 +1,18 @@
-import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-import pydicom
-import matplotlib.pyplot as plt
+import matplotlib.pylab as plt
 import numpy as np
-from dicompylercore import dvhcalc
-from src.Model.CalculateImages import *
 from src.Model.LoadPatients import *
 from src.Model.CalculateDVHs import *
-from src.Controller.mainPageController import *
+from matplotlib.backends.backend_qt5agg import FigureCanvas
+
 
 
 class Ui_MainWindow(object):
 
-    def setupUi(self, MainWindow, pixmap_dict, path):
+    def setupUi(self, MainWindow, pixmap_dict, dirPath):
+        self.callClass = src.Controller.mainPageController.MainPage()
+        self.path = dirPath
+
         # Load DICOM image dictionary
         # self.refresh()
         self.pixmaps = pixmap_dict
@@ -78,53 +78,82 @@ class Ui_MainWindow(object):
         self.slider.setGeometry(QtCore.QRect(0, 0, 50, 500))
         self.gridLayout_view.addWidget(self.slider, 0, 1, 1, 1)
 
-        # DICOM image processing
+        if len(self.pixmaps) != 0:
+        #DICOM image processing
         id = self.slider.value()
-        if len(self.pixmaps) !=0:
-            print(len(self.pixmaps))
-            DICOM_image = self.pixmaps[id]
-            DICOM_image = DICOM_image.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
-            DICOM_image_label = QtWidgets.QLabel()
-            DICOM_image_label.setPixmap(DICOM_image)
-            DICOM_image_scene = QtWidgets.QGraphicsScene()
-            DICOM_image_scene.addWidget(DICOM_image_label)
-            # Introduce DICOM image into DICOM View tab
-            self.DICOM_view = QtWidgets.QGraphicsView(self.tab2_view)
-            self.DICOM_view.setScene(DICOM_image_scene)
-            background_brush = QtGui.QBrush(QtGui.QColor(0, 0, 0), QtCore.Qt.SolidPattern)
-            self.DICOM_view.setBackgroundBrush(background_brush)
-            self.DICOM_view.setGeometry(QtCore.QRect(0, 0, 877, 517))
-            self.DICOM_view.setObjectName("DICOM_view")
+        DICOM_image = self.pixmaps[id]
+        DICOM_image = DICOM_image.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
+        DICOM_image_label = QtWidgets.QLabel()
+        DICOM_image_label.setPixmap(DICOM_image)
+        DICOM_image_scene = QtWidgets.QGraphicsScene()
+        DICOM_image_scene.addWidget(DICOM_image_label)
+        # Introduce DICOM image into DICOM View tab
+        self.DICOM_view = QtWidgets.QGraphicsView(self.tab2_view)
+        self.DICOM_view.setScene(DICOM_image_scene)
+        background_brush = QtGui.QBrush(QtGui.QColor(0, 0, 0), QtCore.Qt.SolidPattern)
+        self.DICOM_view.setBackgroundBrush(background_brush)
+        self.DICOM_view.setGeometry(QtCore.QRect(0, 0, 877, 517))
+        self.DICOM_view.setObjectName("DICOM_view")
 
-            self.gridLayout_view.addWidget(self.DICOM_view, 0, 0, 1, 1)
+        self.gridLayout_view.addWidget(self.DICOM_view, 0, 0, 1, 1)
 
 
-            self.tab2.addTab(self.tab2_view, "")
 
-            # Main view: DVH
-            self.tab2_DVH = QtWidgets.QWidget()
-            self.tab2_DVH.setObjectName("tab2_DVH")
-            # DVH Processing
-            DVH_file = getDVH(path)
-            DVH_image = DVH_view(DVH_file)
-            DVH_image_label = QtWidgets.QLabel()
-            DVH_image_label.setPixmap(DVH_image)
-            DVH_image_scene = QtWidgets.QGraphicsScene()
-            DVH_image_scene.addWidget(DVH_image_label)
-            # Introduce DVH image into DVH tab
-            self.DVH_view = QtWidgets.QGraphicsView(self.tab2_DVH)
-            self.DVH_view.setScene(DVH_image_scene)
-            self.DVH_view.setGeometry(QtCore.QRect(0, 0, 750, 400))
-            self.DVH_view.setObjectName("DVH_view")
-            # DVH: Export DVH Button
-            self.button_exportDVH = QtWidgets.QPushButton(self.tab2_DVH)
-            self.button_exportDVH.setGeometry(QtCore.QRect(760, 358, 97, 39))
-            self.button_exportDVH.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-            self.button_exportDVH.setStyleSheet("background-color: rgb(147, 112, 219);\n""color: rgb(0, 0, 0);")
-            self.button_exportDVH.setObjectName("button_exportDVH")
-            self.tab2.addTab(self.tab2_DVH, "")
+        self.tab2.addTab(self.tab2_view, "")
+
+        # Main view: DVH
+        self.tab2_DVH = QtWidgets.QWidget()
+        self.tab2_DVH.setObjectName("tab2_DVH")
+        # DVH Processing
+        DVH_file = getDVH(path)
+        DVH_image = DVH_view(DVH_file)
+        DVH_image_label = QtWidgets.QLabel()
+        DVH_image_label.setPixmap(DVH_image)
+        DVH_image_scene = QtWidgets.QGraphicsScene()
+        DVH_image_scene.addWidget(DVH_image_label)
+        # Introduce DVH image into DVH tab
+        self.DVH_view = QtWidgets.QGraphicsView(self.tab2_DVH)
+        self.DVH_view.setScene(DVH_image_scene)
+        self.DVH_view.setGeometry(QtCore.QRect(0, 0, 750, 400))
+        self.DVH_view.setObjectName("DVH_view")
+        # DVH: Export DVH Button
+        self.button_exportDVH = QtWidgets.QPushButton(self.tab2_DVH)
+        self.button_exportDVH.setGeometry(QtCore.QRect(760, 358, 97, 39))
+        self.button_exportDVH.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.button_exportDVH.setStyleSheet("background-color: rgb(147, 112, 219);\n""color: rgb(0, 0, 0);")
+        self.button_exportDVH.setObjectName("button_exportDVH")
+        self.tab2.addTab(self.tab2_DVH, "")
 
 
+        self.tab2.addTab(self.tab2_view, "")
+
+        # Main view: DVH
+        self.tab2_DVH = QtWidgets.QWidget()
+        self.tab2_DVH.setObjectName("tab2_DVH")
+        # DVH layout
+        self.widget_DVH = QtWidgets.QWidget(self.tab2_DVH)
+        self.widget_DVH.setGeometry(QtCore.QRect(0, 0, 877, 400))
+        self.widget_DVH.setObjectName("widget_DVH")
+        self.gridLayout_DVH = QtWidgets.QGridLayout(self.widget_DVH)
+        self.gridLayout_DVH.setObjectName("gridLayout_DVH")
+
+        # DVH Processing
+        DVH_file = getDVH(self.path)
+        fig = DVH_view(DVH_file)
+        self.plotWidget = FigureCanvas(fig)
+        self.gridLayout_DVH.addWidget(self.plotWidget, 1, 0, 1, 1)
+
+        # DVH: Export DVH Button
+        self.button_exportDVH = QtWidgets.QPushButton(self.tab2_DVH)
+        self.button_exportDVH.move(15,10)
+        self.button_exportDVH.setFixedSize(QtCore.QSize(100, 39))
+        self.button_exportDVH.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.button_exportDVH.setStyleSheet("background-color: rgb(147, 112, 219);\n""color: rgb(0, 0, 0);")
+        self.button_exportDVH.setObjectName("button_exportDVH")
+
+        self.gridLayout_DVH.addWidget(self.button_exportDVH, 1, 1, 1, 1)
+
+        self.tab2.addTab(self.tab2_DVH, "")
 
         # Main view: DICOM Tree
         self.tab2_DICOM_tree = QtWidgets.QWidget()
@@ -517,7 +546,7 @@ class Ui_MainWindow(object):
         # Export Pyradiomics Action
         self.actionPyradiomics = QtWidgets.QAction(MainWindow)
         self.actionPyradiomics.setObjectName("actionPyradiomics")
-
+        self.actionPyradiomics.triggered.connect(self.pyradiomicsHandler)
 
         # Build menu bar
         self.menuFile.addAction(self.actionOpen)
@@ -602,16 +631,16 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "Onko"))
 
         # Set tab labels
-        if len(self.pixmaps) != 0:
-            self.tab1.setTabText(self.tab1.indexOf(self.tab1_structures), _translate("MainWindow", "Structures"))
-            self.tab1.setTabText(self.tab1.indexOf(self.tab1_isodoses), _translate("MainWindow", "Isodoses"))
-            self.tab2.setTabText(self.tab2.indexOf(self.tab2_view), _translate("MainWindow", "DICOM View"))
-            self.tab2.setTabText(self.tab2.indexOf(self.tab2_DVH), _translate("MainWindow", "DVH"))
-            self.tab2.setTabText(self.tab2.indexOf(self.tab2_DICOM_tree), _translate("MainWindow", "DICOM Tree"))
-            self.tab2.setTabText(self.tab2.indexOf(self.tab2_clinical_data), _translate("MainWindow", "Clinical Data"))
 
-            # Set "export DVH" button label
-            self.button_exportDVH.setText(_translate("MainWindow", "Export DVH"))
+        self.tab1.setTabText(self.tab1.indexOf(self.tab1_structures), _translate("MainWindow", "Structures"))
+        self.tab1.setTabText(self.tab1.indexOf(self.tab1_isodoses), _translate("MainWindow", "Isodoses"))
+        self.tab2.setTabText(self.tab2.indexOf(self.tab2_view), _translate("MainWindow", "DICOM View"))
+        self.tab2.setTabText(self.tab2.indexOf(self.tab2_DVH), _translate("MainWindow", "DVH"))
+        self.tab2.setTabText(self.tab2.indexOf(self.tab2_DICOM_tree), _translate("MainWindow", "DICOM Tree"))
+        self.tab2.setTabText(self.tab2.indexOf(self.tab2_clinical_data), _translate("MainWindow", "Clinical Data"))
+
+        # Set "export DVH" button label
+        self.button_exportDVH.setText(_translate("MainWindow", "Export DVH"))
 
         # Set bottom layer label
         self.label.setText(_translate("MainWindow", "@Onko 2019"))
@@ -677,13 +706,11 @@ class Ui_MainWindow(object):
         MainWindow.update()
 
     # When the value of the slider in the DICOM View changes
-    # Xudong: I think there might be some better ways to do the image changing
     def valueChangeSlider(self):
         id = self.slider.value()
         pixmap = self.pixmaps[id]
         pixmap = pixmap.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
         DICOM_image_label = QtWidgets.QLabel()
-        # ======
         DICOM_image_label.setPixmap(pixmap)
         DICOM_image_scene = QtWidgets.QGraphicsScene()
         DICOM_image_scene.addWidget(DICOM_image_label)
@@ -691,8 +718,10 @@ class Ui_MainWindow(object):
         pass
 
     def PatientHandler(self):
-        callClass = src.Controller.mainPageController.MainPage()
-        return callClass.openPatient()
+        self.callClass.openPatient()
+
+    def pyradiomicsHandler(self):
+        self.callClass.runPyradiomics(self.path)
 
 
 
@@ -701,30 +730,24 @@ import src.View.resources_rc
 
 # In the Model directory
 def getDVH(path):
+    print(path)
     file_rtss = path + "/rtss.dcm"
     file_rtdose = path + "/rtdose.dcm"
     ds_rtss = pydicom.dcmread(file_rtss)
     ds_rtdose = pydicom.dcmread(file_rtdose)
-    return dvhcalc.get_dvh(ds_rtss, ds_rtdose, 13)
+    rois = get_roi_info(ds_rtss)
+    return calc_dvhs(ds_rtss, ds_rtdose, rois)
 
 
 # In the View directory
 def DVH_view(dvh_file):
-    fig = plt.figure()
-    ax = fig.subplots()
-    ax.plot(dvh_file.bincenters, dvh_file.counts, label=dvh_file.name,
-             color=None if not isinstance(dvh_file.color, np.ndarray) else
-             (dvh_file.color / 255))
-    plt.xlabel('Dose [%s]' % dvh_file.dose_units)
-    plt.ylabel('Volume [%s]' % dvh_file.volume_units)
-    if dvh_file.name:
-        plt.legend(loc='best')
-
-    fig.canvas.draw()
-    data = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
-    data = data.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-    qimage = QtGui.QImage(data, data.shape[1], data.shape[0],
-                          QtGui.QImage.Format_RGB888)
-    pixmap = QtGui.QPixmap(qimage)
-    pixmap = pixmap.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
-    return pixmap
+    fig, ax = plt.subplots()
+    for roi, dvh in dvh_file.items():
+        ax.plot(dvh.bincenters, 100*dvh.counts/dvh.volume, label=dvh.name,
+                 color=None if not isinstance(dvh.color, np.ndarray) else
+                 (dvh.color / 255))
+        plt.xlabel('Dose [%s]' % dvh.dose_units)
+        plt.ylabel('Volume [%s]' % '%')
+        if dvh.name:
+            plt.legend(loc='best')
+    return fig

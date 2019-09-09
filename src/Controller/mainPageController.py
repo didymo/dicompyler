@@ -3,14 +3,15 @@ from src.View.mainPage import *
 
 from src.Model.CalculateImages import *
 from src.Model.LoadPatients import *
+from src.Model.Pyradiomics import pyradiomics
 from PyQt5 import QtWidgets
 
 
 
 class MainPage(QtWidgets.QMainWindow):
-    def __init__(self,parent=None):
-        super(MainPage, self).__init__(parent=parent)
-        self.path=''
+
+    def __init__(self):
+        self.path = ''
         self.dataset = []
         self.pixmaps = []
 
@@ -18,10 +19,7 @@ class MainPage(QtWidgets.QMainWindow):
 
     def displayMainPage(self):
         QtWidgets.QWidget.__init__(self)
-        #self.hide()
-        #self.show()
-       # print("show 1")
-
+        print(self.path)
         self.ui = Ui_MainWindow()
        # self.hide()
         self.ui.setupUi(self, self.pixmaps, self.path)
@@ -37,10 +35,11 @@ class MainPage(QtWidgets.QMainWindow):
        # QtWidgets.QWidget.__init__(self)
         # self.hide()
         self.path = QtWidgets.QFileDialog.getExistingDirectory(None, 'Select patient folder...')
-        #self.hide()
         self.dataset = get_datasets(self.path)
         self.pixmaps = get_pixmaps(self.dataset)
-
         self.displayMainPage()
-        #self.show()
-        print(self.path)
+        self.show()
+
+    def runPyradiomics(self, dirPath):
+        pyradiomics(dirPath)
+

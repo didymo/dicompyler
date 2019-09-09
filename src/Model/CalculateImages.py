@@ -22,7 +22,7 @@ def get_img(dict_ds):
             dict_img[key] = np_pixels
     return dict_img
 
-
+# Return a dictionary of pixmaps for UI
 def get_pixmaps(dict_ds):
     # Create a dictionary of storing pixmaps
     dict_pixmaps = {}
