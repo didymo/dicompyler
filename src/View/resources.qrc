@@ -12,5 +12,6 @@
     <file>../Icon/save_all.png</file>
     <file>../Icon/transect.png</file>
     <file>../Icon/windowing.png</file>
+    <file>../Icon/logo.png</file>
   </qresource>
 </RCC>
