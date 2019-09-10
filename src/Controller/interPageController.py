@@ -16,7 +16,7 @@ class Welcome(QtWidgets.QMainWindow, WelcomePage):
         self.pushButton.clicked.connect(self.patientHandler)
 
     def patientHandler(self):
-        path = QtWidgets.QFileDialog.getExistingDirectory(None, 'Select patient folder...')
+        path = QtWidgets.QFileDialog.getExistingDirectory(None, 'Select patient folder...', '/home')
         self.open_patient_window.emit(path)
 
 
@@ -30,7 +30,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionOpen.triggered.connect(self.patientHandler)
 
     def patientHandler(self):
-        path = QtWidgets.QFileDialog.getExistingDirectory(None, 'Select patient folder...')
+        path = QtWidgets.QFileDialog.getExistingDirectory(None, 'Select patient folder...', '/home')
         self.open_patient_window.emit(path)
 
 
@@ -55,8 +55,3 @@ class Controller:
         if self.patient_window.isVisible():
             self.patient_window.close()
         self.patient_window.show()
-
-    # def show_window_two(self, text):
-    #     self.window_two = WindowTwo(text)
-    #     self.window.close()
-    #     self.window_two.show()
