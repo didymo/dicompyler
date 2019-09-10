@@ -3,19 +3,15 @@ import matplotlib.pylab as plt
 import numpy as np
 from src.Model.LoadPatients import *
 from src.Model.CalculateDVHs import *
+from src.Controller.mainPageController import MainPage
 from matplotlib.backends.backend_qt5agg import FigureCanvas
-
 
 
 class Ui_MainWindow(object):
 
-    def setupUi(self, MainWindow, pixmap_dict, dirPath):
-        self.callClass = src.Controller.mainPageController.MainPage()
-        self.path = dirPath
-
-        # Load DICOM image dictionary
-        # self.refresh()
-        self.pixmaps = pixmap_dict
+    def setupUi(self, MainWindow, path, dataset, pixmaps_dict):
+        self.callClass = MainPage(path, dataset, pixmaps_dict)
+        self.pixmaps = pixmaps_dict
 
         # Main Window
         MainWindow.setObjectName("MainWindow")
@@ -78,7 +74,6 @@ class Ui_MainWindow(object):
         self.slider.setGeometry(QtCore.QRect(0, 0, 50, 500))
         self.gridLayout_view.addWidget(self.slider, 0, 1, 1, 1)
 
-        if len(self.pixmaps) != 0:
         #DICOM image processing
         id = self.slider.value()
         DICOM_image = self.pixmaps[id]
@@ -97,25 +92,22 @@ class Ui_MainWindow(object):
 
         self.gridLayout_view.addWidget(self.DICOM_view, 0, 0, 1, 1)
 
-
-
         self.tab2.addTab(self.tab2_view, "")
 
         # Main view: DVH
         self.tab2_DVH = QtWidgets.QWidget()
         self.tab2_DVH.setObjectName("tab2_DVH")
+        # DVH layout
+        self.widget_DVH = QtWidgets.QWidget(self.tab2_DVH)
+        self.widget_DVH.setGeometry(QtCore.QRect(0, 0, 877, 400))
+        self.widget_DVH.setObjectName("widget_DVH")
+        self.gridLayout_DVH = QtWidgets.QGridLayout(self.widget_DVH)
+        self.gridLayout_DVH.setObjectName("gridLayout_DVH")
         # DVH Processing
         DVH_file = getDVH(path)
-        DVH_image = DVH_view(DVH_file)
-        DVH_image_label = QtWidgets.QLabel()
-        DVH_image_label.setPixmap(DVH_image)
-        DVH_image_scene = QtWidgets.QGraphicsScene()
-        DVH_image_scene.addWidget(DVH_image_label)
-        # Introduce DVH image into DVH tab
-        self.DVH_view = QtWidgets.QGraphicsView(self.tab2_DVH)
-        self.DVH_view.setScene(DVH_image_scene)
-        self.DVH_view.setGeometry(QtCore.QRect(0, 0, 750, 400))
-        self.DVH_view.setObjectName("DVH_view")
+        fig = DVH_view(DVH_file)
+        self.plotWidget = FigureCanvas(fig)
+        self.gridLayout_DVH.addWidget(self.plotWidget, 1, 0, 1, 1)
         # DVH: Export DVH Button
         self.button_exportDVH = QtWidgets.QPushButton(self.tab2_DVH)
         self.button_exportDVH.setGeometry(QtCore.QRect(760, 358, 97, 39))
@@ -138,7 +130,7 @@ class Ui_MainWindow(object):
         self.gridLayout_DVH.setObjectName("gridLayout_DVH")
 
         # DVH Processing
-        DVH_file = getDVH(self.path)
+        DVH_file = getDVH(path)
         fig = DVH_view(DVH_file)
         self.plotWidget = FigureCanvas(fig)
         self.gridLayout_DVH.addWidget(self.plotWidget, 1, 0, 1, 1)
@@ -437,7 +429,6 @@ class Ui_MainWindow(object):
         self.actionOpen.setIcon(icon)
         self.actionOpen.setIconVisibleInMenu(True)
         self.actionOpen.setObjectName("actionOpen")
-        self.actionOpen.triggered.connect(self.PatientHandler)
 
         # Import Action
         self.actionImport = QtWidgets.QAction(MainWindow)
@@ -717,20 +708,12 @@ class Ui_MainWindow(object):
         self.DICOM_view.setScene(DICOM_image_scene)
         pass
 
-    def PatientHandler(self):
-        self.callClass.openPatient()
-
     def pyradiomicsHandler(self):
-        self.callClass.runPyradiomics(self.path)
-
-
-
-import src.View.resources_rc
+        self.callClass.runPyradiomics()
 
 
 # In the Model directory
 def getDVH(path):
-    print(path)
     file_rtss = path + "/rtss.dcm"
     file_rtdose = path + "/rtdose.dcm"
     ds_rtss = pydicom.dcmread(file_rtss)
