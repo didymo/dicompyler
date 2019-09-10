@@ -45,10 +45,10 @@ def get_tree(ds, label=0):
 # Get patient name, ID, gender and DOB
 def get_basic_info(ds):
     dict_basic_info = {}
-    dict_basic_info['name'] = repr(ds.PatientName)
-    dict_basic_info['id'] = repr(ds.PatientID)
-    dict_basic_info['gender'] = repr(ds.PatientSex)
-    dict_basic_info['dob'] = repr(ds.PatientBirthDate)
+    dict_basic_info['name'] = str(ds.PatientName)
+    dict_basic_info['id'] = str(ds.PatientID)
+    dict_basic_info['gender'] = str(ds.PatientSex)
+    dict_basic_info['dob'] = str(ds.PatientBirthDate)
     return dict_basic_info
 
 
@@ -163,8 +163,8 @@ def main():
     dicomTree.show_tree()
 
 if __name__ == '__main__':
-    # path = '../../dicom_sample/ct.0.dcm'
-    # ds = pydicom.dcmread(path)
+    path = '../../dicom_sample/ct.0.dcm'
+    ds = pydicom.dcmread(path)
     # ls = get_tree(ds, 0)
     # for i in ls:
     #     print(i)
@@ -172,3 +172,5 @@ if __name__ == '__main__':
     # print(ds)
 
     main()
+    dict = get_basic_info(ds)
+    print(dict)
