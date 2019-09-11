@@ -1,16 +1,15 @@
-from src.View.mainPage import *
-
-
 from src.Model.CalculateImages import *
 from src.Model.LoadPatients import *
 from src.Model.GetPatientInfo import *
+from src.Model.Pyradiomics import pyradiomics
+from PyQt5 import QtWidgets
 
 
-class MainPage(QtWidgets.QMainWindow):
-    def __init__(self):
-        path = 'dicom_sample'
+class MainPage:
 
-        QtWidgets.QWidget.__init__(self)
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self, path)
+    def __init__(self, path):
+        self.path = path
+
+    def runPyradiomics(self):
+        pyradiomics(self.path)
 

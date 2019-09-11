@@ -1,12 +1,11 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-import pydicom
 import matplotlib.pylab as plt
 import numpy as np
-from dicompylercore import dvhcalc
-from src.Model.CalculateImages import *
 from src.Model.LoadPatients import *
 from src.Model.CalculateDVHs import *
+from src.Model.CalculateImages import *
 from src.Model.GetPatientInfo import *
+from src.Controller.mainPageController import MainPage
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 
 
@@ -18,6 +17,7 @@ class Ui_MainWindow(object):
         self.pixmaps = get_pixmaps(self.dataset)
         self.dicomTree = DicomTree(path + '/ct.0.dcm')
         self.basicInfo = get_basic_info(self.dataset[0])
+        self.callClass = MainPage(path)
 
         # Main Window
         MainWindow.setObjectName("MainWindow")
@@ -26,7 +26,6 @@ class Ui_MainWindow(object):
         # Central Layer
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
-
 
         # Left Column
         self.tab1 = QtWidgets.QTabWidget(self.centralwidget)
@@ -49,7 +48,6 @@ class Ui_MainWindow(object):
         self.listView.setObjectName("listView")
         self.tab1.addTab(self.tab1_isodoses, "")
 
-
         # Main view
         self.tab2 = QtWidgets.QTabWidget(self.centralwidget)
         self.tab2.setGeometry(QtCore.QRect(200, 40, 880, 561))
@@ -66,8 +64,8 @@ class Ui_MainWindow(object):
         # Vertical Slider
         self.slider = QtWidgets.QSlider(QtCore.Qt.Vertical)
         self.slider.setMinimum(0)
-        self.slider.setMaximum(len(self.pixmaps)-1)
-        self.slider.setValue(int(len(self.pixmaps)/2))
+        self.slider.setMaximum(len(self.pixmaps) - 1)
+        self.slider.setValue(int(len(self.pixmaps) / 2))
         self.slider.setTickPosition(QtWidgets.QSlider.TicksLeft)
         self.slider.setTickInterval(1)
         self.slider.setStyleSheet("QSlider::handle:vertical:hover {background: qlineargradient(x1:0, y1:0, x2:1, "
@@ -80,7 +78,7 @@ class Ui_MainWindow(object):
         self.slider.setGeometry(QtCore.QRect(0, 0, 50, 500))
         self.gridLayout_view.addWidget(self.slider, 0, 1, 1, 1)
 
-        # DICOM image processing
+        #DICOM image processing
         id = self.slider.value()
         DICOM_image = self.pixmaps[id]
         DICOM_image = DICOM_image.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
@@ -133,6 +131,7 @@ class Ui_MainWindow(object):
         self.tab2.addTab(self.tab2_DVH, "")
 
         # Main view: DICOM Tree
+        self.NAME, self.VALUE, self.TAG, self.VM, self.VR = range(5)
         self.tab2_DICOM_tree = QtWidgets.QWidget()
         self.tab2_DICOM_tree.setObjectName("tab2_DICOM_tree")
         self.treeView = QtWidgets.QTreeView(self.tab2_DICOM_tree)        # self.tableWidget.setObjectName("tableWidget")
@@ -154,7 +153,6 @@ class Ui_MainWindow(object):
         self.tab2_clinical_data.setObjectName("tab2_clinical_data")
         self.tab2.addTab(self.tab2_clinical_data, "")
 
-
         # Bottom Layer
         self.frame_bottom = QtWidgets.QFrame(self.centralwidget)
         self.frame_bottom.setGeometry(QtCore.QRect(0, 600, 1080, 27))
@@ -167,7 +165,6 @@ class Ui_MainWindow(object):
         self.label.setGeometry(QtCore.QRect(1000, 0, 91, 29))
         self.label.setStyleSheet("font: 9pt \"Laksaman\";")
         self.label.setObjectName("label")
-
 
         # Left Column: Structure Information
         self.frame_struct_info = QtWidgets.QFrame(self.centralwidget)
@@ -207,7 +204,6 @@ class Ui_MainWindow(object):
         self.struct_meanDose_label.setStyleSheet("font: 10pt \"Laksaman\";")
         self.struct_meanDose_label.setObjectName("struct_meanDose_label")
 
-
         # Structure Information: "Volume" box
         self.struct_volume_box = QtWidgets.QLabel(self.frame_struct_info)
         self.struct_volume_box.setGeometry(QtCore.QRect(90, 70, 81, 31))
@@ -231,7 +227,6 @@ class Ui_MainWindow(object):
         self.struct_meanDose_box.setGeometry(QtCore.QRect(90, 160, 81, 31))
         self.struct_meanDose_box.setStyleSheet("font: 10pt \"Laksaman\";")
         self.struct_meanDose_box.setObjectName("struct_meanDose_box")
-
 
         # Layout Icon and Text "Structure Information"
         self.widget = QtWidgets.QWidget(self.frame_struct_info)
@@ -266,7 +261,6 @@ class Ui_MainWindow(object):
         self.struct_maxDose_box.raise_()
         self.struct_meanDose_box.raise_()
 
-
         # Patient Bar
 
         # Patient Icon
@@ -297,7 +291,6 @@ class Ui_MainWindow(object):
         self.patient_name_box.setFont(QtGui.QFont("Laksaman", pointSize=10))
         self.gridLayout_name.addWidget(self.patient_name_box, 0, 1, 1, 1)
 
-
         # Patient ID (layout)
         self.widget4 = QtWidgets.QWidget(self.centralwidget)
         self.widget4.setGeometry(QtCore.QRect(500, 5, 280, 31))
@@ -317,7 +310,6 @@ class Ui_MainWindow(object):
         self.patient_ID_box.setObjectName("patient_ID_box")
         self.patient_ID_box.setFont(QtGui.QFont("Laksaman", pointSize=10))
         self.gridLayout_ID.addWidget(self.patient_ID_box, 0, 1, 1, 1)
-
 
         # Gender (layout)
         self.widget2 = QtWidgets.QWidget(self.centralwidget)
@@ -339,7 +331,6 @@ class Ui_MainWindow(object):
         self.patient_gender_box.setFont(QtGui.QFont("Laksaman", pointSize=10))
         self.gridLayout_gender.addWidget(self.patient_gender_box, 0, 1, 1, 1)
 
-
         # Date of Birth (layout)
         self.widget1 = QtWidgets.QWidget(self.centralwidget)
         self.widget1.setGeometry(QtCore.QRect(950, 5, 95, 31))
@@ -360,8 +351,6 @@ class Ui_MainWindow(object):
         self.patient_DOB_box.setFont(QtGui.QFont("Laksaman", pointSize=10))
         self.gridLayout_DOB.addWidget(self.patient_DOB_box, 0, 1, 1, 1)
 
-
-
         self.patient_icon.raise_()
         self.patient_name.raise_()
         self.patient_name_box.raise_()
@@ -380,7 +369,6 @@ class Ui_MainWindow(object):
         self.frame_bottom.raise_()
         self.frame_struct_info.raise_()
         MainWindow.setCentralWidget(self.centralwidget)
-
 
         # Menu Bar
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -531,7 +519,7 @@ class Ui_MainWindow(object):
         # Export Pyradiomics Action
         self.actionPyradiomics = QtWidgets.QAction(MainWindow)
         self.actionPyradiomics.setObjectName("actionPyradiomics")
-
+        self.actionPyradiomics.triggered.connect(self.pyradiomicsHandler)
 
         # Build menu bar
         self.menuFile.addAction(self.actionOpen)
@@ -556,7 +544,6 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuEdit.menuAction())
         self.menubar.addAction(self.menuTools.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
-
 
         # Build toolbar
         self.menuTools.addAction(self.actionZoom_In)
@@ -600,14 +587,10 @@ class Ui_MainWindow(object):
         self.toolBar.addAction(self.actionAnonymize_and_Save)
         # self.toolBar.addWidget(self.right_spacer)
 
-
         self.retranslateUi(MainWindow)
         self.tab1.setCurrentIndex(0)
         self.tab2.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
-
-
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -616,6 +599,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "Onko"))
 
         # Set tab labels
+
         self.tab1.setTabText(self.tab1.indexOf(self.tab1_structures), _translate("MainWindow", "Structures"))
         self.tab1.setTabText(self.tab1.indexOf(self.tab1_isodoses), _translate("MainWindow", "Isodoses"))
         self.tab2.setTabText(self.tab2.indexOf(self.tab2_view), _translate("MainWindow", "DICOM View"))
@@ -641,7 +625,6 @@ class Ui_MainWindow(object):
         self.struct_minDose_box.setText(_translate("MainWindow", "796542"))
         self.struct_maxDose_box.setText(_translate("MainWindow", "889542"))
         self.struct_meanDose_box.setText(_translate("MainWindow", "816857"))
-
 
         # Set patient bar labels
         self.patient_DOB.setText(_translate("MainWindow", "DOB"))
@@ -687,6 +670,7 @@ class Ui_MainWindow(object):
         self.actionClinical_Data.setText(_translate("MainWindow", "Clinical Data"))
         self.actionPyradiomics.setText(_translate("MainWindow", "Pyradiomics"))
 
+        MainWindow.update()
 
     # When the value of the slider in the DICOM View changes
     def valueChangeSlider(self):
@@ -744,8 +728,13 @@ class Ui_MainWindow(object):
                 parent.setData(parent.index(4), value[3])
         return parent
 
+    def pyradiomicsHandler(self):
+        self.callClass.runPyradiomics()
+
 
 import src.View.resources_rc
+
+
 
 
 # In the Model directory
@@ -795,3 +784,4 @@ def DVH_view(dvh_file):
     ax.grid(which='major', alpha=0.5)
 
     return fig
+

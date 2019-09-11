@@ -29,19 +29,24 @@ def get_roi_info(ds_rtss):
 # "1" is the ID of the ROI
 # dvh is a data type defined in dicompyler-core
 # For dvh plotting example with matplotlib, see: dvh_plot()
-def calc_dvhs(rtss, dose, dict_roi):
+def calc_dvhs(rtss, dose, dict_roi, dose_limit=None):
     dict_dvh = {}
     for roi in dict_roi:
-        dict_dvh[roi] = dvhcalc.get_dvh(rtss, dose, roi)
+        # dicompylercore.dvhcalc.get_dvh(structure, dose, roi,
+        #                                   limit=None, calculate_full_volume=True, use_structure_extents=False,
+        #                                   interpolation_resolution=None, interpolation_segments_between_planes=0,
+        #                                   thickness=None, callback=None)
+        dict_dvh[roi] = dvhcalc.get_dvh(rtss, dose, roi, dose_limit)
     return dict_dvh
+
 
 # For the demo example
 def dvh_plot(dvh):
-    plt.plot(dvh.bincenters, dvh.counts, label=dvh.name,
+    plt.plot(dvh.bincenters, 100*dvh.counts/dvh.volume, label=dvh.name,
              color=None if not isinstance(dvh.color, np.ndarray) else
              (dvh.color / 255))
     plt.xlabel('Dose [%s]' % dvh.dose_units)
-    plt.ylabel('Volume [%s]' % dvh.volume_units)
+    plt.ylabel('Volume [%s]' % '%')
     if dvh.name:
         plt.legend(loc='best')
     plt.show()
