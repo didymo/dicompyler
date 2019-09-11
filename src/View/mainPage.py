@@ -9,6 +9,7 @@ from src.Controller.mainPageController import MainPage
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 
 
+
 class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow, path):
@@ -120,32 +121,36 @@ class Ui_MainWindow(object):
         self.button_exportDVH = QtWidgets.QPushButton()
         self.button_exportDVH.setFixedSize(QtCore.QSize(100, 39))
         self.button_exportDVH.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-        self.button_exportDVH.setStyleSheet("background-color: rgb(147, 112, 219);\n""color: rgb(0, 0, 0);")
+        self.button_exportDVH.setStyleSheet("background-color: rgb(147, 112, 219);\n""color: rgb(255, 255, 255);")
         self.button_exportDVH.setObjectName("button_exportDVH")
         self.vbox_DVH.addWidget(self.button_exportDVH)
         self.vbox_DVH.setAlignment(self.button_exportDVH, QtCore.Qt.AlignBottom)
-
         self.vbox_DVH.addStretch(30)
         self.hbox_DVH.addLayout(self.vbox_DVH)
 
         self.tab2.addTab(self.tab2_DVH, "")
 
+
         # Main view: DICOM Tree
         self.NAME, self.VALUE, self.TAG, self.VM, self.VR = range(5)
         self.tab2_DICOM_tree = QtWidgets.QWidget()
         self.tab2_DICOM_tree.setObjectName("tab2_DICOM_tree")
-        self.treeView = QtWidgets.QTreeView(self.tab2_DICOM_tree)        # self.tableWidget.setObjectName("tableWidget")
-        self.treeView.setObjectName("treeView")
-        self.treeView.setRootIsDecorated(False)
-        self.treeView.setAlternatingRowColors(True)
+        # Creation of the Tree View
+        self.treeView = QtWidgets.QTreeView(self.tab2_DICOM_tree)
         self.createTreeModel()
         self.updateTreeModel()
+        # Set parameters for the Tree View
+        self.treeView.header().resizeSection(0, 280)
+        self.treeView.header().resizeSection(1, 380)
+        self.treeView.header().resizeSection(2, 100)
+        self.treeView.header().resizeSection(3, 50)
+        self.treeView.header().resizeSection(4, 50)
+        self.treeView.header().setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
+        self.treeView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.treeView.setAlternatingRowColors(True)
         self.treeView.setGeometry(QtCore.QRect(0, 0, 877, 517))
-        # self.tableWidget = QtWidgets.QTableWidget(self.tab2_DICOM_tree)
-        # self.tableWidget.setGeometry(QtCore.QRect(0, 0, 877, 517))
-        # self.tableWidget.setObjectName("tableWidget")
-        # self.tableWidget.setColumnCount(0)
-        # self.tableWidget.setRowCount(0)
+        self.treeView.expandAll()
+        self.treeView.setObjectName("treeView")
         self.tab2.addTab(self.tab2_DICOM_tree, "")
 
         # Main view: Clinical Data
@@ -699,11 +704,12 @@ class Ui_MainWindow(object):
         ds = self.dicomTree.read_dcm(filename)
         dict = self.dicomTree.dataset_to_dict(ds)
         parentItem = self.modelTree.invisibleRootItem()
-        self.dicomTree.recurse_dict_to_item(dict, parentItem)
+        self.recurseBuildModel(dict, parentItem)
         self.treeView.setModel(self.modelTree)
 
 
     def recurseBuildModel(self, dict, parent):
+        print(dict)
         # For every key in the dictionary
         for key in dict:
             # The value of current key
@@ -711,21 +717,17 @@ class Ui_MainWindow(object):
             # If the value is a dictionary
             if isinstance(value, type(dict)):
                 # Recurse until leaf
-                item = QtGui.QStandardItem(key)
-                self.recurseBuildModel(value, item)
+                itemChild = QtGui.QStandardItem(key)
+                parent.appendRow(self.recurseBuildModel(value, itemChild))
             else:
                 # If the value is a simple item
                 # Append it.
-                # item = QtGui.QStandardItem(key + ': ' + str(value[0]) + " "+ str(value[1]) + " " + str(value[2]) \
-                #                            + " " + str(value[3]))
-                # parent.appendRow(item)
-                item = QtGui.QStandardItem(key)
-                parent.insertRow(0, item)
-                parent.setData(parent.index(0), key)
-                parent.setData(parent.index(1), value[0])
-                parent.setData(parent.index(2), value[1])
-                parent.setData(parent.index(3), value[2])
-                parent.setData(parent.index(4), value[3])
+                item = [QtGui.QStandardItem(key),
+                        QtGui.QStandardItem(str(value[0])),
+                        QtGui.QStandardItem(str(value[1])),
+                        QtGui.QStandardItem(str(value[2])),
+                        QtGui.QStandardItem(str(value[3]))]
+                parent.appendRow(item)
         return parent
 
     def pyradiomicsHandler(self):
@@ -785,3 +787,16 @@ def DVH_view(dvh_file):
 
     return fig
 
+
+# # For Testing
+# class MyWin(QtWidgets.QMainWindow):
+#     def __init__(self, parent=None):
+#         QtWidgets.QWidget.__init__(self, parent)
+#         self.ui = Ui_MainWindow()
+#         self.ui.setupUi(self, path='dicom_sample')
+#
+# if __name__ == "__main__":
+#     app = QtWidgets.QApplication(sys.argv)
+#     myapp = MyWin()
+#     myapp.show()
+#     sys.exit(app.exec_())
