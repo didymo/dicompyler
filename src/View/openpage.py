@@ -34,10 +34,13 @@ class WelcomePage(object):
         "background-color: rgb(147, 112, 219);")
         self.pushButton.setObjectName("pushButton")
         self.logo = QtWidgets.QLabel(self.centralwidget)
-        self.logo.setGeometry(QtCore.QRect(135, 30, 601, 261))
+        self.logo.setGeometry(QtCore.QRect(185, 30, 671, 261))
         self.logo.setText("")
-        self.logo.setPixmap(QtGui.QPixmap("src/Icon/logo.png"))
-        self.logo.setScaledContents(True)
+        pixmap = QtGui.QPixmap("src/Icon/logo.png")
+        self.pixmapResized = pixmap.scaled(671, 261,
+                                           QtCore.Qt.KeepAspectRatio,
+                                           QtCore.Qt.FastTransformation)
+        self.logo.setPixmap(self.pixmapResized)
         self.logo.setObjectName("logo")
         WelcomePage.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(WelcomePage)
