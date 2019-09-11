@@ -10,15 +10,21 @@ from country_list import countries_for_language
 from array import *
 import numpy as np
 import csv
+from src.Model.CalculateImages import *
+from src.Model.GetPatientInfo import *
 from src.Controller.mainPageController import MainPage
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 
 
 class Ui_MainWindow(object):
 
-    def setupUi(self, MainWindow, path, dataset, pixmaps_dict):
-        self.callClass = MainPage(path, dataset, pixmaps_dict)
-        self.pixmaps = pixmaps_dict
+    def setupUi(self, MainWindow, path):
+        # Load all information from the patient
+        self.dataset = get_datasets(path)
+        self.pixmaps = get_pixmaps(self.dataset)
+        self.dicomTree = DicomTree(path + '/ct.0.dcm')
+        self.basicInfo = get_basic_info(self.dataset[0])
+        self.callClass = MainPage(path)
 
         # Main Window
         MainWindow.setObjectName("MainWindow")
@@ -27,7 +33,6 @@ class Ui_MainWindow(object):
         # Central Layer
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
-
 
         # Left Column
         self.tab1 = QtWidgets.QTabWidget(self.centralwidget)
@@ -50,7 +55,6 @@ class Ui_MainWindow(object):
         self.listView.setObjectName("listView")
         self.tab1.addTab(self.tab1_isodoses, "")
 
-
         # Main view
         self.tab2 = QtWidgets.QTabWidget(self.centralwidget)
         self.tab2.setGeometry(QtCore.QRect(200, 40, 880, 561))
@@ -67,8 +71,8 @@ class Ui_MainWindow(object):
         # Vertical Slider
         self.slider = QtWidgets.QSlider(QtCore.Qt.Vertical)
         self.slider.setMinimum(0)
-        self.slider.setMaximum(len(self.pixmaps)-1)
-        self.slider.setValue(int(len(self.pixmaps)/2))
+        self.slider.setMaximum(len(self.pixmaps) - 1)
+        self.slider.setValue(int(len(self.pixmaps) / 2))
         self.slider.setTickPosition(QtWidgets.QSlider.TicksLeft)
         self.slider.setTickInterval(1)
         self.slider.setStyleSheet("QSlider::handle:vertical:hover {background: qlineargradient(x1:0, y1:0, x2:1, "
@@ -101,30 +105,6 @@ class Ui_MainWindow(object):
 
         self.tab2.addTab(self.tab2_view, "")
 
-        # Main view: DVH
-        self.tab2_DVH = QtWidgets.QWidget()
-        self.tab2_DVH.setObjectName("tab2_DVH")
-        # DVH layout
-        self.widget_DVH = QtWidgets.QWidget(self.tab2_DVH)
-        self.widget_DVH.setGeometry(QtCore.QRect(0, 0, 877, 400))
-        self.widget_DVH.setObjectName("widget_DVH")
-        self.gridLayout_DVH = QtWidgets.QGridLayout(self.widget_DVH)
-        self.gridLayout_DVH.setObjectName("gridLayout_DVH")
-        # DVH Processing
-        DVH_file = getDVH(path)
-        fig = DVH_view(DVH_file)
-        self.plotWidget = FigureCanvas(fig)
-        self.gridLayout_DVH.addWidget(self.plotWidget, 1, 0, 1, 1)
-        # DVH: Export DVH Button
-        self.button_exportDVH = QtWidgets.QPushButton(self.tab2_DVH)
-        self.button_exportDVH.setGeometry(QtCore.QRect(760, 358, 97, 39))
-        self.button_exportDVH.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-        self.button_exportDVH.setStyleSheet("background-color: rgb(147, 112, 219);\n""color: rgb(0, 0, 0);")
-        self.button_exportDVH.setObjectName("button_exportDVH")
-        self.tab2.addTab(self.tab2_DVH, "")
-
-
-        self.tab2.addTab(self.tab2_view, "")
 
         # Main view: DVH
         self.tab2_DVH = QtWidgets.QWidget()
@@ -133,35 +113,46 @@ class Ui_MainWindow(object):
         self.widget_DVH = QtWidgets.QWidget(self.tab2_DVH)
         self.widget_DVH.setGeometry(QtCore.QRect(0, 0, 877, 400))
         self.widget_DVH.setObjectName("widget_DVH")
-        self.gridLayout_DVH = QtWidgets.QGridLayout(self.widget_DVH)
-        self.gridLayout_DVH.setObjectName("gridLayout_DVH")
+        self.hbox_DVH = QtWidgets.QHBoxLayout(self.widget_DVH)
+        self.hbox_DVH.setObjectName("hbox_DVH")
 
         # DVH Processing
         DVH_file = getDVH(path)
         fig = DVH_view(DVH_file)
         self.plotWidget = FigureCanvas(fig)
-        self.gridLayout_DVH.addWidget(self.plotWidget, 1, 0, 1, 1)
+        self.hbox_DVH.addWidget(self.plotWidget)
 
         # DVH: Export DVH Button
-        self.button_exportDVH = QtWidgets.QPushButton(self.tab2_DVH)
-        self.button_exportDVH.move(15,10)
+        self.vbox_DVH = QtWidgets.QVBoxLayout()
+        self.button_exportDVH = QtWidgets.QPushButton()
         self.button_exportDVH.setFixedSize(QtCore.QSize(100, 39))
         self.button_exportDVH.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.button_exportDVH.setStyleSheet("background-color: rgb(147, 112, 219);\n""color: rgb(0, 0, 0);")
         self.button_exportDVH.setObjectName("button_exportDVH")
+        self.vbox_DVH.addWidget(self.button_exportDVH)
+        self.vbox_DVH.setAlignment(self.button_exportDVH, QtCore.Qt.AlignBottom)
 
-        self.gridLayout_DVH.addWidget(self.button_exportDVH, 1, 1, 1, 1)
+        self.vbox_DVH.addStretch(30)
+        self.hbox_DVH.addLayout(self.vbox_DVH)
 
         self.tab2.addTab(self.tab2_DVH, "")
 
         # Main view: DICOM Tree
+        self.NAME, self.VALUE, self.TAG, self.VM, self.VR = range(5)
         self.tab2_DICOM_tree = QtWidgets.QWidget()
         self.tab2_DICOM_tree.setObjectName("tab2_DICOM_tree")
-        self.tableWidget = QtWidgets.QTableWidget(self.tab2_DICOM_tree)
-        self.tableWidget.setGeometry(QtCore.QRect(0, 0, 877, 517))
-        self.tableWidget.setObjectName("tableWidget")
-        self.tableWidget.setColumnCount(0)
-        self.tableWidget.setRowCount(0)
+        self.treeView = QtWidgets.QTreeView(self.tab2_DICOM_tree)        # self.tableWidget.setObjectName("tableWidget")
+        self.treeView.setObjectName("treeView")
+        self.treeView.setRootIsDecorated(False)
+        self.treeView.setAlternatingRowColors(True)
+        self.createTreeModel()
+        self.updateTreeModel()
+        self.treeView.setGeometry(QtCore.QRect(0, 0, 877, 517))
+        # self.tableWidget = QtWidgets.QTableWidget(self.tab2_DICOM_tree)
+        # self.tableWidget.setGeometry(QtCore.QRect(0, 0, 877, 517))
+        # self.tableWidget.setObjectName("tableWidget")
+        # self.tableWidget.setColumnCount(0)
+        # self.tableWidget.setRowCount(0)
         self.tab2.addTab(self.tab2_DICOM_tree, "")
 
         # Main view: Clinical Data
@@ -579,7 +570,6 @@ class Ui_MainWindow(object):
         self.label.setStyleSheet("font: 9pt \"Laksaman\";")
         self.label.setObjectName("label")
 
-
         # Left Column: Structure Information
         self.frame_struct_info = QtWidgets.QFrame(self.centralwidget)
         self.frame_struct_info.setGeometry(QtCore.QRect(0, 400, 200, 201))
@@ -618,7 +608,6 @@ class Ui_MainWindow(object):
         self.struct_meanDose_label.setStyleSheet("font: 10pt \"Laksaman\";")
         self.struct_meanDose_label.setObjectName("struct_meanDose_label")
 
-
         # Structure Information: "Volume" box
         self.struct_volume_box = QtWidgets.QLabel(self.frame_struct_info)
         self.struct_volume_box.setGeometry(QtCore.QRect(90, 70, 81, 31))
@@ -642,7 +631,6 @@ class Ui_MainWindow(object):
         self.struct_meanDose_box.setGeometry(QtCore.QRect(90, 160, 81, 31))
         self.struct_meanDose_box.setStyleSheet("font: 10pt \"Laksaman\";")
         self.struct_meanDose_box.setObjectName("struct_meanDose_box")
-
 
         # Layout Icon and Text "Structure Information"
         self.widget = QtWidgets.QWidget(self.frame_struct_info)
@@ -677,7 +665,6 @@ class Ui_MainWindow(object):
         self.struct_maxDose_box.raise_()
         self.struct_meanDose_box.raise_()
 
-
         # Patient Bar
 
         # Patient Icon
@@ -689,7 +676,7 @@ class Ui_MainWindow(object):
 
         # Name Patient (layout)
         self.widget3 = QtWidgets.QWidget(self.centralwidget)
-        self.widget3.setGeometry(QtCore.QRect(50, 5, 305, 31))
+        self.widget3.setGeometry(QtCore.QRect(50, 5, 370, 31))
         self.widget3.setObjectName("widget3")
         self.gridLayout_name = QtWidgets.QGridLayout(self.widget3)
         self.gridLayout_name.setContentsMargins(0, 0, 0, 0)
@@ -708,10 +695,9 @@ class Ui_MainWindow(object):
         self.patient_name_box.setFont(QtGui.QFont("Laksaman", pointSize=10))
         self.gridLayout_name.addWidget(self.patient_name_box, 0, 1, 1, 1)
 
-
         # Patient ID (layout)
         self.widget4 = QtWidgets.QWidget(self.centralwidget)
-        self.widget4.setGeometry(QtCore.QRect(450, 5, 300, 31))
+        self.widget4.setGeometry(QtCore.QRect(500, 5, 280, 31))
         self.widget4.setObjectName("widget4")
         self.gridLayout_ID = QtWidgets.QGridLayout(self.widget4)
         self.gridLayout_ID.setContentsMargins(0, 0, 0, 0)
@@ -728,7 +714,6 @@ class Ui_MainWindow(object):
         self.patient_ID_box.setObjectName("patient_ID_box")
         self.patient_ID_box.setFont(QtGui.QFont("Laksaman", pointSize=10))
         self.gridLayout_ID.addWidget(self.patient_ID_box, 0, 1, 1, 1)
-
 
         # Gender (layout)
         self.widget2 = QtWidgets.QWidget(self.centralwidget)
@@ -750,7 +735,6 @@ class Ui_MainWindow(object):
         self.patient_gender_box.setFont(QtGui.QFont("Laksaman", pointSize=10))
         self.gridLayout_gender.addWidget(self.patient_gender_box, 0, 1, 1, 1)
 
-
         # Date of Birth (layout)
         self.widget1 = QtWidgets.QWidget(self.centralwidget)
         self.widget1.setGeometry(QtCore.QRect(950, 5, 95, 31))
@@ -771,8 +755,6 @@ class Ui_MainWindow(object):
         self.patient_DOB_box.setFont(QtGui.QFont("Laksaman", pointSize=10))
         self.gridLayout_DOB.addWidget(self.patient_DOB_box, 0, 1, 1, 1)
 
-
-
         self.patient_icon.raise_()
         self.patient_name.raise_()
         self.patient_name_box.raise_()
@@ -791,7 +773,6 @@ class Ui_MainWindow(object):
         self.frame_bottom.raise_()
         self.frame_struct_info.raise_()
         MainWindow.setCentralWidget(self.centralwidget)
-
 
         # Menu Bar
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -928,6 +909,8 @@ class Ui_MainWindow(object):
         self.actionAnonymize_and_Save.setIcon(icon1)
         self.actionAnonymize_and_Save.setIconVisibleInMenu(True)
         self.actionAnonymize_and_Save.setObjectName("actionAnonymize_and_Save")
+        # self.actionAnonymize_and_Save.triggered.connect(self.pluginMenu)
+
 
         # Export DVH Spreadsheet Action
         self.actionDVH_Spreadsheet = QtWidgets.QAction(MainWindow)
@@ -965,7 +948,6 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuEdit.menuAction())
         self.menubar.addAction(self.menuTools.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
-
 
         # Build toolbar
         self.menuTools.addAction(self.actionZoom_In)
@@ -1009,14 +991,10 @@ class Ui_MainWindow(object):
         self.toolBar.addAction(self.actionAnonymize_and_Save)
         # self.toolBar.addWidget(self.right_spacer)
 
-
         self.retranslateUi(MainWindow)
         self.tab1.setCurrentIndex(0)
         self.tab2.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
-
-
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -1221,7 +1199,6 @@ class Ui_MainWindow(object):
         self.struct_maxDose_box.setText(_translate("MainWindow", "889542"))
         self.struct_meanDose_box.setText(_translate("MainWindow", "816857"))
 
-
         # Set patient bar labels
         self.patient_DOB.setText(_translate("MainWindow", "DOB"))
         self.patient_gender.setText(_translate("MainWindow", "Gender"))
@@ -1229,10 +1206,10 @@ class Ui_MainWindow(object):
         self.patient_ID.setText(_translate("MainWindow", "ID"))
 
         # Set patient bar boxes
-        self.patient_DOB_box.setText(_translate("MainWindow", "01/01/90"))
-        self.patient_gender_box.setText(_translate("MainWindow", "F"))
-        self.patient_name_box.setText(_translate("MainWindow", "First_Name Last_Name"))
-        self.patient_ID_box.setText(_translate("MainWindow", "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3"))
+        self.patient_DOB_box.setText(_translate("MainWindow", self.basicInfo['dob']))
+        self.patient_gender_box.setText(_translate("MainWindow", self.basicInfo['gender']))
+        self.patient_ID_box.setText(_translate("MainWindow", self.basicInfo['id']))
+        self.patient_name_box.setText(_translate("MainWindow", self.basicInfo['name']))
 
         # Set menu labels
         self.menuFile.setTitle(_translate("MainWindow", "File"))
@@ -1280,8 +1257,57 @@ class Ui_MainWindow(object):
         self.DICOM_view.setScene(DICOM_image_scene)
         pass
 
+
+    def createTreeModel(self):
+        self.NAME, self.VALUE, self.TAG, self.VM, self.VR = range(5)
+        self.modelTree = QtGui.QStandardItemModel(0, 5)
+        self.modelTree.setHeaderData(self.NAME, QtCore.Qt.Horizontal, "Name")
+        self.modelTree.setHeaderData(self.VALUE, QtCore.Qt.Horizontal, "Value")
+        self.modelTree.setHeaderData(self.TAG, QtCore.Qt.Horizontal, "Tag")
+        self.modelTree.setHeaderData(self.VM, QtCore.Qt.Horizontal, "VM")
+        self.modelTree.setHeaderData(self.VR, QtCore.Qt.Horizontal, "VR")
+
+    def updateTreeModel(self):
+        filename = self.dicomTree.filename
+        ds = self.dicomTree.read_dcm(filename)
+        dict = self.dicomTree.dataset_to_dict(ds)
+        parentItem = self.modelTree.invisibleRootItem()
+        self.dicomTree.recurse_dict_to_item(dict, parentItem)
+        self.treeView.setModel(self.modelTree)
+
+
+    def recurseBuildModel(self, dict, parent):
+        # For every key in the dictionary
+        for key in dict:
+            # The value of current key
+            value = dict[key]
+            # If the value is a dictionary
+            if isinstance(value, type(dict)):
+                # Recurse until leaf
+                item = QtGui.QStandardItem(key)
+                self.recurseBuildModel(value, item)
+            else:
+                # If the value is a simple item
+                # Append it.
+                # item = QtGui.QStandardItem(key + ': ' + str(value[0]) + " "+ str(value[1]) + " " + str(value[2]) \
+                #                            + " " + str(value[3]))
+                # parent.appendRow(item)
+                item = QtGui.QStandardItem(key)
+                parent.insertRow(0, item)
+                parent.setData(parent.index(0), key)
+                parent.setData(parent.index(1), value[0])
+                parent.setData(parent.index(2), value[1])
+                parent.setData(parent.index(3), value[2])
+                parent.setData(parent.index(4), value[3])
+        return parent
+
     def pyradiomicsHandler(self):
         self.callClass.runPyradiomics()
+
+
+import src.View.resources_rc
+
+
 
 
 # In the Model directory
@@ -1291,18 +1317,44 @@ def getDVH(path):
     ds_rtss = pydicom.dcmread(file_rtss)
     ds_rtdose = pydicom.dcmread(file_rtdose)
     rois = get_roi_info(ds_rtss)
-    return calc_dvhs(ds_rtss, ds_rtdose, rois)
+    res = calc_dvhs(ds_rtss, ds_rtdose, rois)
+    return res
 
 
 # In the View directory
 def DVH_view(dvh_file):
     fig, ax = plt.subplots()
+    fig.subplots_adjust(0.1, 0.15, 1, 1)
+    max_xlim = 0
     for roi, dvh in dvh_file.items():
-        ax.plot(dvh.bincenters, 100*dvh.counts/dvh.volume, label=dvh.name,
-                 color=None if not isinstance(dvh.color, np.ndarray) else
-                 (dvh.color / 255))
-        plt.xlabel('Dose [%s]' % dvh.dose_units)
-        plt.ylabel('Volume [%s]' % '%')
-        if dvh.name:
-            plt.legend(loc='best')
+        if dvh.volume != 0:
+            ax.plot(dvh.bincenters, 100*dvh.counts/dvh.volume, label=dvh.name,
+                    color=None if not isinstance(dvh.color, np.ndarray) else
+                    (dvh.color / 255))
+            if dvh.bincenters[-1] > max_xlim:
+                max_xlim = dvh.bincenters[-1]
+            plt.xlabel('Dose [%s]' % dvh.dose_units)
+            plt.ylabel('Volume [%s]' % '%')
+            if dvh.name:
+                plt.legend(loc='best')
+
+    ax.set_ylim([0, 105])
+    ax.set_xlim([0, max_xlim + 3])
+
+
+    # Major ticks every 20, minor ticks every 5
+    major_ticks_y = np.arange(0, 105, 20)
+    minor_ticks_y = np.arange(0, 105, 5)
+    major_ticks_x = np.arange(0, max_xlim + 3, 20)
+    minor_ticks_x = np.arange(0, max_xlim + 3, 5)
+
+    ax.set_xticks(major_ticks_x)
+    ax.set_xticks(minor_ticks_x, minor=True)
+    ax.set_yticks(major_ticks_y)
+    ax.set_yticks(minor_ticks_y, minor=True)
+
+    ax.grid(which='minor', alpha=0.2)
+    ax.grid(which='major', alpha=0.5)
+
     return fig
+

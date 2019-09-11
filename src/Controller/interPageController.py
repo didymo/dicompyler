@@ -23,9 +23,9 @@ class Welcome(QtWidgets.QMainWindow, WelcomePage):
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     open_patient_window = QtCore.pyqtSignal(str)
 
-    def __init__(self, path, dataset, pixmaps):
+    def __init__(self, path):
         QtWidgets.QMainWindow.__init__(self)
-        self.setupUi(self, path, dataset, pixmaps)
+        self.setupUi(self, path)
 
         self.actionOpen.triggered.connect(self.patientHandler)
 
@@ -46,10 +46,9 @@ class Controller:
 
     def show_patient(self, path):
         dataset = get_datasets(path)
-        pixmaps = get_pixmaps(dataset)
 
         window = QtWidgets.QMainWindow()
-        self.patient_window = MainWindow(path, dataset, pixmaps)
+        self.patient_window = MainWindow(path)
         self.patient_window.open_patient_window.connect(self.show_patient)
         self.welcome_window.close()
         if self.patient_window.isVisible():
