@@ -29,7 +29,7 @@ def get_roi_info(ds_rtss):
 # "1" is the ID of the ROI
 # dvh is a data type defined in dicompyler-core
 # For dvh plotting example with matplotlib, see: dvh_plot()
-def calc_dvhs(rtss, dose, dict_roi, dose_limit):
+def calc_dvhs(rtss, dose, dict_roi, dose_limit=None):
     dict_dvh = {}
     for roi in dict_roi:
         # dicompylercore.dvhcalc.get_dvh(structure, dose, roi,
