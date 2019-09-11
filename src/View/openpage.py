@@ -34,7 +34,7 @@ class WelcomePage(object):
         "background-color: rgb(147, 112, 219);")
         self.pushButton.setObjectName("pushButton")
         self.logo = QtWidgets.QLabel(self.centralwidget)
-        self.logo.setGeometry(QtCore.QRect(185, 30, 671, 261))
+        self.logo.setGeometry(QtCore.QRect(100, 30, 671, 261))
         self.logo.setText("")
         self.logo.setPixmap(QtGui.QPixmap("src/Icon/logo.png"))
         self.logo.setScaledContents(True)
