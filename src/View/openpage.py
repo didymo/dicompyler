@@ -11,6 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 
 class WelcomePage(object):
+
     def setupUi(self, WelcomePage):
         WelcomePage.setObjectName("WelcomePage")
         WelcomePage.resize(844, 528)
