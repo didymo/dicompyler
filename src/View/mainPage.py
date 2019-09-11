@@ -709,7 +709,6 @@ class Ui_MainWindow(object):
 
 
     def recurseBuildModel(self, dict, parent):
-        print(dict)
         # For every key in the dictionary
         for key in dict:
             # The value of current key
