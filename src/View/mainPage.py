@@ -1,3 +1,4 @@
+import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 import matplotlib.pylab as plt
 import numpy as np
@@ -11,7 +12,7 @@ import numpy as np
 import csv
 from src.Controller.mainPageController import MainPage
 from matplotlib.backends.backend_qt5agg import FigureCanvas
-from src.data import *
+
 
 class Ui_MainWindow(object):
 
@@ -172,14 +173,14 @@ class Ui_MainWindow(object):
         data = []
         for i, v in enumerate(countries):
             data.append(countries[v])
-        with open('ICD10_Topography.csv', 'r') as f:
+        with open('src/data/ICD10_Topography.csv', 'r') as f:
             reader = csv.reader(f)
             icd = list(reader)
             icd.pop(0)
-        with open('ICD10_Topography_C.csv', 'r') as f:
+        with open('src/data/ICD10_Topography_C.csv', 'r') as f:
             reader = csv.reader(f)
             icdc = list(reader)
-        with open('ICD10_Morphology.csv', 'r') as f:
+        with open('src/data/ICD10_Morphology.csv', 'r') as f:
             reader = csv.reader(f)
             hist = list(reader)
             hist.pop(0)
@@ -204,12 +205,16 @@ class Ui_MainWindow(object):
 
         #Building the form
         self.scrollArea_cd = QtWidgets.QScrollArea(self.tab2_clinical_data)
-        self.scrollArea_cd.setGeometry(QtCore.QRect(0, 0, 721, 431))
-        self.scrollArea_cd.setWidgetResizable(True)
+        self.scrollArea_cd.setGeometry(QtCore.QRect(0, 0, 880, 517))
+        self.scrollArea_cd.setWidgetResizable(False)
         self.scrollArea_cd.setObjectName("scrollArea_cd")
+        self.scrollArea_cd.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        self.scrollArea_cd.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 719, 429))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1000, 800))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
+        #self.scrollArea_cd.setLayout(self.scrollAreaWidgetContents)
+        self.scrollArea_cd.ensureWidgetVisible(self.scrollAreaWidgetContents)
         self.label_LN = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         self.label_LN.setGeometry(QtCore.QRect(10, 10, 81, 21))
         self.label_LN.setObjectName("label_LN")
@@ -479,6 +484,7 @@ class Ui_MainWindow(object):
                                        "background-color: rgb(147, 112, 219);\n"
                                        "")
         self.Edit_button.setObjectName("Edit_button")
+        self.scrollArea_cd.ensureWidgetVisible(self.Edit_button)
         self.RC_duration = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         self.RC_duration.setGeometry(QtCore.QRect(140, 590, 171, 21))
         self.RC_duration.setText("")
