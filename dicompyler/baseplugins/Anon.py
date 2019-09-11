@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# quickopen.py
-"""dicompyler plugin that allows quick import of DICOM data."""
-# Copyright (c) 2012-2017 Aditya Panchal
+# Anon.py
+"""dicompyler plugin that allows Anonymise function"""
 # This file is part of dicompyler, released under a BSD license.
 #    See the file license.txt included with this distribution, also
 #    available at https://github.com/bastula/dicompyler/
@@ -25,11 +24,11 @@ def pluginProperties():
     """Properties of the plugin."""
 
     props = {}
-    props['name'] = 'DICOM Quick Import'
-    props['menuname'] = "&DICOM File Quickly...\tCtrl-Shift-O"
-    props['description'] = "Import DICOM data quickly"
-    props['author'] = 'Aditya Panchal'
-    props['version'] = "0.5.0"
+    props['name'] = 'Anonymize the Identifiers'
+    props['menuname'] = "&DICOM Anonymization...\tCtrl-Shift-O"
+    props['description'] = "Anonymize the Identifiers "
+    props['author'] = 'Augustin Pinto'
+    props['version'] = "0.1.0"
     props['plugin_type'] = 'import'
     props['plugin_version'] = 1
     props['min_dicom'] = []
@@ -69,19 +68,21 @@ class plugin:
         def hasattribute(keyword, ds):
             return keyword in ds
 
-        Dicom_folder_path = self.path  # Getting and storing the Folder path of rtss.dcm file
-        print("PATH of the dicom file is:-----", Dicom_folder_path, "\n\n")
-        # creating the .dcm filename variable that we wnat to load in dataframe
-        Dicom_filename = "rtss.dcm"
-        # concatinating the folder path and the filename
-        Full_dicom_filepath = (Dicom_folder_path + "/" + Dicom_filename)
-        print("FULL PATH of dicom file is:----", Full_dicom_filepath)
-        ds_rtss = pydicom.dcmread(Full_dicom_filepath)
-        print("rtss.dcm loaded in ds_rtss")
+        def LOAD_DCM():
+            Dicom_folder_path = self.path  # Getting and storing the Folder path of rtss.dcm file
+            print("PATH of the dicom file is:-----", Dicom_folder_path, "\n\n")
+            # creating the .dcm filename variable that we wnat to load in dataframe
+            Dicom_filename = "rtss.dcm"
+            # concatinating the folder path and the filename
+            Full_dicom_filepath = (Dicom_folder_path + "/" + Dicom_filename)
+            print("FULL PATH of dicom file is:----", Full_dicom_filepath)
+            ds_rtss = pydicom.dcmread(Full_dicom_filepath)
+            print("rtss.dcm loaded in ds_rtss")
+            return ds_rtss,Dicom_folder_path
 
 
         ## ===================================HASH Function================================================
-        def Hash_identifiers():
+        def Hash_identifiers(ds_rtss):
 
             # ------------------------------------Sha1 hash for patient name-------------------------------------
 
@@ -145,7 +146,6 @@ class plugin:
                 hash_patient_Sex_MD5 = uuid.uuid5(uuid.NAMESPACE_URL, patient_sex)
                 # Hashing the MD5 haah again using SHA1
                 hash_patient_Sex_sha1 = uuid.uuid3(uuid.NAMESPACE_URL, str(hash_patient_Sex_MD5))
-
                 # storing the hash to dataset
                 ds_rtss.PatientSex = str(hash_patient_Sex_sha1)
                 print('\n\n')
@@ -153,11 +153,10 @@ class plugin:
                 print("Patient Sex not found")
 
             return (P_name_ID, hash_patient_name_sha1)
-            # Call options again for the user
-            # options()
+
 
          ## ===================================CHECK FILE EXIST================================================
-   
+
         def checkFileExist(fileName):
             print("file name:-- ", fileName)  # printing file name
 
@@ -211,25 +210,41 @@ class plugin:
                     writer.writerow(row)
                     csvFile.close()
                 print("------CSV updated -----")
-                # options()
 
+
+        # ===================================WRITE DICOM FILE================================================
+        def write_hash_dcm(sha1_P_name, ds_rtss, Dicom_folder_path):
+
+            Print_identifiers(ds_rtss)  # print the changed value
+            print("Writing the hash==========", sha1_P_name)
+            sha1_P_name = str(sha1_P_name)
+
+            print(Dicom_folder_path + "/" + sha1_P_name + "_" + "rtss.dcm")
+            ds_rtss.save_as(Dicom_folder_path + "/" + sha1_P_name + "_" + "rtss.dcm")
+            print(":::::::Write complete :::")
 
         ## ===================================PRINTING THE HASH VALUES================================================
 
-        def Print_identifiers():
+        def Print_identifiers(ds_rtss):
             print("Patient name in dataset not hash: ", ds_rtss.PatientName)
             print("Patient ID in dataset not hash: ", ds_rtss.PatientID)
             print("Patient DOB in dataset not hash: ", ds_rtss.PatientBirthDate)
             print("Patient SEX in dataset not hash: ", ds_rtss.PatientSex)
             print("\n\n")
 
-        ##==========================================CALLING HASHING ==========================================    
+        ##==========================================Anon Function==========================================
+        def anon_call():
+            ds_rtss,Dicom_folder_path = LOAD_DCM()
+            Print_identifiers(ds_rtss)
+            pname_ID, sha1_pname = Hash_identifiers(ds_rtss)
+            print(" In main Pname and ID=  {} and SHA1_name: {}".format(pname_ID, sha1_pname))
+            csv_filename = str("Hash_map") + ".csv"
+            create_hash_csv(pname_ID, sha1_pname, csv_filename)
+            print("Calling WRITE FUNCTION==============")
+            write_hash_dcm(sha1_pname, ds_rtss, Dicom_folder_path)
 
-        Print_identifiers()
-        pname_ID, sha1_pname = Hash_identifiers()
-        print(" In main Pname and ID=  {} and SHA1_name: {}".format(pname_ID, sha1_pname))
-        csv_filename = str("Hash_map") + ".csv"
-        create_hash_csv(pname_ID, sha1_pname, csv_filename)
+        # Calling Anonymization
+        anon_call()
 
         return
 
