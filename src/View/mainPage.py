@@ -6,14 +6,18 @@ from dicompylercore import dvhcalc
 from src.Model.CalculateImages import *
 from src.Model.LoadPatients import *
 from src.Model.CalculateDVHs import *
+from src.Model.GetPatientInfo import *
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 
 
 class Ui_MainWindow(object):
 
-    def setupUi(self, MainWindow, pixmap_dict, path):
-        # Load DICOM image dictionary
-        self.pixmaps = pixmap_dict
+    def setupUi(self, MainWindow, path):
+        # Load all information from the patient
+        self.dataset = get_datasets(path)
+        self.pixmaps = get_pixmaps(self.dataset)
+        self.dicomTree = DicomTree(path + '/ct.0.dcm')
+        self.basicInfo = get_basic_info(self.dataset[0])
 
         # Main Window
         MainWindow.setObjectName("MainWindow")
@@ -94,8 +98,8 @@ class Ui_MainWindow(object):
 
         self.gridLayout_view.addWidget(self.DICOM_view, 0, 0, 1, 1)
 
-
         self.tab2.addTab(self.tab2_view, "")
+
 
         # Main view: DVH
         self.tab2_DVH = QtWidgets.QWidget()
@@ -104,35 +108,45 @@ class Ui_MainWindow(object):
         self.widget_DVH = QtWidgets.QWidget(self.tab2_DVH)
         self.widget_DVH.setGeometry(QtCore.QRect(0, 0, 877, 400))
         self.widget_DVH.setObjectName("widget_DVH")
-        self.gridLayout_DVH = QtWidgets.QGridLayout(self.widget_DVH)
-        self.gridLayout_DVH.setObjectName("gridLayout_DVH")
+        self.hbox_DVH = QtWidgets.QHBoxLayout(self.widget_DVH)
+        self.hbox_DVH.setObjectName("hbox_DVH")
 
         # DVH Processing
         DVH_file = getDVH(path)
         fig = DVH_view(DVH_file)
         self.plotWidget = FigureCanvas(fig)
-        self.gridLayout_DVH.addWidget(self.plotWidget, 1, 0, 1, 1)
+        self.hbox_DVH.addWidget(self.plotWidget)
 
         # DVH: Export DVH Button
-        self.button_exportDVH = QtWidgets.QPushButton(self.tab2_DVH)
-        self.button_exportDVH.move(15,10)
+        self.vbox_DVH = QtWidgets.QVBoxLayout()
+        self.button_exportDVH = QtWidgets.QPushButton()
         self.button_exportDVH.setFixedSize(QtCore.QSize(100, 39))
         self.button_exportDVH.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.button_exportDVH.setStyleSheet("background-color: rgb(147, 112, 219);\n""color: rgb(0, 0, 0);")
         self.button_exportDVH.setObjectName("button_exportDVH")
+        self.vbox_DVH.addWidget(self.button_exportDVH)
+        self.vbox_DVH.setAlignment(self.button_exportDVH, QtCore.Qt.AlignBottom)
 
-        self.gridLayout_DVH.addWidget(self.button_exportDVH, 1, 1, 1, 1)
+        self.vbox_DVH.addStretch(30)
+        self.hbox_DVH.addLayout(self.vbox_DVH)
 
         self.tab2.addTab(self.tab2_DVH, "")
 
         # Main view: DICOM Tree
         self.tab2_DICOM_tree = QtWidgets.QWidget()
         self.tab2_DICOM_tree.setObjectName("tab2_DICOM_tree")
-        self.tableWidget = QtWidgets.QTableWidget(self.tab2_DICOM_tree)
-        self.tableWidget.setGeometry(QtCore.QRect(0, 0, 877, 517))
-        self.tableWidget.setObjectName("tableWidget")
-        self.tableWidget.setColumnCount(0)
-        self.tableWidget.setRowCount(0)
+        self.treeView = QtWidgets.QTreeView(self.tab2_DICOM_tree)        # self.tableWidget.setObjectName("tableWidget")
+        self.treeView.setObjectName("treeView")
+        self.treeView.setRootIsDecorated(False)
+        self.treeView.setAlternatingRowColors(True)
+        self.createTreeModel()
+        self.updateTreeModel()
+        self.treeView.setGeometry(QtCore.QRect(0, 0, 877, 517))
+        # self.tableWidget = QtWidgets.QTableWidget(self.tab2_DICOM_tree)
+        # self.tableWidget.setGeometry(QtCore.QRect(0, 0, 877, 517))
+        # self.tableWidget.setObjectName("tableWidget")
+        # self.tableWidget.setColumnCount(0)
+        # self.tableWidget.setRowCount(0)
         self.tab2.addTab(self.tab2_DICOM_tree, "")
 
         # Main view: Clinical Data
@@ -264,7 +278,7 @@ class Ui_MainWindow(object):
 
         # Name Patient (layout)
         self.widget3 = QtWidgets.QWidget(self.centralwidget)
-        self.widget3.setGeometry(QtCore.QRect(50, 5, 305, 31))
+        self.widget3.setGeometry(QtCore.QRect(50, 5, 370, 31))
         self.widget3.setObjectName("widget3")
         self.gridLayout_name = QtWidgets.QGridLayout(self.widget3)
         self.gridLayout_name.setContentsMargins(0, 0, 0, 0)
@@ -286,7 +300,7 @@ class Ui_MainWindow(object):
 
         # Patient ID (layout)
         self.widget4 = QtWidgets.QWidget(self.centralwidget)
-        self.widget4.setGeometry(QtCore.QRect(450, 5, 300, 31))
+        self.widget4.setGeometry(QtCore.QRect(500, 5, 280, 31))
         self.widget4.setObjectName("widget4")
         self.gridLayout_ID = QtWidgets.QGridLayout(self.widget4)
         self.gridLayout_ID.setContentsMargins(0, 0, 0, 0)
@@ -503,6 +517,8 @@ class Ui_MainWindow(object):
         self.actionAnonymize_and_Save.setIcon(icon1)
         self.actionAnonymize_and_Save.setIconVisibleInMenu(True)
         self.actionAnonymize_and_Save.setObjectName("actionAnonymize_and_Save")
+        # self.actionAnonymize_and_Save.triggered.connect(self.pluginMenu)
+
 
         # Export DVH Spreadsheet Action
         self.actionDVH_Spreadsheet = QtWidgets.QAction(MainWindow)
@@ -634,10 +650,10 @@ class Ui_MainWindow(object):
         self.patient_ID.setText(_translate("MainWindow", "ID"))
 
         # Set patient bar boxes
-        self.patient_DOB_box.setText(_translate("MainWindow", "01/01/90"))
-        self.patient_gender_box.setText(_translate("MainWindow", "F"))
-        self.patient_name_box.setText(_translate("MainWindow", "First_Name Last_Name"))
-        self.patient_ID_box.setText(_translate("MainWindow", "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3"))
+        self.patient_DOB_box.setText(_translate("MainWindow", self.basicInfo['dob']))
+        self.patient_gender_box.setText(_translate("MainWindow", self.basicInfo['gender']))
+        self.patient_ID_box.setText(_translate("MainWindow", self.basicInfo['id']))
+        self.patient_name_box.setText(_translate("MainWindow", self.basicInfo['name']))
 
         # Set menu labels
         self.menuFile.setTitle(_translate("MainWindow", "File"))
@@ -684,6 +700,51 @@ class Ui_MainWindow(object):
         self.DICOM_view.setScene(DICOM_image_scene)
         pass
 
+
+    def createTreeModel(self):
+        self.NAME, self.VALUE, self.TAG, self.VM, self.VR = range(5)
+        self.modelTree = QtGui.QStandardItemModel(0, 5)
+        self.modelTree.setHeaderData(self.NAME, QtCore.Qt.Horizontal, "Name")
+        self.modelTree.setHeaderData(self.VALUE, QtCore.Qt.Horizontal, "Value")
+        self.modelTree.setHeaderData(self.TAG, QtCore.Qt.Horizontal, "Tag")
+        self.modelTree.setHeaderData(self.VM, QtCore.Qt.Horizontal, "VM")
+        self.modelTree.setHeaderData(self.VR, QtCore.Qt.Horizontal, "VR")
+
+    def updateTreeModel(self):
+        filename = self.dicomTree.filename
+        ds = self.dicomTree.read_dcm(filename)
+        dict = self.dicomTree.dataset_to_dict(ds)
+        parentItem = self.modelTree.invisibleRootItem()
+        self.dicomTree.recurse_dict_to_item(dict, parentItem)
+        self.treeView.setModel(self.modelTree)
+
+
+    def recurseBuildModel(self, dict, parent):
+        # For every key in the dictionary
+        for key in dict:
+            # The value of current key
+            value = dict[key]
+            # If the value is a dictionary
+            if isinstance(value, type(dict)):
+                # Recurse until leaf
+                item = QtGui.QStandardItem(key)
+                self.recurseBuildModel(value, item)
+            else:
+                # If the value is a simple item
+                # Append it.
+                # item = QtGui.QStandardItem(key + ': ' + str(value[0]) + " "+ str(value[1]) + " " + str(value[2]) \
+                #                            + " " + str(value[3]))
+                # parent.appendRow(item)
+                item = QtGui.QStandardItem(key)
+                parent.insertRow(0, item)
+                parent.setData(parent.index(0), key)
+                parent.setData(parent.index(1), value[0])
+                parent.setData(parent.index(2), value[1])
+                parent.setData(parent.index(3), value[2])
+                parent.setData(parent.index(4), value[3])
+        return parent
+
+
 import src.View.resources_rc
 
 
@@ -694,18 +755,43 @@ def getDVH(path):
     ds_rtss = pydicom.dcmread(file_rtss)
     ds_rtdose = pydicom.dcmread(file_rtdose)
     rois = get_roi_info(ds_rtss)
-    return calc_dvhs(ds_rtss, ds_rtdose, rois)
+    res = calc_dvhs(ds_rtss, ds_rtdose, rois)
+    return res
 
 
 # In the View directory
 def DVH_view(dvh_file):
     fig, ax = plt.subplots()
+    fig.subplots_adjust(0.1, 0.15, 1, 1)
+    max_xlim = 0
     for roi, dvh in dvh_file.items():
-        ax.plot(dvh.bincenters, 100*dvh.counts/dvh.volume, label=dvh.name,
-                 color=None if not isinstance(dvh.color, np.ndarray) else
-                 (dvh.color / 255))
-        plt.xlabel('Dose [%s]' % dvh.dose_units)
-        plt.ylabel('Volume [%s]' % '%')
-        if dvh.name:
-            plt.legend(loc='best')
+        if dvh.volume != 0:
+            ax.plot(dvh.bincenters, 100*dvh.counts/dvh.volume, label=dvh.name,
+                    color=None if not isinstance(dvh.color, np.ndarray) else
+                    (dvh.color / 255))
+            if dvh.bincenters[-1] > max_xlim:
+                max_xlim = dvh.bincenters[-1]
+            plt.xlabel('Dose [%s]' % dvh.dose_units)
+            plt.ylabel('Volume [%s]' % '%')
+            if dvh.name:
+                plt.legend(loc='best')
+
+    ax.set_ylim([0, 105])
+    ax.set_xlim([0, max_xlim + 3])
+
+
+    # Major ticks every 20, minor ticks every 5
+    major_ticks_y = np.arange(0, 105, 20)
+    minor_ticks_y = np.arange(0, 105, 5)
+    major_ticks_x = np.arange(0, max_xlim + 3, 20)
+    minor_ticks_x = np.arange(0, max_xlim + 3, 5)
+
+    ax.set_xticks(major_ticks_x)
+    ax.set_xticks(minor_ticks_x, minor=True)
+    ax.set_yticks(major_ticks_y)
+    ax.set_yticks(minor_ticks_y, minor=True)
+
+    ax.grid(which='minor', alpha=0.2)
+    ax.grid(which='major', alpha=0.5)
+
     return fig
