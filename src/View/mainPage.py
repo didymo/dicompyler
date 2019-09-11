@@ -202,7 +202,7 @@ class Ui_MainWindow(object):
         self.scrollArea_cd.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
         self.scrollArea_cd.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1000, 800))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1000, 770))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         #self.scrollArea_cd.setLayout(self.scrollAreaWidgetContents)
         self.scrollArea_cd.ensureWidgetVisible(self.scrollAreaWidgetContents)
