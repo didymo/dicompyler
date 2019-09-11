@@ -20,7 +20,7 @@ class WelcomePage(object):
         self.welcomeLabel = QtWidgets.QLabel(self.centralwidget)
         self.welcomeLabel.setGeometry(QtCore.QRect(310, 310, 201, 41))
         self.welcomeLabel.setStyleSheet("font: 57 18pt \"Ubuntu\";\n"
-"font: 57 18pt \"Ubuntu\";")
+        "font: 57 18pt \"Ubuntu\";")
         self.welcomeLabel.setObjectName("welcomeLabel")
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
         self.label_2.setGeometry(QtCore.QRect(150, 360, 521, 21))
@@ -29,13 +29,13 @@ class WelcomePage(object):
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton.setGeometry(QtCore.QRect(350, 410, 121, 31))
         self.pushButton.setStyleSheet("font: 57 12pt \"Ubuntu\";color: rgb(244, 245, 245);\n"
-"font: 57 12pt \"Ubuntu\";\n"
-"background-color: rgb(147, 112, 219);")
+        "font: 57 12pt \"Ubuntu\";\n"
+        "background-color: rgb(147, 112, 219);")
         self.pushButton.setObjectName("pushButton")
         self.logo = QtWidgets.QLabel(self.centralwidget)
         self.logo.setGeometry(QtCore.QRect(80, 30, 671, 261))
         self.logo.setText("")
-        self.logo.setPixmap(QtGui.QPixmap(":/images/Icon/logo.png"))
+        self.logo.setPixmap(QtGui.QPixmap("src/Icon/logo.png"))
         self.logo.setObjectName("logo")
         WelcomePage.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(WelcomePage)
