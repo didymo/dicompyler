@@ -48,7 +48,7 @@ class plugin:
         # Setup toolbar controls
         openbmp = wx.Bitmap(util.GetResourcePath('AnonButton2.png'))
         self.tools = [{'label':"ANON", 'bmp':openbmp,
-                            'shortHelp':"Anonimize the Patient Identifiers",
+                            'shortHelp':"Anonymize the Patient Identifiers",
                             'eventhandler':self.pluginMenu}]
 
     def OnImportPrefsChange(self, topic, msg):
@@ -218,7 +218,8 @@ class plugin:
             sha1_P_name = str(sha1_P_name) # storing the hash value as a string
 
             print("Changing the name of file==== ",Dicom_folder_path + "/" + sha1_P_name + "_" + file_to_write)
-            ds_rtss.save_as(Dicom_folder_path + "/" + sha1_P_name + "_" + file_to_write)
+            # save the dicom file wiith new hased identifiers
+            ds_rtss.save_as(Dicom_folder_path + "/" + "Hashed" + "_" + file_to_write)
             print(":::::::Write complete :::","\n\n")
 
         # ====================getting all file names=================
