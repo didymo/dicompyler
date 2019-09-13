@@ -157,20 +157,20 @@ class DicomTree(object):
 
 
 
-def main():
-    filename = '../../dicom_sample/ct.0.dcm'
-    dicomTree = DicomTree(filename)
-    dicomTree.show_tree()
-
-if __name__ == '__main__':
-    path = '../../dicom_sample/ct.0.dcm'
-    ds = pydicom.dcmread(path)
-    # ls = get_tree(ds, 0)
-    # for i in ls:
-    #     print(i)
-    #
-    # print(ds)
-
-    main()
-    dict = get_basic_info(ds)
-    print(dict)
+# def main():
+#     filename = 'dicom_sample/ct.0.dcm'
+#     dicomTree = DicomTree(filename)
+#     dicomTree.show_tree()
+#
+# if __name__ == '__main__':
+#     path = 'dicom_sample/ct.0.dcm'
+#     ds = pydicom.dcmread(path)
+#     # ls = get_tree(ds, 0)
+#     # for i in ls:
+#     #     print(i)
+#     #
+#     # print(ds)
+#
+#     main()
+#     dict = get_basic_info(ds)
+#     print(dict)

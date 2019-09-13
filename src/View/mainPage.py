@@ -21,11 +21,18 @@ class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow, path):
         # Load all information from the patient
+        self.path = path
         self.dataset = get_datasets(path)
         self.pixmaps = get_pixmaps(self.dataset)
-        self.dicomTree = DicomTree(path + '/ct.0.dcm')
+        self.file_rtss = path + "/rtss.dcm"
+        self.file_rtdose = path + "/rtdose.dcm"
+        self.dataset_rtss = pydicom.dcmread(self.file_rtss)
+        self.dataset_rtdose = pydicom.dcmread(self.file_rtdose)
+        self.rois = get_roi_info(self.dataset_rtss)
+        self.selected_rois = []
         self.basicInfo = get_basic_info(self.dataset[0])
         self.callClass = MainPage(path)
+
 
         # Main Window
         MainWindow.setObjectName("MainWindow")
@@ -43,17 +50,55 @@ class Ui_MainWindow(object):
         # Left Column: Structures tab
         self.tab1_structures = QtWidgets.QWidget()
         self.tab1_structures.setObjectName("tab1_structures")
-        self.listView_2 = QtWidgets.QListView(self.tab1_structures)
-        self.listView_2.setGeometry(QtCore.QRect(0, 0, 200, 361))
-        self.listView_2.setObjectName("listView_2")
+        self.updateStructureColumn()
+        # color1_struct = QtGui.QPixmap(10, 10)
+        # color1_struct.fill(QtGui.QColor(255, 144, 3))
+        # self.colorIcon1_struct = QtGui.QIcon(color1_struct)
+        # self.colorButton_struct = QtWidgets.QToolButton()
+        # self.colorButton_struct.setIcon(self.colorIcon1_struct)
+        # self.frame_structures.addWidget(self.painter, 0, 0, 1, 1)
+        # self.button1_struct = QtWidgets.QCheckBox("ROI1")
+        # self.frame_structures.addWidget(self.button1_struct)
+        # self.frame_structures.setAlignment(self.button1_struct, QtCore.Qt.AlignTop)
         self.tab1.addTab(self.tab1_structures, "")
 
         # Left Column: Isodoses tab
         self.tab1_isodoses = QtWidgets.QWidget()
         self.tab1_isodoses.setObjectName("tab1_isodoses")
-        self.listView = QtWidgets.QListView(self.tab1_isodoses)
-        self.listView.setGeometry(QtCore.QRect(0, 0, 200, 361))
-        self.listView.setObjectName("listView")
+        self.vbox_isod = QtWidgets.QVBoxLayout(self.tab1_isodoses)
+        self.box1_isod = QtWidgets.QCheckBox("90 % / 6300 cGy [Max]")
+        self.box2_isod = QtWidgets.QCheckBox("102 % / 7140 cGy")
+        self.box3_isod = QtWidgets.QCheckBox("100 % / 7000 cGy")
+        self.box4_isod = QtWidgets.QCheckBox("98 % / 6860 cGy")
+        self.box5_isod = QtWidgets.QCheckBox("95 % / 6650 cGy")
+        self.box6_isod = QtWidgets.QCheckBox("90 % / 6300 cGy")
+        self.box7_isod = QtWidgets.QCheckBox("80 % / 5600 cGy")
+        self.box8_isod = QtWidgets.QCheckBox("70 % / 4900 cGy")
+        self.box9_isod = QtWidgets.QCheckBox("50 % / 3500 cGy")
+        self.box10_isod = QtWidgets.QCheckBox("30 % / 2100 cGy")
+        self.box1_isod.setStyleSheet("font: 10pt \"Laksaman\";")
+        self.box2_isod.setStyleSheet("font: 10pt \"Laksaman\";")
+        self.box3_isod.setStyleSheet("font: 10pt \"Laksaman\";")
+        self.box4_isod.setStyleSheet("font: 10pt \"Laksaman\";")
+        self.box5_isod.setStyleSheet("font: 10pt \"Laksaman\";")
+        self.box6_isod.setStyleSheet("font: 10pt \"Laksaman\";")
+        self.box7_isod.setStyleSheet("font: 10pt \"Laksaman\";")
+        self.box8_isod.setStyleSheet("font: 10pt \"Laksaman\";")
+        self.box9_isod.setStyleSheet("font: 10pt \"Laksaman\";")
+        self.box10_isod.setStyleSheet("font: 10pt \"Laksaman\";")
+        self.vbox_isod.addWidget(self.box1_isod)
+        self.vbox_isod.addWidget(self.box2_isod)
+        self.vbox_isod.addWidget(self.box3_isod)
+        self.vbox_isod.addWidget(self.box4_isod)
+        self.vbox_isod.addWidget(self.box5_isod)
+        self.vbox_isod.addWidget(self.box6_isod)
+        self.vbox_isod.addWidget(self.box7_isod)
+        self.vbox_isod.addWidget(self.box8_isod)
+        self.vbox_isod.addWidget(self.box9_isod)
+        self.vbox_isod.addWidget(self.box10_isod)
+        # self.listView = QtWidgets.QListView(self.tab1_isodoses)
+        # self.listView.setGeometry(QtCore.QRect(0, 0, 200, 361))
+        # self.listView.setObjectName("listView")
         self.tab1.addTab(self.tab1_isodoses, "")
 
         # Main view
@@ -118,8 +163,8 @@ class Ui_MainWindow(object):
         self.hbox_DVH.setObjectName("hbox_DVH")
 
         # DVH Processing
-        DVH_file = getDVH(path)
-        fig = DVH_view(DVH_file)
+        DVH_file = self.getDVH()
+        fig = self.DVH_view(DVH_file)
         self.plotWidget = FigureCanvas(fig)
         self.hbox_DVH.addWidget(self.plotWidget)
 
@@ -130,9 +175,13 @@ class Ui_MainWindow(object):
         self.button_exportDVH.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.button_exportDVH.setStyleSheet("background-color: rgb(147, 112, 219);\n""color: rgb(255, 255, 255);")
         self.button_exportDVH.setObjectName("button_exportDVH")
+
+        self.spacer = QtWidgets.QWidget()
+        self.spacer.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.vbox_DVH.addWidget(self.spacer)
         self.vbox_DVH.addWidget(self.button_exportDVH)
-        self.vbox_DVH.setAlignment(self.button_exportDVH, QtCore.Qt.AlignBottom)
-        self.vbox_DVH.addStretch(30)
+        # self.vbox_DVH.setAlignment(self.button_exportDVH, QtCore.Qt.AlignBottom)
+        # self.vbox_DVH.addStretch(30)
         self.hbox_DVH.addLayout(self.vbox_DVH)
 
         self.tab2.addTab(self.tab2_DVH, "")
@@ -145,7 +194,7 @@ class Ui_MainWindow(object):
         # Creation of the Tree View
         self.treeView = QtWidgets.QTreeView(self.tab2_DICOM_tree)
         self.createTreeModel()
-        self.updateTreeModel()
+        self.updateTreeModel(self.slider.value())
         # Set parameters for the Tree View
         self.treeView.header().resizeSection(0, 280)
         self.treeView.header().resizeSection(1, 380)
@@ -1250,9 +1299,90 @@ class Ui_MainWindow(object):
 
         MainWindow.update()
 
+
+    def updateStructureColumn(self):
+
+        self.scrollAreaStruct = QtWidgets.QScrollArea(self.tab1_structures)
+        self.scrollAreaStruct.setWidgetResizable(True)
+
+        self.frame_structures = QtWidgets.QFrame(self.scrollAreaStruct)
+        self.frame_structures.setLayout(QtWidgets.QVBoxLayout())
+        self.scrollAreaStruct.setWidget(self.frame_structures)
+        self.frame_structures.layout().setContentsMargins(0, 0, 0, 0)
+
+        self.dictCheckBoxStruct = dict()
+
+        for key, value in self.rois.items():
+            self.checkBoxStruct = QtWidgets.QCheckBox(value['name'])
+            self.dictCheckBoxStruct[value['name']] = self.checkBoxStruct
+            # self.dictCheckBoxStruct[value['name']].clicked.connect(
+            #     lambda: self.checkBoxState(self.checkBoxStruct))
+            #     lambda: self.checkBoxState(self.checkBoxStruct))
+            self.checkBoxStruct.setStyleSheet("font: 10pt \"Laksaman\";")
+            self.frame_structures.layout().addWidget(self.dictCheckBoxStruct[value['name']])
+        self.scrollAreaStruct.setGeometry(QtCore.QRect(0, 0, 200, 361))
+
+
+    def checkBoxState(self, checkBox):
+        print(self.dictCheckBoxStruct)
+        print(checkBox.text())
+        if checkBox.isChecked() == True:
+            self.selected_rois.append(checkBox.text())
+            print(self.selected_rois)
+
+        else:
+            self.selected_rois.remove(checkBox.text())
+            print(self.selected_rois)
+
+
+
+    # In the Model directory
+    def getDVH(self):
+        res = calc_dvhs(self.dataset_rtss, self.dataset_rtdose, self.rois)
+        return res
+
+
+    # In the View directory
+    def DVH_view(self, dvh_file):
+        fig, ax = plt.subplots()
+        fig.subplots_adjust(0.1, 0.15, 1, 1)
+        max_xlim = 0
+        for roi, dvh in dvh_file.items():
+            if dvh.volume != 0:
+                ax.plot(dvh.bincenters, 100 * dvh.counts / dvh.volume, label=dvh.name,
+                        color=None if not isinstance(dvh.color, np.ndarray) else
+                        (dvh.color / 255))
+                if dvh.bincenters[-1] > max_xlim:
+                    max_xlim = dvh.bincenters[-1]
+                plt.xlabel('Dose [%s]' % dvh.dose_units)
+                plt.ylabel('Volume [%s]' % '%')
+                if dvh.name:
+                    plt.legend(loc='best')
+
+        ax.set_ylim([0, 105])
+        ax.set_xlim([0, max_xlim + 3])
+
+        # Major ticks every 20, minor ticks every 5
+        major_ticks_y = np.arange(0, 105, 20)
+        minor_ticks_y = np.arange(0, 105, 5)
+        major_ticks_x = np.arange(0, max_xlim + 3, 20)
+        minor_ticks_x = np.arange(0, max_xlim + 3, 5)
+
+        ax.set_xticks(major_ticks_x)
+        ax.set_xticks(minor_ticks_x, minor=True)
+        ax.set_yticks(major_ticks_y)
+        ax.set_yticks(minor_ticks_y, minor=True)
+
+        ax.grid(which='minor', alpha=0.2)
+        ax.grid(which='major', alpha=0.5)
+
+        return fig
+
+
     # When the value of the slider in the DICOM View changes
     def valueChangeSlider(self):
         id = self.slider.value()
+        # Update DICOM View
         pixmap = self.pixmaps[id]
         pixmap = pixmap.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
         DICOM_image_label = QtWidgets.QLabel()
@@ -1260,6 +1390,9 @@ class Ui_MainWindow(object):
         DICOM_image_scene = QtWidgets.QGraphicsScene()
         DICOM_image_scene.addWidget(DICOM_image_label)
         self.DICOM_view.setScene(DICOM_image_scene)
+        # # Update DICOM Tree
+        # self.modelTree.endResetModel()
+        # self.updateTreeModel(id)
         pass
 
 
@@ -1272,8 +1405,9 @@ class Ui_MainWindow(object):
         self.modelTree.setHeaderData(self.VM, QtCore.Qt.Horizontal, "VM")
         self.modelTree.setHeaderData(self.VR, QtCore.Qt.Horizontal, "VR")
 
-    def updateTreeModel(self):
-        filename = self.dicomTree.filename
+    def updateTreeModel(self, id):
+        filename = self.path + '/ct.' + str(id) + '.dcm'
+        self.dicomTree = DicomTree(filename)
         ds = self.dicomTree.read_dcm(filename)
         dict = self.dicomTree.dataset_to_dict(ds)
         parentItem = self.modelTree.invisibleRootItem()
@@ -1308,56 +1442,6 @@ class Ui_MainWindow(object):
 
 import src.View.resources_rc
 
-
-
-
-# In the Model directory
-def getDVH(path):
-    file_rtss = path + "/rtss.dcm"
-    file_rtdose = path + "/rtdose.dcm"
-    ds_rtss = pydicom.dcmread(file_rtss)
-    ds_rtdose = pydicom.dcmread(file_rtdose)
-    rois = get_roi_info(ds_rtss)
-    res = calc_dvhs(ds_rtss, ds_rtdose, rois)
-    return res
-
-
-# In the View directory
-def DVH_view(dvh_file):
-    fig, ax = plt.subplots()
-    fig.subplots_adjust(0.1, 0.15, 1, 1)
-    max_xlim = 0
-    for roi, dvh in dvh_file.items():
-        if dvh.volume != 0:
-            ax.plot(dvh.bincenters, 100*dvh.counts/dvh.volume, label=dvh.name,
-                    color=None if not isinstance(dvh.color, np.ndarray) else
-                    (dvh.color / 255))
-            if dvh.bincenters[-1] > max_xlim:
-                max_xlim = dvh.bincenters[-1]
-            plt.xlabel('Dose [%s]' % dvh.dose_units)
-            plt.ylabel('Volume [%s]' % '%')
-            if dvh.name:
-                plt.legend(loc='best')
-
-    ax.set_ylim([0, 105])
-    ax.set_xlim([0, max_xlim + 3])
-
-
-    # Major ticks every 20, minor ticks every 5
-    major_ticks_y = np.arange(0, 105, 20)
-    minor_ticks_y = np.arange(0, 105, 5)
-    major_ticks_x = np.arange(0, max_xlim + 3, 20)
-    minor_ticks_x = np.arange(0, max_xlim + 3, 5)
-
-    ax.set_xticks(major_ticks_x)
-    ax.set_xticks(minor_ticks_x, minor=True)
-    ax.set_yticks(major_ticks_y)
-    ax.set_yticks(minor_ticks_y, minor=True)
-
-    ax.grid(which='minor', alpha=0.2)
-    ax.grid(which='major', alpha=0.5)
-
-    return fig
 
 
 # # For Testing
