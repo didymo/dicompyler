@@ -71,7 +71,7 @@ class plugin:
 
         ## ===================================HASH Function================================================
 
-        def Hash_identifiers(file_to_write, ds_rtss):
+        def Hash_identifiers(file_no, ds_rtss):
 
             # ------------------------------------Sha1 hash for patient name-------------------------------------
 
@@ -139,7 +139,7 @@ class plugin:
 
              # used to reture flag = 1 to indicate the first file is used for saving the hash in 
              # hash_CSV file so CSV function will not be performed for rest of the files.   
-            if file_to_write == "rtss.dcm":
+            if file_no == 1:
                 if hasattribute("PatientID", ds_rtss):
                     P_name_ID = patient_name + " + " + patient_ID
                     print("Pname and ID=   ", P_name_ID)
@@ -263,7 +263,7 @@ class plugin:
 
             count = 0 
             for eachFile in All_dcm:
-
+                count +=1
                 print("HASHING FILE === ",eachFile)
                 Dicom_filename = eachFile       # store the name of each dcm file in variable
                 # concatinating the folder path and the filename
@@ -274,13 +274,14 @@ class plugin:
 
                 # calling the HASH function and it returns the (Pname + PID), (hashvalue) and
                 # (flag = 1 that will be used to restrict only one hash per patient in the CSV file)
-                pname_ID, sha1_pname, flag = Hash_identifiers(Dicom_filename, ds_rtss)
-                count +=1
+                pname_ID, sha1_pname, flag = Hash_identifiers(count, ds_rtss)
+                
 
                 if flag == 1:   #(flag = 1 that will be used to restrict only one hash per patient in the CSV file)
                     # print("FLAG --1111111111111111111111111\n")
                     print(" In main Pname and ID=  {} and SHA1_name: {}".format(pname_ID, sha1_pname))
                     Print_identifiers(ds_rtss)  # calling the print to show the identifiers
+                    print("========File used for CSV export :::", Dicom_filename)
                     csv_filename = str("Hash_map") + ".csv"
                     create_hash_csv(pname_ID, sha1_pname, csv_filename) # calling create CSV to store the the hashed value
                     print("Calling WRITE FUNCTION==============")
