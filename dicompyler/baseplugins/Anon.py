@@ -215,9 +215,9 @@ class plugin:
             Dicom_folder_path = self.path
             # Print_identifiers(ds_rtss)  # print the changed value
             # print("Writing the hash==========", sha1_P_name)
-            sha1_P_name = str(sha1_P_name) # storing the hash value as a string
-
-            print("Changing the name of file==== ",Dicom_folder_path + "/" + sha1_P_name + "_" + file_to_write)
+            # sha1_P_name = str(sha1_P_name) # storing the hash value as a string
+	    # Adding Prefix "Hashed " for each anonymized Dicom file
+            print("Changing the name of file==== ",Dicom_folder_path + "/" + "Hashed" + "_" + file_to_write)
             # save the dicom file wiith new hased identifiers
             ds_rtss.save_as(Dicom_folder_path + "/" + "Hashed" + "_" + file_to_write)
             print(":::::::Write complete :::","\n\n")
@@ -253,6 +253,14 @@ class plugin:
             # print("rtss.dcm loaded in ds_rtss")
             return ds_rtss 
 
+         # ====================== Function to check if the file is sub-directory ==========   
+
+        def Check_if_folder(file_path):
+            # store the boolean after checking the type of file
+            file_type = os.path.isdir(file_path)
+            return file_type
+
+
         ##==========================================Anon Function==========================================
         def anon_call():
             Dicom_folder_path = self.path
@@ -264,37 +272,47 @@ class plugin:
             count = 0 
             for eachFile in All_dcm:
                 count +=1
-                print("HASHING FILE === ",eachFile)
+                # print("HASHING FILE === ",eachFile)
                 Dicom_filename = eachFile       # store the name of each dcm file in variable
+                
                 # concatinating the folder path and the filename
                 Full_dicom_filepath = (Dicom_folder_path + "/" + Dicom_filename)
-
-                ds_rtss = LOAD_DCM(Dicom_filename)  # readind the DCM FILE
-                print(" loaded in ds_rtss:============ ", Dicom_filename)
-
-                # calling the HASH function and it returns the (Pname + PID), (hashvalue) and
-                # (flag = 1 that will be used to restrict only one hash per patient in the CSV file)
-                pname_ID, sha1_pname, flag = Hash_identifiers(count, ds_rtss)
                 
+                file_type = Check_if_folder(Full_dicom_filepath)
 
-                if flag == 1:   #(flag = 1 that will be used to restrict only one hash per patient in the CSV file)
-                    # print("FLAG --1111111111111111111111111\n")
-                    print(" In main Pname and ID=  {} and SHA1_name: {}".format(pname_ID, sha1_pname))
-                    Print_identifiers(ds_rtss)  # calling the print to show the identifiers
-                    print("========File used for CSV export :::", Dicom_filename)
-                    csv_filename = str("Hash_map") + ".csv"
-                    create_hash_csv(pname_ID, sha1_pname, csv_filename) # calling create CSV to store the the hashed value
-                    print("Calling WRITE FUNCTION==============")
-                    # write_hash_dcm(sha1_pname, Dicom_filename)
-                    write_hash_dcm(ds_rtss, Dicom_folder_path , Dicom_filename, sha1_pname)
-                else:
-                    # print("FLAG --0000000000000000000000000\n")
-                    print("CSV function not called")
-                    print("Calling WRITE FUNCTION==============")
-                    # write_hash_dcm(sha1_pname, Dicom_filename)
-                    write_hash_dcm(ds_rtss, Dicom_folder_path , Dicom_filename, sha1_pname)
+                if file_type != True:
+
+                    print("The file {} is regular file {}: ".format(Dicom_filename,file_type))
             
+                    Full_dicom_filepath = (Dicom_folder_path + "/" + Dicom_filename)
+
+                    ds_rtss = LOAD_DCM(Dicom_filename)  # readind the DCM FILE
+                    print(" loaded in ds_rtss:============ ", Dicom_filename)
+
+                    # calling the HASH function and it returns the (Pname + PID), (hashvalue) and
+                    # (flag = 1 that will be used to restrict only one hash per patient in the CSV file)
+                    pname_ID, sha1_pname, flag = Hash_identifiers(count, ds_rtss)
+                     
+                    if flag == 1:   #(flag = 1 that will be used to restrict only one hash per patient in the CSV file)
+                        # print("FLAG --1111111111111111111111111\n")
+                        print(" In main Pname and ID=  {} and SHA1_name: {}".format(pname_ID, sha1_pname))
+                        Print_identifiers(ds_rtss)  # calling the print to show the identifiers
+                        print("========File used for CSV export :::", Dicom_filename)
+                        csv_filename = str("Hash_map") + ".csv"
+                        create_hash_csv(pname_ID, sha1_pname, csv_filename) # calling create CSV to store the the hashed value
+                        print("Calling WRITE FUNCTION==============")
+                        # write_hash_dcm(sha1_pname, Dicom_filename)
+                        write_hash_dcm(ds_rtss, Dicom_folder_path , Dicom_filename, sha1_pname)
+                    else:
+                        # print("FLAG --0000000000000000000000000\n")
+                        print("CSV function not called")
+                        print("Calling WRITE FUNCTION==============\n")
+                        write_hash_dcm(ds_rtss, Dicom_folder_path , Dicom_filename, sha1_pname)
+                else:
+                    print("\n\n\n======File {} is a Folder=====".format(Dicom_filename))    #     write_hash_dcm(ds_rtss, Dicom_folder_path , Dicom_filename, sha1_pname)
+                    print("\n\n\n")
             print("Total files hashed======", count)
+
 
 
 
