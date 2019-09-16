@@ -672,6 +672,7 @@ class Ui_MainWindow(object):
         self.tab2.setTabText(self.tab2.indexOf(self.tab2_DICOM_tree), _translate("MainWindow", "DICOM Tree"))
         self.tab2.setTabText(3, "Clinical Data")
 
+
        # self.tab2.setTabText(self.tab2.indexOf(self.tab2_clinical_data), _translate("MainWindow", "Clinical Data"))
 
         # Set "export DVH" button label

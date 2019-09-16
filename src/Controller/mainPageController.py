@@ -21,10 +21,11 @@ def calculate_years(year1, year2):
 class ClinicalDataForm(QtWidgets.QWidget, Ui_Form):
     open_patient_window = QtCore.pyqtSignal(str)
 
-    def __init__(self, path):
+    def __init__(self, tabWindow, path):
         QtWidgets.QWidget.__init__(self)
 
         self.path = path
+        self.tabWindow = tabWindow
         self.ui = Ui_Form()
         self.ui.setupUi(self)
         # setting tab order
@@ -308,7 +309,7 @@ class ClinicalDataForm(QtWidgets.QWidget, Ui_Form):
                                                 "The Clinical Data was saved successfully in your directory!",
                                                 QMessageBox.Ok)
             if SaveReply == QMessageBox.Ok:
-                pass
+                self.display_cd_dat()
 
 
         else:
@@ -318,14 +319,20 @@ class ClinicalDataForm(QtWidgets.QWidget, Ui_Form):
                 message = ""
                 pass
 
+    def display_cd_dat(self):
+        self.tab_cd = ClinicalDataDisplay(self.tabWindow,self.path)
+        self.tabWindow.removeTab(3)
+        self.tabWindow.addTab(self.tab_cd, "Clinical Data")
+        self.tabWindow.setCurrentIndex(3)
 
 class ClinicalDataDisplay(QtWidgets.QWidget, Ui_CD_Display):
     open_patient_window = QtCore.pyqtSignal(str)
 
-    def __init__(self, path):
+    def __init__(self, tabWindow, path):
         QtWidgets.QWidget.__init__(self)
 
         self.path = path
+        self.tabWindow = tabWindow
         self.ui = Ui_CD_Display()
         self.ui.setupUi(self)
         self.load_cd()
@@ -372,7 +379,10 @@ class ClinicalDataDisplay(QtWidgets.QWidget, Ui_CD_Display):
         self.ui.Hormone.setDisabled(True)
         self.ui.Death.setCurrentText(self.getCode(clinical_data[18]))
         self.ui.Death.setDisabled(True)
-        self.ui.Cancer_death.setCurrentText(self.getCode(clinical_data[19]))
+        if clinical_data[19] =='':
+            self.ui.Cancer_death.setCurrentIndex(-1)
+        else:
+            self.ui.Cancer_death.setCurrentText(self.getCode(clinical_data[19]))
         self.ui.Cancer_death.setDisabled(True)
         self.ui.survival_duration.setText(clinical_data[20])
         self.ui.survival_duration.setDisabled(True)
@@ -449,10 +459,9 @@ class MainPage:
         pyradiomics(self.path)
 
     def display_cd_form(self, tabWindow, file_path):
-        self.tab_cd = ClinicalDataForm(file_path)
-
+        self.tab_cd = ClinicalDataForm(tabWindow,file_path)
         tabWindow.addTab(self.tab_cd, "")
 
     def display_cd_dat(self, tabWindow, file_path):
-        self.tab_cd = ClinicalDataDisplay(file_path)
+        self.tab_cd = ClinicalDataDisplay(tabWindow,file_path)
         tabWindow.addTab(self.tab_cd, "")
