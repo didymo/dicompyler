@@ -162,11 +162,11 @@ class Ui_MainWindow(object):
         self.hbox_DVH = QtWidgets.QHBoxLayout(self.widget_DVH)
         self.hbox_DVH.setObjectName("hbox_DVH")
 
-        # # DVH Processing
-        # DVH_file = self.getDVH()
-        # fig = self.DVH_view(DVH_file)
-        # self.plotWidget = FigureCanvas(fig)
-        # self.hbox_DVH.addWidget(self.plotWidget)
+        # DVH Processing
+        DVH_file = self.getDVH()
+        fig = self.DVH_view(DVH_file)
+        self.plotWidget = FigureCanvas(fig)
+        self.hbox_DVH.addWidget(self.plotWidget)
 
         # DVH: Export DVH Button
         self.vbox_DVH = QtWidgets.QVBoxLayout()
@@ -453,6 +453,9 @@ class Ui_MainWindow(object):
 
 
         # All icons used for menu bar and toolbar
+        iconOpen = QtGui.QIcon()
+        iconOpen.addPixmap(QtGui.QPixmap(":/images/Icon/open_patient.png"),
+                           QtGui.QIcon.Normal, QtGui.QIcon.On)
         iconAnonymize_and_Save = QtGui.QIcon()
         iconAnonymize_and_Save.addPixmap(QtGui.QPixmap(":/images/Icon/save_all.png"),
                                          QtGui.QIcon.Normal, QtGui.QIcon.On)
@@ -502,9 +505,7 @@ class Ui_MainWindow(object):
 
         # Open Patient Action
         self.actionOpen = QtWidgets.QAction(MainWindow)
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/images/Icon/open_patient.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
-        self.actionOpen.setIcon(icon)
+        self.actionOpen.setIcon(iconOpen)
         self.actionOpen.setIconVisibleInMenu(True)
         self.actionOpen.setObjectName("actionOpen")
 
@@ -952,15 +953,15 @@ import src.View.resources_rc
 
 
 
-# For Testing
-class MyWin(QtWidgets.QMainWindow):
-    def __init__(self, parent=None):
-        QtWidgets.QWidget.__init__(self, parent)
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self, path='dicom_sample')
-
-if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    myapp = MyWin()
-    myapp.show()
-    sys.exit(app.exec_())
+# # For Testing
+# class MyWin(QtWidgets.QMainWindow):
+#     def __init__(self, parent=None):
+#         QtWidgets.QWidget.__init__(self, parent)
+#         self.ui = Ui_MainWindow()
+#         self.ui.setupUi(self, path='dicom_sample')
+#
+# if __name__ == "__main__":
+#     app = QtWidgets.QApplication(sys.argv)
+#     myapp = MyWin()
+#     myapp.show()
+#     sys.exit(app.exec_())
