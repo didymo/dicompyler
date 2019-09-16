@@ -53,9 +53,9 @@ class Ui_MainWindow(object):
         self.updateStructureColumn()
         # color1_struct = QtGui.QPixmap(10, 10)
         # color1_struct.fill(QtGui.QColor(255, 144, 3))
-        # self.colorIcon1_struct = QtGui.QIcon(color1_struct)
+        # self.coloriconAnonymize_and_Save_struct = QtGui.QIcon(color1_struct)
         # self.colorButton_struct = QtWidgets.QToolButton()
-        # self.colorButton_struct.setIcon(self.colorIcon1_struct)
+        # self.colorButton_struct.setIcon(self.coloriconAnonymize_and_Save_struct)
         # self.frame_structures.addWidget(self.painter, 0, 0, 1, 1)
         # self.button1_struct = QtWidgets.QCheckBox("ROI1")
         # self.frame_structures.addWidget(self.button1_struct)
@@ -162,11 +162,11 @@ class Ui_MainWindow(object):
         self.hbox_DVH = QtWidgets.QHBoxLayout(self.widget_DVH)
         self.hbox_DVH.setObjectName("hbox_DVH")
 
-        # DVH Processing
-        DVH_file = self.getDVH()
-        fig = self.DVH_view(DVH_file)
-        self.plotWidget = FigureCanvas(fig)
-        self.hbox_DVH.addWidget(self.plotWidget)
+        # # DVH Processing
+        # DVH_file = self.getDVH()
+        # fig = self.DVH_view(DVH_file)
+        # self.plotWidget = FigureCanvas(fig)
+        # self.hbox_DVH.addWidget(self.plotWidget)
 
         # DVH: Export DVH Button
         self.vbox_DVH = QtWidgets.QVBoxLayout()
@@ -844,21 +844,54 @@ class Ui_MainWindow(object):
         self.menuHelp = QtWidgets.QMenu(self.menubar)
         self.menuHelp.setObjectName("menuHelp")
 
-        # Menu Bar (Tools)
+
+        # All icons used for menu bar and toolbar
+        iconAnonymize_and_Save = QtGui.QIcon()
+        iconAnonymize_and_Save.addPixmap(QtGui.QPixmap(":/images/Icon/save_all.png"),
+                                         QtGui.QIcon.Normal, QtGui.QIcon.On)
+        iconZoom_In = QtGui.QIcon()
+        iconZoom_In.addPixmap(QtGui.QPixmap(":/images/Icon/plus.png"),
+                              QtGui.QIcon.Normal, QtGui.QIcon.On)
+        iconZoom_Out = QtGui.QIcon()
+        iconZoom_Out.addPixmap(QtGui.QPixmap(":/images/Icon/minus.png"),
+                               QtGui.QIcon.Normal, QtGui.QIcon.On)
+        iconWindowing = QtGui.QIcon()
+        iconWindowing.addPixmap(QtGui.QPixmap(":/images/Icon/windowing.png"),
+                                QtGui.QIcon.Normal, QtGui.QIcon.On)
+        iconTransect = QtGui.QIcon()
+        iconTransect.addPixmap(QtGui.QPixmap(":/images/Icon/transect.png"),
+                               QtGui.QIcon.Normal, QtGui.QIcon.On)
+        iconBrush = QtGui.QIcon()
+        iconBrush.addPixmap(QtGui.QPixmap(":/images/Icon/ROI_Brush.png"),
+                            QtGui.QIcon.Normal, QtGui.QIcon.On)
+        iconIsodose = QtGui.QIcon()
+        iconIsodose.addPixmap(QtGui.QPixmap(":/images/Icon/ROI_Isodose.png"),
+                              QtGui.QIcon.Normal, QtGui.QIcon.On)
+        iconPlugin_Manager = QtGui.QIcon()
+        iconPlugin_Manager.addPixmap(QtGui.QPixmap(":/images/Icon/management.png"),
+                                     QtGui.QIcon.Normal, QtGui.QIcon.On)
+        iconExport = QtGui.QIcon()
+        iconExport.addPixmap(QtGui.QPixmap(":/images/Icon/export.png"),
+                             QtGui.QIcon.Normal, QtGui.QIcon.On)
+
+
+        # Set Menu Bar (Tools tab)
+        self.menuWindowing = QtWidgets.QMenu(self.menuTools)
+        self.menuWindowing.setObjectName("menuWindowing")
+        self.menuWindowing.setIcon(iconWindowing)
         self.menuROI_Creation = QtWidgets.QMenu(self.menuTools)
         self.menuROI_Creation.setObjectName("menuROI_Creation")
         self.menuExport = QtWidgets.QMenu(self.menuTools)
-        icon9 = QtGui.QIcon()
-        icon9.addPixmap(QtGui.QPixmap(":/images/Icon/export.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
-        self.menuExport.setIcon(icon9)
+        self.menuExport.setIcon(iconExport)
         self.menuExport.setObjectName("menuExport")
 
-        # Tool Bar
+        # Set Tool Bar
         self.toolBar = QtWidgets.QToolBar(MainWindow)
         self.toolBar.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.toolBar.setMovable(False)
         self.toolBar.setObjectName("toolBar")
         MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
+
 
         # Open Patient Action
         self.actionOpen = QtWidgets.QAction(MainWindow)
@@ -902,65 +935,60 @@ class Ui_MainWindow(object):
 
         # Zoom In Action
         self.actionZoom_In = QtWidgets.QAction(MainWindow)
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(":/images/Icon/plus.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
-        self.actionZoom_In.setIcon(icon2)
+        self.actionZoom_In.setIcon(iconZoom_In)
         self.actionZoom_In.setIconVisibleInMenu(True)
         self.actionZoom_In.setObjectName("actionZoom_In")
 
         # Zoom Out Action
         self.actionZoom_Out = QtWidgets.QAction(MainWindow)
-        icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap(":/images/Icon/minus.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
-        self.actionZoom_Out.setIcon(icon3)
+
+        self.actionZoom_Out.setIcon(iconZoom_Out)
         self.actionZoom_Out.setIconVisibleInMenu(True)
         self.actionZoom_Out.setObjectName("actionZoom_Out")
 
         # Windowing Action
         self.actionWindowing = QtWidgets.QAction(MainWindow)
-        icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap(":/images/Icon/windowing.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionWindowing.setIcon(icon4)
+        self.actionWindowing.setIcon(iconWindowing)
         self.actionWindowing.setIconVisibleInMenu(True)
         self.actionWindowing.setObjectName("actionWindowing")
+        self.actionWindowingNormal = QtWidgets.QAction(MainWindow)
+        self.actionWindowingNormal.setObjectName("actionWindowingNormal")
+        self.actionWindowingLung = QtWidgets.QAction(MainWindow)
+        self.actionWindowingLung.setObjectName("actionWindowingLung")
+        self.actionWindowingBone = QtWidgets.QAction(MainWindow)
+        self.actionWindowingBone.setObjectName("actionWindowingBone")
+        self.actionWindowingSoftTissue = QtWidgets.QAction(MainWindow)
+        self.actionWindowingSoftTissue.setObjectName("actionWindowingSoftTissue")
+        self.actionWindowingBrain = QtWidgets.QAction(MainWindow)
+        self.actionWindowingBrain.setObjectName("actionWindowingBrain")
 
         # Transect Action
         self.actionTransect = QtWidgets.QAction(MainWindow)
-        icon5 = QtGui.QIcon()
-        icon5.addPixmap(QtGui.QPixmap(":/images/Icon/transect.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
-        self.actionTransect.setIcon(icon5)
+        self.actionTransect.setIcon(iconTransect)
         self.actionTransect.setIconVisibleInMenu(True)
         self.actionTransect.setObjectName("actionTransect")
 
         # ROI by brush Action
         self.actionBrush = QtWidgets.QAction(MainWindow)
-        icon6 = QtGui.QIcon()
-        icon6.addPixmap(QtGui.QPixmap(":/images/Icon/ROI_Brush.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
-        self.actionBrush.setIcon(icon6)
+        self.actionBrush.setIcon(iconBrush)
         self.actionBrush.setIconVisibleInMenu(True)
         self.actionBrush.setObjectName("actionBrush")
 
         # ROI by Isodose Action
         self.actionIsodose = QtWidgets.QAction(MainWindow)
-        icon7 = QtGui.QIcon()
-        icon7.addPixmap(QtGui.QPixmap(":/images/Icon/ROI_Isodose.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
-        self.actionIsodose.setIcon(icon7)
+        self.actionIsodose.setIcon(iconIsodose)
         self.actionIsodose.setIconVisibleInMenu(True)
         self.actionIsodose.setObjectName("actionIsodose")
 
         # Plugin Manager Action
         self.actionPlugin_Manager = QtWidgets.QAction(MainWindow)
-        icon8 = QtGui.QIcon()
-        icon8.addPixmap(QtGui.QPixmap(":/images/Icon/management.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
-        self.actionPlugin_Manager.setIcon(icon8)
+        self.actionPlugin_Manager.setIcon(iconPlugin_Manager)
         self.actionPlugin_Manager.setIconVisibleInMenu(True)
         self.actionPlugin_Manager.setObjectName("actionPlugin_Manager")
 
         # Anonymize and Save Action
         self.actionAnonymize_and_Save = QtWidgets.QAction(MainWindow)
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/images/Icon/save_all.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
-        self.actionAnonymize_and_Save.setIcon(icon1)
+        self.actionAnonymize_and_Save.setIcon(iconAnonymize_and_Save)
         self.actionAnonymize_and_Save.setIconVisibleInMenu(True)
         self.actionAnonymize_and_Save.setObjectName("actionAnonymize_and_Save")
         # self.actionAnonymize_and_Save.triggered.connect(self.pluginMenu)
@@ -979,6 +1007,7 @@ class Ui_MainWindow(object):
         self.actionPyradiomics.setObjectName("actionPyradiomics")
         self.actionPyradiomics.triggered.connect(self.pyradiomicsHandler)
 
+
         # Build menu bar
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addAction(self.actionImport)
@@ -992,6 +1021,11 @@ class Ui_MainWindow(object):
         self.menuEdit.addSeparator()
         self.menuEdit.addAction(self.actionRename_ROI)
         self.menuEdit.addAction(self.actionDelete_ROI)
+        self.menuWindowing.addAction(self.actionWindowingNormal)
+        self.menuWindowing.addAction(self.actionWindowingBone)
+        self.menuWindowing.addAction(self.actionWindowingBrain)
+        self.menuWindowing.addAction(self.actionWindowingLung)
+        self.menuWindowing.addAction(self.actionWindowingSoftTissue)
         self.menuROI_Creation.addAction(self.actionBrush)
         self.menuROI_Creation.addAction(self.actionIsodose)
         self.menuExport.addAction(self.actionDVH_Spreadsheet)
@@ -1003,22 +1037,28 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuTools.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
 
+        # Windowing drop-down list on toolbar
+        self.windowingButton = QtWidgets.QToolButton()
+        self.windowingButton.setMenu(self.menuWindowing)
+        self.windowingButton.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+        self.windowingButton.setIcon(iconWindowing)
+
+        # Export Button drop-down list on toolbar
+        self.exportButton = QtWidgets.QToolButton()
+        self.exportButton.setMenu(self.menuExport)
+        self.exportButton.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+        self.exportButton.setIcon(iconExport)
+
         # Build toolbar
         self.menuTools.addAction(self.actionZoom_In)
         self.menuTools.addAction(self.actionZoom_Out)
-        self.menuTools.addAction(self.actionWindowing)
+        self.menuTools.addAction(self.menuWindowing.menuAction())
         self.menuTools.addAction(self.actionTransect)
         self.menuTools.addAction(self.menuROI_Creation.menuAction())
         self.menuTools.addAction(self.actionPlugin_Manager)
         self.menuTools.addSeparator()
         self.menuTools.addAction(self.menuExport.menuAction())
         self.menuTools.addAction(self.actionAnonymize_and_Save)
-
-        # Export Button on toolbar
-        self.exportButton = QtWidgets.QToolButton()
-        self.exportButton.setMenu(self.menuExport)
-        self.exportButton.setPopupMode(QtWidgets.QToolButton.InstantPopup)
-        self.exportButton.setIcon(icon9)
 
         # To create a space in the toolbar
         self.toolbar_spacer = QtWidgets.QWidget()
@@ -1032,7 +1072,7 @@ class Ui_MainWindow(object):
         self.toolBar.addAction(self.actionZoom_In)
         self.toolBar.addAction(self.actionZoom_Out)
         self.toolBar.addSeparator()
-        self.toolBar.addAction(self.actionWindowing)
+        self.toolBar.addWidget(self.windowingButton)
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.actionTransect)
         self.toolBar.addSeparator()
@@ -1050,6 +1090,8 @@ class Ui_MainWindow(object):
         self.tab2.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
 
@@ -1057,7 +1099,6 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "Onko"))
 
         # Set tab labels
-
         self.tab1.setTabText(self.tab1.indexOf(self.tab1_structures), _translate("MainWindow", "Structures"))
         self.tab1.setTabText(self.tab1.indexOf(self.tab1_isodoses), _translate("MainWindow", "Isodoses"))
         self.tab2.setTabText(self.tab2.indexOf(self.tab2_view), _translate("MainWindow", "DICOM View"))
@@ -1270,6 +1311,7 @@ class Ui_MainWindow(object):
         self.menuEdit.setTitle(_translate("MainWindow", "Edit"))
         self.menuEdit.setTitle(_translate("MainWindow", "Edit"))
         self.menuTools.setTitle(_translate("MainWindow", "Tools"))
+        self.menuWindowing.setTitle(_translate("MainWindow", "Windowing"))
         self.menuROI_Creation.setTitle(_translate("MainWindow", "ROI Creation"))
         self.menuExport.setTitle(_translate("MainWindow", "Export"))
         self.menuHelp.setTitle(_translate("MainWindow", "Help"))
@@ -1288,6 +1330,11 @@ class Ui_MainWindow(object):
         self.actionZoom_In.setText(_translate("MainWindow", "Zoom In"))
         self.actionZoom_Out.setText(_translate("MainWindow", "Zoom Out"))
         self.actionWindowing.setText(_translate("MainWindow", "Windowing"))
+        self.actionWindowingNormal.setText(_translate("MainWindow", "Normal"))
+        self.actionWindowingLung.setText(_translate("MainWindow", "Lung"))
+        self.actionWindowingBone.setText(_translate("MainWindow", "Bone"))
+        self.actionWindowingSoftTissue.setText(_translate("MainWindow", "Soft Tissue"))
+        self.actionWindowingBrain.setText(_translate("MainWindow", "Brain"))
         self.actionTransect.setText(_translate("MainWindow", "Transect"))
         self.actionBrush.setText(_translate("MainWindow", "ROI by Brush"))
         self.actionIsodose.setText(_translate("MainWindow", "ROI by Isodose"))
@@ -1310,28 +1357,48 @@ class Ui_MainWindow(object):
         self.scrollAreaStruct.setWidget(self.frame_structures)
         self.frame_structures.layout().setContentsMargins(0, 0, 0, 0)
 
+        # self.scrollAreaStruct = QtWidgets.QScrollArea(self.tab1_structures)
+        # self.scrollAreaStruct.setWidgetResizable(False)
+        # self.scrollAreaStruct.setGeometry(QtCore.QRect(0, 0, 200, 333))
+        # self.scrollAreaStruct.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        # self.scrollAreaStruct.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+
+        # self.scrollContentsStruct = QtWidgets.QWidget()
+        # self.scrollContentsStruct.setGeometry(QtCore.QRect(0, 0, 200, 633))
+        # self.scrollContentsStruct.setObjectName("scrollContentsStruct")
+        # self.scrollAreaStruct.ensureWidgetVisible(self.scrollContentsStruct)
+
+        self.frame_structures = QtWidgets.QFrame(self.scrollAreaStruct)
+        self.frame_structures.setLayout(QtWidgets.QVBoxLayout())
+        self.scrollAreaStruct.setWidget(self.frame_structures)
+        self.frame_structures.layout().setContentsMargins(0, 0, 0, 0)
+
         self.dictCheckBoxStruct = dict()
+        index = 0
 
         for key, value in self.rois.items():
-            self.checkBoxStruct = QtWidgets.QCheckBox(value['name'])
-            self.dictCheckBoxStruct[value['name']] = self.checkBoxStruct
-            # self.dictCheckBoxStruct[value['name']].clicked.connect(
-            #     lambda: self.checkBoxState(self.checkBoxStruct))
-            #     lambda: self.checkBoxState(self.checkBoxStruct))
-            self.checkBoxStruct.setStyleSheet("font: 10pt \"Laksaman\";")
-            self.frame_structures.layout().addWidget(self.dictCheckBoxStruct[value['name']])
-        self.scrollAreaStruct.setGeometry(QtCore.QRect(0, 0, 200, 361))
+            # checkBoxStruct = QtWidgets.QCheckBox(self.scrollContentsStruct)
+            checkBoxStruct = QtWidgets.QCheckBox(value['name'])
+            checkBoxStruct.clicked.connect(
+                lambda: print(value['name']) if checkBoxStruct.isChecked() == True
+                        else print(value['name']))
+            checkBoxStruct.setStyleSheet("font: 10pt \"Laksaman\";")
+            self.frame_structures.layout().addWidget(checkBoxStruct)
+            self.dictCheckBoxStruct[value['name']] = checkBoxStruct
 
 
-    def checkBoxState(self, checkBox):
+
+    def checkBoxState(self):
         print(self.dictCheckBoxStruct)
-        print(checkBox.text())
-        if checkBox.isChecked() == True:
-            self.selected_rois.append(checkBox.text())
+        print(self.sender().text())
+        text = self.sender().text()
+        pressedCheckBox = self.dictCheckBoxStruct[text]
+        if pressedCheckBox.isChecked() == True:
+            self.selected_rois.append(text)
             print(self.selected_rois)
 
         else:
-            self.selected_rois.remove(checkBox.text())
+            self.selected_rois.remove(text)
             print(self.selected_rois)
 
 
@@ -1444,15 +1511,15 @@ import src.View.resources_rc
 
 
 
-# # For Testing
-# class MyWin(QtWidgets.QMainWindow):
-#     def __init__(self, parent=None):
-#         QtWidgets.QWidget.__init__(self, parent)
-#         self.ui = Ui_MainWindow()
-#         self.ui.setupUi(self, path='dicom_sample')
-#
-# if __name__ == "__main__":
-#     app = QtWidgets.QApplication(sys.argv)
-#     myapp = MyWin()
-#     myapp.show()
-#     sys.exit(app.exec_())
+# For Testing
+class MyWin(QtWidgets.QMainWindow):
+    def __init__(self, parent=None):
+        QtWidgets.QWidget.__init__(self, parent)
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self, path='dicom_sample')
+
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    myapp = MyWin()
+    myapp.show()
+    sys.exit(app.exec_())
