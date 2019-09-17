@@ -22,17 +22,16 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow, path):
         # Load all information from the patient
         self.path = path
-        self.dataset = get_datasets(path)
+        self.dataset, self.filepaths = get_datasets(path)
         self.pixmaps = get_pixmaps(self.dataset)
-        self.file_rtss = path + "/rtss.dcm"
-        self.file_rtdose = path + "/rtdose.dcm"
+        self.file_rtss = self.filepaths['rtss']
+        self.file_rtdose = self.filepaths['rtdose']
         self.dataset_rtss = pydicom.dcmread(self.file_rtss)
         self.dataset_rtdose = pydicom.dcmread(self.file_rtdose)
         self.rois = get_roi_info(self.dataset_rtss)
         self.selected_rois = []
         self.basicInfo = get_basic_info(self.dataset[0])
         self.callClass = MainPage(path)
-        #print(self.dataset[0].PatientID)
 
         # Main Window
         MainWindow.setObjectName("MainWindow")
@@ -914,7 +913,7 @@ class Ui_MainWindow(object):
         self.modelTree.setHeaderData(self.VR, QtCore.Qt.Horizontal, "VR")
 
     def updateTreeModel(self, id):
-        filename = self.path + '/ct.' + str(id) + '.dcm'
+        filename = self.filepaths[id]
         self.dicomTree = DicomTree(filename)
         ds = self.dicomTree.read_dcm(filename)
         dict = self.dicomTree.dataset_to_dict(ds)

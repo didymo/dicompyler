@@ -32,7 +32,7 @@ class ClinicalDataForm(QtWidgets.QWidget, Ui_Form):
         QtWidgets.QWidget.__init__(self)
 
         self.path = path
-        self.dataset = get_datasets(self.path)
+        self.dataset, self.filenames = get_datasets(self.path)
         self.pID = self.dataset[0].PatientID
         self.tabWindow = tabWindow
         self.ui = Ui_Form()
