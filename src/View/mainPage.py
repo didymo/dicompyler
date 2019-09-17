@@ -569,6 +569,8 @@ class Ui_MainWindow(object):
         self.actionWindowingSoftTissue.setObjectName("actionWindowingSoftTissue")
         self.actionWindowingBrain = QtWidgets.QAction(MainWindow)
         self.actionWindowingBrain.setObjectName("actionWindowingBrain")
+        self.actionWindowingHeadNeck = QtWidgets.QAction(MainWindow)
+        self.actionWindowingHeadNeck.setObjectName("actionWindowingHeadNeck")
 
         # Transect Action
         self.actionTransect = QtWidgets.QAction(MainWindow)
@@ -632,6 +634,7 @@ class Ui_MainWindow(object):
         self.menuWindowing.addAction(self.actionWindowingNormal)
         self.menuWindowing.addAction(self.actionWindowingBone)
         self.menuWindowing.addAction(self.actionWindowingBrain)
+        self.menuWindowing.addAction(self.actionWindowingHeadNeck)
         self.menuWindowing.addAction(self.actionWindowingLung)
         self.menuWindowing.addAction(self.actionWindowingSoftTissue)
         self.menuROI_Creation.addAction(self.actionBrush)
@@ -777,6 +780,7 @@ class Ui_MainWindow(object):
         self.actionWindowingBone.setText(_translate("MainWindow", "Bone"))
         self.actionWindowingSoftTissue.setText(_translate("MainWindow", "Soft Tissue"))
         self.actionWindowingBrain.setText(_translate("MainWindow", "Brain"))
+        self.actionWindowingHeadNeck.setText(_translate("MainWindow", "Head and Neck"))
         self.actionTransect.setText(_translate("MainWindow", "Transect"))
         self.actionBrush.setText(_translate("MainWindow", "ROI by Brush"))
         self.actionIsodose.setText(_translate("MainWindow", "ROI by Isodose"))
@@ -794,14 +798,9 @@ class Ui_MainWindow(object):
         self.scrollAreaStruct = QtWidgets.QScrollArea(self.tab1_structures)
         self.scrollAreaStruct.setWidgetResizable(True)
 
-        self.frame_structures = QtWidgets.QFrame(self.scrollAreaStruct)
-        self.frame_structures.setLayout(QtWidgets.QVBoxLayout())
-        self.scrollAreaStruct.setWidget(self.frame_structures)
-        self.frame_structures.layout().setContentsMargins(0, 0, 0, 0)
-
         # self.scrollAreaStruct = QtWidgets.QScrollArea(self.tab1_structures)
         # self.scrollAreaStruct.setWidgetResizable(False)
-        # self.scrollAreaStruct.setGeometry(QtCore.QRect(0, 0, 200, 333))
+        self.scrollAreaStruct.setGeometry(QtCore.QRect(0, 0, 198, 333))
         # self.scrollAreaStruct.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
         # self.scrollAreaStruct.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
 
@@ -820,10 +819,10 @@ class Ui_MainWindow(object):
 
         for key, value in self.rois.items():
             # checkBoxStruct = QtWidgets.QCheckBox(self.scrollContentsStruct)
-            checkBoxStruct = QtWidgets.QCheckBox(value['name'])
-            checkBoxStruct.clicked.connect(
-                lambda: print(value['name']) if checkBoxStruct.isChecked() == True
-                        else print(value['name']))
+            checkBoxStruct = QtWidgets.QCheckBox(str(value['name']))
+            checkBoxStruct.stateChanged.connect(
+                lambda: print(checkBoxStruct.text() + " checked") if checkBoxStruct.isChecked()
+                        else print(checkBoxStruct.text() + " not checked"))
             checkBoxStruct.setStyleSheet("font: 10pt \"Laksaman\";")
             self.frame_structures.layout().addWidget(checkBoxStruct)
             self.dictCheckBoxStruct[value['name']] = checkBoxStruct
