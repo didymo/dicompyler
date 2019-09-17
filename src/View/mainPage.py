@@ -601,7 +601,7 @@ class Ui_MainWindow(object):
         self.actionAnonymize_and_Save.setIcon(iconAnonymize_and_Save)
         self.actionAnonymize_and_Save.setIconVisibleInMenu(True)
         self.actionAnonymize_and_Save.setObjectName("actionAnonymize_and_Save")
-        # self.actionAnonymize_and_Save.triggered.connect(self.pluginMenu)
+        self.actionAnonymize_and_Save.triggered.connect(self.HandleAnonymization)
 
 
         # Export DVH Spreadsheet Action
@@ -947,6 +947,8 @@ class Ui_MainWindow(object):
     def pyradiomicsHandler(self):
         self.callClass.runPyradiomics()
 
+    def HandleAnonymization(self):
+        self.callClass.runAnonymization()
 
 import src.View.resources_rc
 

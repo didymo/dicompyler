@@ -16,7 +16,7 @@ from pandas import DataFrame
 import numpy as np
 import pandas as pd
 from pathlib import Path
-
+from src.Model.Anon import *
 
 
 message = ""
@@ -560,6 +560,9 @@ class MainPage:
 
     def runPyradiomics(self):
         pyradiomics(self.path)
+
+    def runAnonymization(self):
+        anonymize(self.path)
 
     def display_cd_form(self, tabWindow, file_path):
         self.tab_cd = ClinicalDataForm(tabWindow,file_path)
