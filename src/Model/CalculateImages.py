@@ -22,6 +22,7 @@ def get_img(dict_ds):
             dict_img[key] = np_pixels
     return dict_img
 
+
 # Return a dictionary of pixmaps for UI
 def get_pixmaps(dict_ds):
     # Create a dictionary of storing pixmaps
@@ -41,7 +42,7 @@ def get_pixmaps(dict_ds):
             # Preprocessing it for better looking
             max_val = np.amax(np_pixels)
             min_val = np.amin(np_pixels)
-            np_pixels = (np_pixels - min_val) / (max_val - min_val) * 256
+            np_pixels = (np_pixels - min_val) / (max_val - min_val) * 255
             np_pixels[np_pixels < 0] = 0
             np_pixels[np_pixels > 255] = 255
             np_pixels = np_pixels.astype("int8")

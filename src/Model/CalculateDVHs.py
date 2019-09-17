@@ -69,5 +69,4 @@ if __name__ == '__main__':
 
     dvhs = calc_dvhs(ds_rtss, ds_rtdose, rois)
     for i in dvhs:
-        print(i)
-        dvh_plot(dvhs[i])
+        print(dvhs[i])
