@@ -161,13 +161,11 @@ class Ui_MainWindow(object):
         self.widget_DVH = QtWidgets.QWidget(self.tab2_DVH)
         self.widget_DVH.setGeometry(QtCore.QRect(0, 0, 877, 400))
         self.widget_DVH.setObjectName("widget_DVH")
-        self.hbox_DVH = QtWidgets.QHBoxLayout(self.widget_DVH)
-        self.hbox_DVH.setObjectName("hbox_DVH")
+        self.gridL_DVH = QtWidgets.QGridLayout(self.widget_DVH)
+        self.gridL_DVH.setObjectName("gridL_DVH")
 
         # DVH Processing
-        fig = self.DVH_view()
-        self.plotWidget = FigureCanvas(fig)
-        self.hbox_DVH.addWidget(self.plotWidget)
+        self.initDVH_view()
 
         # DVH: Export DVH Button
         self.vbox_DVH = QtWidgets.QVBoxLayout()
@@ -177,13 +175,14 @@ class Ui_MainWindow(object):
         self.button_exportDVH.setStyleSheet("background-color: rgb(147, 112, 219);\n""color: rgb(255, 255, 255);")
         self.button_exportDVH.setObjectName("button_exportDVH")
 
-        self.spacer = QtWidgets.QWidget()
-        self.spacer.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        self.vbox_DVH.addWidget(self.spacer)
+        # self.spacer = QtWidgets.QWidget()
+        # self.spacer.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        # self.vbox_DVH.addWidget(self.spacer)
         self.vbox_DVH.addWidget(self.button_exportDVH)
+
         # self.vbox_DVH.setAlignment(self.button_exportDVH, QtCore.Qt.AlignBottom)
         # self.vbox_DVH.addStretch(30)
-        self.hbox_DVH.addLayout(self.vbox_DVH)
+        self.gridL_DVH.addLayout(self.vbox_DVH, 1, 1, 1, 1)
 
         self.tab2.addTab(self.tab2_DVH, "")
 
@@ -821,14 +820,13 @@ class Ui_MainWindow(object):
             text = value['name']
             checkBoxStruct = QtWidgets.QCheckBox()
             checkBoxStruct.clicked.connect(
-                lambda ch, text=text:
-                self.selected_rois.append(text) if ch
-                else self.selected_rois.remove(text))
+                lambda state, text=key: self.check(state, text))
             checkBoxStruct.setStyleSheet("font: 10pt \"Laksaman\";")
             checkBoxStruct.setText(text)
             checkBoxStruct.setObjectName(text)
             self.frame_structures.layout().addWidget(checkBoxStruct)
 
+        # text="text"
         # boxTest = QtWidgets.QCheckBox()
         # boxTest.clicked.connect(
         #     lambda ch, text=text: print(self.selected_rois))
@@ -838,16 +836,21 @@ class Ui_MainWindow(object):
         # self.frame_structures.layout().addWidget(boxTest)
 
 
-    def check(self, button, text):
-        print(button.text())
-        if button.isChecked():
+    def check(self, state, text):
+        if state:
             self.selected_rois.append(text)
+            self.updateDVH_view()
         else:
             self.selected_rois.remove(text)
+            self.updateDVH_view()
 
     # In the Model directory
     def getDVH(self):
-        res = calc_dvhs(self.dataset_rtss, self.dataset_rtdose, self.rois)
+        res = dict()
+        tmp = calc_dvhs(self.dataset_rtss, self.dataset_rtdose, self.rois)
+        for key, value in tmp.items():
+            key_int = int(key)
+            res[key_int] = value
         return res
 
 
@@ -857,7 +860,7 @@ class Ui_MainWindow(object):
         fig.subplots_adjust(0.1, 0.15, 1, 1)
         max_xlim = 0
         for roi in self.selected_rois:
-            dvh = self.dvh['roi']
+            dvh = self.dvh[int(roi)]
             if dvh.volume != 0:
                 ax.plot(dvh.bincenters, 100 * dvh.counts / dvh.volume, label=dvh.name,
                         color=None if not isinstance(dvh.color, np.ndarray) else
@@ -868,6 +871,7 @@ class Ui_MainWindow(object):
                 plt.ylabel('Volume [%s]' % '%')
                 if dvh.name:
                     plt.legend(loc='best')
+                    # plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 
         ax.set_ylim([0, 105])
         ax.set_xlim([0, max_xlim + 3])
@@ -887,6 +891,18 @@ class Ui_MainWindow(object):
         ax.grid(which='major', alpha=0.5)
 
         return fig
+
+    def initDVH_view(self):
+        fig = self.DVH_view()
+        self.plotWidget = FigureCanvas(fig)
+        self.gridL_DVH.addWidget(self.plotWidget, 1, 0, 1, 1)
+
+
+    def updateDVH_view(self):
+        self.gridL_DVH.removeWidget(self.plotWidget)
+        fig = self.DVH_view()
+        self.plotWidget = FigureCanvas(fig)
+        self.gridL_DVH.addWidget(self.plotWidget, 1, 0, 1, 1)
 
 
     # When the value of the slider in the DICOM View changes
@@ -954,15 +970,15 @@ import src.View.resources_rc
 
 
 
-# For Testing
-class MyWin(QtWidgets.QMainWindow):
-    def __init__(self, parent=None):
-        QtWidgets.QWidget.__init__(self, parent)
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self, path='dicom_sample')
-
-if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    myapp = MyWin()
-    myapp.show()
-    sys.exit(app.exec_())
+# # For Testing
+# class MyWin(QtWidgets.QMainWindow):
+#     def __init__(self, parent=None):
+#         QtWidgets.QWidget.__init__(self, parent)
+#         self.ui = Ui_MainWindow()
+#         self.ui.setupUi(self, path='dicom_sample')
+#
+# if __name__ == "__main__":
+#     app = QtWidgets.QApplication(sys.argv)
+#     myapp = MyWin()
+#     myapp.show()
+#     sys.exit(app.exec_())
