@@ -98,9 +98,6 @@ class Ui_MainWindow(object):
         self.vbox_isod.addWidget(self.box8_isod)
         self.vbox_isod.addWidget(self.box9_isod)
         self.vbox_isod.addWidget(self.box10_isod)
-        # self.listView = QtWidgets.QListView(self.tab1_isodoses)
-        # self.listView.setGeometry(QtCore.QRect(0, 0, 200, 361))
-        # self.listView.setObjectName("listView")
         self.tab1.addTab(self.tab1_isodoses, "")
 
         # Main view
@@ -242,6 +239,8 @@ class Ui_MainWindow(object):
         self.comboBox = QtWidgets.QComboBox(self.frame_struct_info)
         self.comboBox.setStyleSheet("font: 75 10pt \"Laksaman\";")
         self.comboBox.addItem("Select...")
+        for key, value in self.rois.items():
+            self.comboBox.addItem(value['name'])
         self.comboBox.setGeometry(QtCore.QRect(5, 35, 188, 31))
         self.comboBox.setObjectName("comboBox")
 
@@ -970,15 +969,15 @@ import src.View.resources_rc
 
 
 
-# # For Testing
-# class MyWin(QtWidgets.QMainWindow):
-#     def __init__(self, parent=None):
-#         QtWidgets.QWidget.__init__(self, parent)
-#         self.ui = Ui_MainWindow()
-#         self.ui.setupUi(self, path='dicom_sample')
-#
-# if __name__ == "__main__":
-#     app = QtWidgets.QApplication(sys.argv)
-#     myapp = MyWin()
-#     myapp.show()
-#     sys.exit(app.exec_())
+# For Testing
+class MyWin(QtWidgets.QMainWindow):
+    def __init__(self, parent=None):
+        QtWidgets.QWidget.__init__(self, parent)
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self, path='dicom_sample')
+
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    myapp = MyWin()
+    myapp.show()
+    sys.exit(app.exec_())
