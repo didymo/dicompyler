@@ -10,12 +10,19 @@ import _csv
 import csv
 from src.Model.form_UI import *
 from src.Model.Display_CD_UI import *
+from src.Model.GetPatientInfo import *
+from numpy import fromfile, dtype
+from pandas import DataFrame
+import numpy as np
+import pandas as pd
+from pathlib import Path
+
+
 
 message = ""
 
-
 def calculate_years(year1, year2):
-    return year2.year() - year1.year() - ((year2.month(), year2.day()) < (year1.month(), year1.day()))
+    return float(year2.year() - year1.year() - ((year2.month(), year2.day()) < (year1.month(), year1.day())))
 
 
 class ClinicalDataForm(QtWidgets.QWidget, Ui_Form):
@@ -25,6 +32,8 @@ class ClinicalDataForm(QtWidgets.QWidget, Ui_Form):
         QtWidgets.QWidget.__init__(self)
 
         self.path = path
+        self.dataset = get_datasets(self.path)
+        self.pID = self.dataset[0].PatientID
         self.tabWindow = tabWindow
         self.ui = Ui_Form()
         self.ui.setupUi(self)
@@ -136,10 +145,7 @@ class ClinicalDataForm(QtWidgets.QWidget, Ui_Form):
         local_failure = str(self.ui.Local_control.currentText())
         if (local_failure == "Control"):
             self.ui.Dt_local_failure.setDisabled(True)
-            # self.ui.Dt_local_failure.setReadOnly(True)
         elif (local_failure == "Failure"):
-            # date = self.ui.Dt_Last_Existence.date()
-            # self.ui.Dt_local_failure.setDate(date)
             self.ui.Dt_local_failure.setDisabled(False)
             self.ui.Dt_local_failure.setReadOnly(False)
         elif (local_failure == "Select..."):
@@ -150,10 +156,7 @@ class ClinicalDataForm(QtWidgets.QWidget, Ui_Form):
         regional_failure = str(self.ui.Regional_Control.currentText())
         if (regional_failure == "Control"):
             self.ui.Dt_REgional_failure.setDisabled(True)
-            # self.ui.Dt_REgional_failure.setReadOnly(False)
         elif (regional_failure == "Failure"):
-            # date = self.ui.Dt_Last_Existence.date()
-            # self.ui.Dt_REgional_failure.setDate(date)
             self.ui.Dt_REgional_failure.setDisabled(False)
             self.ui.Dt_REgional_failure.setReadOnly(False)
         elif (regional_failure == "Select..."):
@@ -164,11 +167,7 @@ class ClinicalDataForm(QtWidgets.QWidget, Ui_Form):
         distant_failure = str(self.ui.Distant_Control.currentText())
         if (distant_failure == "Control"):
             self.ui.Dt_Distant_Failure.setDisabled(True)
-            # self.ui.Dt_Distant_Failure.setReadOnly(False)
-            # self.ui.Dt_Distant_Failure.setDate('')
         elif (distant_failure == "Failure"):
-            # date = self.ui.Dt_Last_Existence.date()
-            # self.ui.Dt_Distant_Failure.setDate(date)
             self.ui.Dt_Distant_Failure.setDisabled(False)
             self.ui.Dt_Distant_Failure.setReadOnly(False)
         elif (distant_failure == "Select..."):
@@ -283,7 +282,7 @@ class ClinicalDataForm(QtWidgets.QWidget, Ui_Form):
 
             Survival_years = str(calculate_years(self.ui.dateEdit_2.date(), self.ui.Dt_Last_Existence.date()))
 
-            dataRow = ['TBD', self.ui.gender.currentText(), self.ui.line_BP.text(),
+            dataRow = [  self.pID , self.ui.gender.currentText(), self.ui.line_BP.text(),
                        ageAtDiagnosis, self.ui.dateEdit_2.date().year(),
                        self.ui.line_histology.text(), self.ui.line_icd.text(), self.ui.T_stage.currentText(),
                        self.ui.N_stage.currentText(), self.ui.M_stage.currentText(),
@@ -305,6 +304,32 @@ class ClinicalDataForm(QtWidgets.QWidget, Ui_Form):
                 writer.writerow(columnNames)
                 writer.writerow(dataRow)
 
+            #save the dates in binary file with patient ID/MDHash5
+            fileName = Path('src/data/records.pkl')
+            df = pd.DataFrame(columns=['PID', 'DOB', 'DOD','DOLE'])
+            dt = [self.pID, self.ui.date_of_birth.date().toString("dd/MM/yyyy"), self.ui.dateEdit_2.date().toString("dd/MM/yyyy"),
+                       self.ui.Dt_Last_Existence.date().toString("dd/MM/yyyy")]
+            df.loc[0] = dt
+            if fileName.exists():
+
+                new_df = pd.read_pickle('src/data/records.pkl')
+                check = False
+                for i in new_df.index:
+                    if new_df.at[i, 'PID'] == self.pID:
+                        new_df.at[i,'DOB'] = self.ui.date_of_birth.date().toString("dd/MM/yyyy")
+                        new_df.at[i,'DOD'] = self.ui.dateEdit_2.date().toString("dd/MM/yyyy")
+                        new_df.at[i,'DOLE'] = self.ui.Dt_Last_Existence.date().toString("dd/MM/yyyy")
+                        check = True
+
+                if check:
+                    new_df.append(df,ignore_index = True)
+                    new_df.to_pickle('src/data/records.pkl')
+            else:
+                open('src/data/records.pkl', 'w+')
+                df.to_pickle('src/data/records.pkl')
+
+
+
             SaveReply = QMessageBox.information(self, "Message",
                                                 "The Clinical Data was saved successfully in your directory!",
                                                 QMessageBox.Ok)
@@ -325,6 +350,83 @@ class ClinicalDataForm(QtWidgets.QWidget, Ui_Form):
         self.tabWindow.addTab(self.tab_cd, "Clinical Data")
         self.tabWindow.setCurrentIndex(3)
 
+    def load_Data(self, filename):
+        with open(filename, 'rt')as f:
+            data = csv.reader(f)
+            cd = list(data)
+            cd.pop(0)
+            li = []
+            for i in cd[0]:
+                li.append(i)
+            return li
+
+    def editing_mode(self):
+        reg = '/[clinicaldata]*[.csv]'
+        pathcd = glob.glob(self.path + reg)
+        clinical_data = self.load_Data(pathcd[0])
+
+        self.ui.label_4.setText("You are editing the last known Clinical Data for this patient.")
+        self.ui.line_FN.setVisible(False)
+        self.ui.line_LN.setVisible(False)
+        self.ui.line_FN.setText("...")
+        self.ui.line_LN.setText("...")
+        self.ui.date_of_birth.setVisible(False)
+        self.ui.gender.setCurrentIndex(self.ui.gender.findText(clinical_data[1], QtCore.Qt.MatchFixedString))
+        self.ui.line_BP.setText(clinical_data[2])
+        self.ui.line_histology.setText(clinical_data[5])
+        self.ui.line_icd.setText(clinical_data[6])
+        self.ui.T_stage.setCurrentIndex(self.ui.T_stage.findText(clinical_data[7], QtCore.Qt.MatchFixedString))
+        self.ui.N_stage.setCurrentText(clinical_data[8])
+        self.ui.M_stage.setCurrentText(clinical_data[9])
+        self.ui.Overall_Stage.setCurrentText(clinical_data[10])
+        self.ui.Tx_intent.setCurrentText(clinical_data[11])
+        self.ui.Surgery.setCurrentText(self.getCode(clinical_data[12]))
+        self.ui.Rad.setCurrentText(self.getCode(clinical_data[13]))
+        self.ui.Chemo.setCurrentText(self.getCode(clinical_data[14]))
+        self.ui.Immuno.setCurrentText(self.getCode(clinical_data[15]))
+        self.ui.Branchy.setCurrentText(self.getCode(clinical_data[16]))
+        self.ui.Hormone.setCurrentText(self.getCode(clinical_data[17]))
+        if clinical_data[11] == "Refused":
+            self.Tx_Intent_Refused()
+        self.ui.Death.setCurrentText(self.getCode(clinical_data[18]))
+        if clinical_data[19] == '':
+            self.ui.Cancer_death.setCurrentIndex(0)
+            self.ui.Cancer_death.setDisabled(True)
+        else:
+            self.ui.Cancer_death.setCurrentText(self.getCode(clinical_data[19]))
+        self.ui.Survival_dt.setText("Survival Length: " + clinical_data[20])
+        self.ui.Survival_dt.setVisible(True)
+        self.ui.Local_control.setCurrentText(clinical_data[21])
+        if clinical_data[22] == '':
+            self.ui.Dt_local_failure.setDate(QtCore.QDate.fromString('01/01/1900', "dd/MM/yyyy"))
+        else:
+            self.ui.Dt_local_failure.setDate(QtCore.QDate.fromString(clinical_data[22], "dd/MM/yyyy"))
+        self.ui.Regional_Control.setCurrentText(clinical_data[24])
+        if clinical_data[25] == '':
+            self.ui.Dt_REgional_failure.setDate(QtCore.QDate.fromString('01/01/1900', "dd/MM/yyyy"))
+        else:
+            self.ui.Dt_REgional_failure.setDate(QtCore.QDate.fromString(clinical_data[25], "dd/MM/yyyy"))
+        self.ui.Distant_Control.setCurrentText(clinical_data[27])
+        if clinical_data[28] == '':
+            self.ui.Dt_Distant_Failure.setDate(QtCore.QDate.fromString('01/01/1900', "dd/MM/yyyy"))
+        else:
+            self.ui.Dt_Distant_Failure.setDate(QtCore.QDate.fromString(clinical_data[28], "dd/MM/yyyy"))
+
+        # add the sensitive data of dates from the binary file
+        # date of birth
+        # date of diagnosis
+        # date of last existence
+        # Create a dtype with the binary data format and the desired column names
+        df = pd.read_pickle('src/data/records.pkl')
+        for i in df.index:
+            if df.at[i, 'PID']== self.pID:
+               self.ui.date_of_birth.setDate(QtCore.QDate.fromString( df.at[i,'DOB'], "dd/MM/yyyy"))
+               self.ui.dateEdit_2.setDate(QtCore.QDate.fromString( df.at[i,'DOD'], "dd/MM/yyyy"))
+               self.ui.Dt_Last_Existence.setDate(QtCore.QDate.fromString( df.at[i,'DOLE'], "dd/MM/yyyy"))
+
+
+
+
 class ClinicalDataDisplay(QtWidgets.QWidget, Ui_CD_Display):
     open_patient_window = QtCore.pyqtSignal(str)
 
@@ -336,7 +438,7 @@ class ClinicalDataDisplay(QtWidgets.QWidget, Ui_CD_Display):
         self.ui = Ui_CD_Display()
         self.ui.setupUi(self)
         self.load_cd()
-        self.ui.Edit_button.clicked.connect(self.open_form)
+        self.ui.Edit_button.clicked.connect(self.edit_mode)
 
     def load_cd(self):
         reg = '/[clinicaldata]*[.csv]'
@@ -442,12 +544,13 @@ class ClinicalDataDisplay(QtWidgets.QWidget, Ui_CD_Display):
         else:
             return theChoice
 
-    def open_form(self):
-        Reply = QMessageBox.information(self, "Message",
-                                        "Option to be added soon!",
-                                        QMessageBox.Ok)
-        if Reply == QMessageBox.Ok:
-            pass
+
+    def edit_mode(self):
+        self.tab_cd = ClinicalDataForm(self.tabWindow, self.path)
+        self.tab_cd.editing_mode()
+        self.tabWindow.removeTab(3)
+        self.tabWindow.addTab(self.tab_cd, "Clinical Data")
+        self.tabWindow.setCurrentIndex(3)
 
 
 class MainPage:

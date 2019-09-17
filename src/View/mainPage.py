@@ -32,7 +32,7 @@ class Ui_MainWindow(object):
         self.selected_rois = []
         self.basicInfo = get_basic_info(self.dataset[0])
         self.callClass = MainPage(path)
-
+        #print(self.dataset[0].PatientID)
 
         # Main Window
         MainWindow.setObjectName("MainWindow")
