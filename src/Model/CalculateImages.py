@@ -40,8 +40,6 @@ def get_pixmaps(dict_ds):
             # Get the numpy array pixel data
             np_pixels = ds._pixel_array
             # Preprocessing it for better looking
-            a = np_pixels[np.where(np_pixels in range(52, 2000))]
-            a = a * 1.5
             max_val = np.amax(np_pixels)
             min_val = np.amin(np_pixels)
             np_pixels = (np_pixels - min_val) / (max_val - min_val) * 255
