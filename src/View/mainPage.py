@@ -31,7 +31,8 @@ class Ui_MainWindow(object):
         self.rois = get_roi_info(self.dataset_rtss)
         self.selected_rois = []
         self.basicInfo = get_basic_info(self.dataset[0])
-        self.callClass = MainPage(path)
+
+        self.callClass = MainPage(self.path, self.dataset, self.filepaths)
 
         # Main Window
         MainWindow.setObjectName("MainWindow")

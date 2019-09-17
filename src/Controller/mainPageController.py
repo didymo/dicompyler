@@ -555,11 +555,13 @@ class ClinicalDataDisplay(QtWidgets.QWidget, Ui_CD_Display):
 
 class MainPage:
 
-    def __init__(self, path):
+    def __init__(self, path, datasets, filepaths):
         self.path = path
+        self.datasets = datasets
+        self.filepaths = filepaths
 
     def runPyradiomics(self):
-        pyradiomics(self.path)
+        pyradiomics(self.path, self.filepaths)
 
     def runAnonymization(self):
         anonymize(self.path)
