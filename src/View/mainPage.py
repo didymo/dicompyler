@@ -30,6 +30,7 @@ class Ui_MainWindow(object):
         self.dataset_rtdose = pydicom.dcmread(self.file_rtdose)
         self.rois = get_roi_info(self.dataset_rtss)
         self.selected_rois = []
+        self.dvh = self.getDVH()
         self.basicInfo = get_basic_info(self.dataset[0])
         self.callClass = MainPage(path)
 
@@ -51,6 +52,7 @@ class Ui_MainWindow(object):
         self.tab1_structures = QtWidgets.QWidget()
         self.tab1_structures.setObjectName("tab1_structures")
         self.updateStructureColumn()
+
         # color1_struct = QtGui.QPixmap(10, 10)
         # color1_struct.fill(QtGui.QColor(255, 144, 3))
         # self.coloriconAnonymize_and_Save_struct = QtGui.QIcon(color1_struct)
@@ -163,8 +165,7 @@ class Ui_MainWindow(object):
         self.hbox_DVH.setObjectName("hbox_DVH")
 
         # DVH Processing
-        DVH_file = self.getDVH()
-        fig = self.DVH_view(DVH_file)
+        fig = self.DVH_view()
         self.plotWidget = FigureCanvas(fig)
         self.hbox_DVH.addWidget(self.plotWidget)
 
@@ -793,6 +794,7 @@ class Ui_MainWindow(object):
 
         self.scrollAreaStruct = QtWidgets.QScrollArea(self.tab1_structures)
         self.scrollAreaStruct.setWidgetResizable(True)
+        self.scrollAreaStruct.setGeometry(QtCore.QRect(0, 0, 200, 333))
 
         self.frame_structures = QtWidgets.QFrame(self.scrollAreaStruct)
         self.frame_structures.setLayout(QtWidgets.QVBoxLayout())
@@ -815,35 +817,33 @@ class Ui_MainWindow(object):
         self.scrollAreaStruct.setWidget(self.frame_structures)
         self.frame_structures.layout().setContentsMargins(0, 0, 0, 0)
 
-        self.dictCheckBoxStruct = dict()
-        index = 0
-
         for key, value in self.rois.items():
-            # checkBoxStruct = QtWidgets.QCheckBox(self.scrollContentsStruct)
-            checkBoxStruct = QtWidgets.QCheckBox(value['name'])
+            text = value['name']
+            checkBoxStruct = QtWidgets.QCheckBox()
             checkBoxStruct.clicked.connect(
-                lambda: print(value['name']) if checkBoxStruct.isChecked() == True
-                        else print(value['name']))
+                lambda ch, text=text:
+                self.selected_rois.append(text) if ch
+                else self.selected_rois.remove(text))
             checkBoxStruct.setStyleSheet("font: 10pt \"Laksaman\";")
+            checkBoxStruct.setText(text)
+            checkBoxStruct.setObjectName(text)
             self.frame_structures.layout().addWidget(checkBoxStruct)
-            self.dictCheckBoxStruct[value['name']] = checkBoxStruct
+
+        # boxTest = QtWidgets.QCheckBox()
+        # boxTest.clicked.connect(
+        #     lambda ch, text=text: print(self.selected_rois))
+        # boxTest.setStyleSheet("font: 10pt \"Laksaman\";")
+        # boxTest.setText("Test")
+        # boxTest.setObjectName("Test")
+        # self.frame_structures.layout().addWidget(boxTest)
 
 
-
-    def checkBoxState(self):
-        print(self.dictCheckBoxStruct)
-        print(self.sender().text())
-        text = self.sender().text()
-        pressedCheckBox = self.dictCheckBoxStruct[text]
-        if pressedCheckBox.isChecked() == True:
+    def check(self, button, text):
+        print(button.text())
+        if button.isChecked():
             self.selected_rois.append(text)
-            print(self.selected_rois)
-
         else:
             self.selected_rois.remove(text)
-            print(self.selected_rois)
-
-
 
     # In the Model directory
     def getDVH(self):
@@ -852,11 +852,12 @@ class Ui_MainWindow(object):
 
 
     # In the View directory
-    def DVH_view(self, dvh_file):
+    def DVH_view(self):
         fig, ax = plt.subplots()
         fig.subplots_adjust(0.1, 0.15, 1, 1)
         max_xlim = 0
-        for roi, dvh in dvh_file.items():
+        for roi in self.selected_rois:
+            dvh = self.dvh['roi']
             if dvh.volume != 0:
                 ax.plot(dvh.bincenters, 100 * dvh.counts / dvh.volume, label=dvh.name,
                         color=None if not isinstance(dvh.color, np.ndarray) else
@@ -953,15 +954,15 @@ import src.View.resources_rc
 
 
 
-# # For Testing
-# class MyWin(QtWidgets.QMainWindow):
-#     def __init__(self, parent=None):
-#         QtWidgets.QWidget.__init__(self, parent)
-#         self.ui = Ui_MainWindow()
-#         self.ui.setupUi(self, path='dicom_sample')
-#
-# if __name__ == "__main__":
-#     app = QtWidgets.QApplication(sys.argv)
-#     myapp = MyWin()
-#     myapp.show()
-#     sys.exit(app.exec_())
+# For Testing
+class MyWin(QtWidgets.QMainWindow):
+    def __init__(self, parent=None):
+        QtWidgets.QWidget.__init__(self, parent)
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self, path='dicom_sample')
+
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    myapp = MyWin()
+    myapp.show()
+    sys.exit(app.exec_())
