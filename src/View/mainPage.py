@@ -24,7 +24,7 @@ class Ui_MainWindow(object):
         self.path = path
         self.dataset, self.filepaths = get_datasets(path)
         self.pixmaps = get_pixmaps(self.dataset)
-        self.file_rtss = self.filepaths['rtss']
+        self.fileg_rtss = self.filepaths['rtss']
         self.file_rtdose = self.filepaths['rtdose']
         self.dataset_rtss = pydicom.dcmread(self.file_rtss)
         self.dataset_rtdose = pydicom.dcmread(self.file_rtdose)
