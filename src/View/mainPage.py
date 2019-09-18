@@ -22,17 +22,18 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow, path):
         # Load all information from the patient
         self.path = path
-        self.dataset = get_datasets(path)
+        self.dataset, self.filepaths = get_datasets(path)
         self.pixmaps = get_pixmaps(self.dataset)
-        self.file_rtss = path + "/rtss.dcm"
-        self.file_rtdose = path + "/rtdose.dcm"
+        self.file_rtss = self.filepaths['rtss']
+        self.file_rtdose = self.filepaths['rtdose']
         self.dataset_rtss = pydicom.dcmread(self.file_rtss)
         self.dataset_rtdose = pydicom.dcmread(self.file_rtdose)
         self.rois = get_roi_info(self.dataset_rtss)
         self.selected_rois = []
+        self.dvh = self.getDVH()
         self.basicInfo = get_basic_info(self.dataset[0])
-        self.callClass = MainPage(path)
-        #print(self.dataset[0].PatientID)
+
+        self.callClass = MainPage(self.path, self.dataset, self.filepaths)
 
         # Main Window
         MainWindow.setObjectName("MainWindow")
@@ -51,6 +52,7 @@ class Ui_MainWindow(object):
         self.tab1_structures = QtWidgets.QWidget()
         self.tab1_structures.setObjectName("tab1_structures")
         self.updateStructureColumn()
+
         # color1_struct = QtGui.QPixmap(10, 10)
         # color1_struct.fill(QtGui.QColor(255, 144, 3))
         # self.coloriconAnonymize_and_Save_struct = QtGui.QIcon(color1_struct)
@@ -96,9 +98,6 @@ class Ui_MainWindow(object):
         self.vbox_isod.addWidget(self.box8_isod)
         self.vbox_isod.addWidget(self.box9_isod)
         self.vbox_isod.addWidget(self.box10_isod)
-        # self.listView = QtWidgets.QListView(self.tab1_isodoses)
-        # self.listView.setGeometry(QtCore.QRect(0, 0, 200, 361))
-        # self.listView.setObjectName("listView")
         self.tab1.addTab(self.tab1_isodoses, "")
 
         # Main view
@@ -159,14 +158,11 @@ class Ui_MainWindow(object):
         self.widget_DVH = QtWidgets.QWidget(self.tab2_DVH)
         self.widget_DVH.setGeometry(QtCore.QRect(0, 0, 877, 400))
         self.widget_DVH.setObjectName("widget_DVH")
-        self.hbox_DVH = QtWidgets.QHBoxLayout(self.widget_DVH)
-        self.hbox_DVH.setObjectName("hbox_DVH")
+        self.gridL_DVH = QtWidgets.QGridLayout(self.widget_DVH)
+        self.gridL_DVH.setObjectName("gridL_DVH")
 
         # DVH Processing
-        DVH_file = self.getDVH()
-        fig = self.DVH_view(DVH_file)
-        self.plotWidget = FigureCanvas(fig)
-        self.hbox_DVH.addWidget(self.plotWidget)
+        self.initDVH_view()
 
         # DVH: Export DVH Button
         self.vbox_DVH = QtWidgets.QVBoxLayout()
@@ -176,13 +172,14 @@ class Ui_MainWindow(object):
         self.button_exportDVH.setStyleSheet("background-color: rgb(147, 112, 219);\n""color: rgb(255, 255, 255);")
         self.button_exportDVH.setObjectName("button_exportDVH")
 
-        self.spacer = QtWidgets.QWidget()
-        self.spacer.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        self.vbox_DVH.addWidget(self.spacer)
+        # self.spacer = QtWidgets.QWidget()
+        # self.spacer.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        # self.vbox_DVH.addWidget(self.spacer)
         self.vbox_DVH.addWidget(self.button_exportDVH)
+
         # self.vbox_DVH.setAlignment(self.button_exportDVH, QtCore.Qt.AlignBottom)
         # self.vbox_DVH.addStretch(30)
-        self.hbox_DVH.addLayout(self.vbox_DVH)
+        self.gridL_DVH.addLayout(self.vbox_DVH, 1, 1, 1, 1)
 
         self.tab2.addTab(self.tab2_DVH, "")
 
@@ -242,6 +239,8 @@ class Ui_MainWindow(object):
         self.comboBox = QtWidgets.QComboBox(self.frame_struct_info)
         self.comboBox.setStyleSheet("font: 75 10pt \"Laksaman\";")
         self.comboBox.addItem("Select...")
+        for key, value in self.rois.items():
+            self.comboBox.addItem(value['name'])
         self.comboBox.setGeometry(QtCore.QRect(5, 35, 188, 31))
         self.comboBox.setObjectName("comboBox")
 
@@ -601,7 +600,7 @@ class Ui_MainWindow(object):
         self.actionAnonymize_and_Save.setIcon(iconAnonymize_and_Save)
         self.actionAnonymize_and_Save.setIconVisibleInMenu(True)
         self.actionAnonymize_and_Save.setObjectName("actionAnonymize_and_Save")
-        # self.actionAnonymize_and_Save.triggered.connect(self.pluginMenu)
+        self.actionAnonymize_and_Save.triggered.connect(self.HandleAnonymization)
 
 
         # Export DVH Spreadsheet Action
@@ -797,6 +796,7 @@ class Ui_MainWindow(object):
 
         self.scrollAreaStruct = QtWidgets.QScrollArea(self.tab1_structures)
         self.scrollAreaStruct.setWidgetResizable(True)
+        self.scrollAreaStruct.setGeometry(QtCore.QRect(0, 0, 200, 333))
 
         # self.scrollAreaStruct = QtWidgets.QScrollArea(self.tab1_structures)
         # self.scrollAreaStruct.setWidgetResizable(False)
@@ -814,48 +814,51 @@ class Ui_MainWindow(object):
         self.scrollAreaStruct.setWidget(self.frame_structures)
         self.frame_structures.layout().setContentsMargins(0, 0, 0, 0)
 
-        self.dictCheckBoxStruct = dict()
-        index = 0
-
         for key, value in self.rois.items():
-            # checkBoxStruct = QtWidgets.QCheckBox(self.scrollContentsStruct)
-            checkBoxStruct = QtWidgets.QCheckBox(str(value['name']))
-            checkBoxStruct.stateChanged.connect(
-                lambda: print(checkBoxStruct.text() + " checked") if checkBoxStruct.isChecked()
-                        else print(checkBoxStruct.text() + " not checked"))
+            text = value['name']
+            checkBoxStruct = QtWidgets.QCheckBox()
+            checkBoxStruct.clicked.connect(
+                lambda state, text=key: self.check(state, text))
             checkBoxStruct.setStyleSheet("font: 10pt \"Laksaman\";")
+            checkBoxStruct.setText(text)
+            checkBoxStruct.setObjectName(text)
             self.frame_structures.layout().addWidget(checkBoxStruct)
-            self.dictCheckBoxStruct[value['name']] = checkBoxStruct
+
+        # text="text"
+        # boxTest = QtWidgets.QCheckBox()
+        # boxTest.clicked.connect(
+        #     lambda ch, text=text: print(self.selected_rois))
+        # boxTest.setStyleSheet("font: 10pt \"Laksaman\";")
+        # boxTest.setText("Test")
+        # boxTest.setObjectName("Test")
+        # self.frame_structures.layout().addWidget(boxTest)
 
 
-
-    def checkBoxState(self):
-        print(self.dictCheckBoxStruct)
-        print(self.sender().text())
-        text = self.sender().text()
-        pressedCheckBox = self.dictCheckBoxStruct[text]
-        if pressedCheckBox.isChecked() == True:
+    def check(self, state, text):
+        if state:
             self.selected_rois.append(text)
-            print(self.selected_rois)
-
+            self.updateDVH_view()
         else:
             self.selected_rois.remove(text)
-            print(self.selected_rois)
-
-
+            self.updateDVH_view()
 
     # In the Model directory
     def getDVH(self):
-        res = calc_dvhs(self.dataset_rtss, self.dataset_rtdose, self.rois)
+        res = dict()
+        tmp = calc_dvhs(self.dataset_rtss, self.dataset_rtdose, self.rois)
+        for key, value in tmp.items():
+            key_int = int(key)
+            res[key_int] = value
         return res
 
 
     # In the View directory
-    def DVH_view(self, dvh_file):
+    def DVH_view(self):
         fig, ax = plt.subplots()
         fig.subplots_adjust(0.1, 0.15, 1, 1)
         max_xlim = 0
-        for roi, dvh in dvh_file.items():
+        for roi in self.selected_rois:
+            dvh = self.dvh[int(roi)]
             if dvh.volume != 0:
                 ax.plot(dvh.bincenters, 100 * dvh.counts / dvh.volume, label=dvh.name,
                         color=None if not isinstance(dvh.color, np.ndarray) else
@@ -866,6 +869,7 @@ class Ui_MainWindow(object):
                 plt.ylabel('Volume [%s]' % '%')
                 if dvh.name:
                     plt.legend(loc='best')
+                    # plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 
         ax.set_ylim([0, 105])
         ax.set_xlim([0, max_xlim + 3])
@@ -885,6 +889,18 @@ class Ui_MainWindow(object):
         ax.grid(which='major', alpha=0.5)
 
         return fig
+
+    def initDVH_view(self):
+        fig = self.DVH_view()
+        self.plotWidget = FigureCanvas(fig)
+        self.gridL_DVH.addWidget(self.plotWidget, 1, 0, 1, 1)
+
+
+    def updateDVH_view(self):
+        self.gridL_DVH.removeWidget(self.plotWidget)
+        fig = self.DVH_view()
+        self.plotWidget = FigureCanvas(fig)
+        self.gridL_DVH.addWidget(self.plotWidget, 1, 0, 1, 1)
 
 
     # When the value of the slider in the DICOM View changes
@@ -914,7 +930,7 @@ class Ui_MainWindow(object):
         self.modelTree.setHeaderData(self.VR, QtCore.Qt.Horizontal, "VR")
 
     def updateTreeModel(self, id):
-        filename = self.path + '/ct.' + str(id) + '.dcm'
+        filename = self.filepaths[id]
         self.dicomTree = DicomTree(filename)
         ds = self.dicomTree.read_dcm(filename)
         dict = self.dicomTree.dataset_to_dict(ds)
@@ -947,6 +963,8 @@ class Ui_MainWindow(object):
     def pyradiomicsHandler(self):
         self.callClass.runPyradiomics()
 
+    def HandleAnonymization(self):
+        self.callClass.runAnonymization()
 
 import src.View.resources_rc
 

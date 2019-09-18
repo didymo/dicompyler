@@ -17,6 +17,8 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from dateutil.relativedelta import relativedelta
+from src.Model.Anon import *
+
 
 
 message = ""
@@ -74,7 +76,7 @@ class ClinicalDataForm(QtWidgets.QWidget, Ui_Form):
         QtWidgets.QWidget.__init__(self)
 
         self.path = path
-        self.dataset = get_datasets(self.path)
+        self.dataset, self.filenames = get_datasets(self.path)
         self.pID = self.dataset[0].PatientID
         self.tabWindow = tabWindow
         self.ui = Ui_Form()
@@ -661,11 +663,16 @@ class ClinicalDataDisplay(QtWidgets.QWidget, Ui_CD_Display):
 
 class MainPage:
 
-    def __init__(self, path):
+    def __init__(self, path, datasets, filepaths):
         self.path = path
+        self.datasets = datasets
+        self.filepaths = filepaths
 
     def runPyradiomics(self):
-        pyradiomics(self.path)
+        pyradiomics(self.path, self.filepaths)
+
+    def runAnonymization(self):
+        anonymize(self.path)
 
     def display_cd_form(self, tabWindow, file_path):
         self.tab_cd = ClinicalDataForm(tabWindow,file_path)

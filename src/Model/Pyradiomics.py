@@ -9,15 +9,13 @@ from pydicom import dcmread
 from radiomics import featureextractor
 
 
-def pyradiomics(path):
+def pyradiomics(path, filepaths):
     """Generate pyradiomics spreadsheet."""
 
-    patient_hash = ''
-    if 'rtdose.dcm' in os.listdir(path):
-        rtdose_file = dcmread(path + '/rtdose.dcm')
-        patient_hash = os.path.basename(rtdose_file.PatientID)
-    else:
-        patient_hash = os.path.basename(path)
+    ct_file = dcmread(filepaths[0])
+    patient_hash = os.path.basename(ct_file.PatientID)
+
+    rtss_path = filepaths['rtss']
 
     converted_file_name = patient_hash + '.nrrd'  # Name of nrrd file
     converted_file_location = path + '/nrrd/'  # Location of folder where nrrd file saved
@@ -38,7 +36,7 @@ def pyradiomics(path):
     # Convert rtstruct to nrrd
     # Each ROI is saved in separate nrrd files
     converted_struct_location = converted_file_location + 'structures'  # Location of folder where converted masks saved
-    cmd_for_segmask = 'plastimatch convert --input ' + path + '/rtss.dcm --output-prefix ' + converted_struct_location + ' --prefix-format nrrd --referenced-ct ' + path + ' 1>' + path + '/NUL'
+    cmd_for_segmask = 'plastimatch convert --input ' + rtss_path + ' --output-prefix ' + converted_struct_location + ' --prefix-format nrrd --referenced-ct ' + path + ' 1>' + path + '/NUL'
     cmd_del_nul = 'rm ' + path + '/NUL'
     os.system(cmd_for_segmask)
     os.system(cmd_del_nul)

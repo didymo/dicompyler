@@ -1,7 +1,9 @@
 """
 ./src/Model/LoadPatients.py
 This file contains basic functions for loading original dicom files.
-The desired output should be a 'pydicom' defined type of dataset.
+The output returned consists of two dictionaries, one contains the
+file paths of read files and the other the data obtained from each file
+after reading the data.
 """
 
 import glob
@@ -18,10 +20,10 @@ load_logger.setLevel(logging.DEBUG)
 
 
 # For sorting dicom file names by numbers
-# Filename format example: "ct.0.dcm", "rtss.dcm", "rtdose.dcm"
 # Input is a list of dcm file names.
 # Return the sorted list of all file names.
-path = '/home/xudong/dicom_sample'
+
+
 def natural_sort(file_list):
     # Logger info
     load_logger.info('Natural Sorting...')
@@ -31,18 +33,41 @@ def natural_sort(file_list):
 
 
 def get_datasets(path):
-    dict_ds = {}
-    dcm_files = natural_sort(glob.glob(path + '/*.dcm'))
-    for i, file in enumerate(dcm_files):
-        ds_tmp = pydicom.dcmread(file)
-        if ds_tmp.SOPClassUID == '1.2.840.10008.5.1.4.1.1.2':
-            img_file_name = os.path.basename(dcm_files[i])
-            img_index = int(''.join(list(filter(str.isdigit, img_file_name))))
-            dict_ds[img_index] = ds_tmp
-        elif ds_tmp.SOPClassUID == '1.2.840.10008.5.1.4.1.1.481.3':
-            dict_ds['rtss'] = ds_tmp
-        elif ds_tmp.SOPClassUID == '1.2.840.10008.5.1.4.1.1.481.2':
-            dict_ds['rtdose'] = ds_tmp
-        elif ds_tmp.SOPClassUID == '1.2.840.10008.5.1.4.1.1.481.5':
-            dict_ds['rtplan'] = ds_tmp
-    return dict_ds
+    """
+    :param path: str
+    :return read_data_dict: dict
+    :return file_names_dict: dict
+    """
+
+    # Data contains data read from files
+    # Key is int for ct images and str (rtdose, rtss, rtplan) for RT files
+    read_data_dict = {}
+
+    # Data contains file paths
+    # Key is int for ct images and str (rtdose, rtss, rtplan) for RT files
+    file_names_dict = {}
+
+    # Sort files based on name
+    dcm_files = natural_sort(glob.glob(path + '/*'))
+    i = 0 # For key values for ct images
+
+    # For each file in path
+    for file in dcm_files:
+        # If file exists and the first two letters in the name are CT, RD, RP, RS, or RT
+        if os.path.isfile(file) and os.path.basename(file)[0:2].upper() in ['CT', 'RD', 'RP', 'RS', 'RT']:
+            read_file = pydicom.dcmread(file)
+            if read_file.Modality == 'CT':
+                read_data_dict[i] = read_file
+                file_names_dict[i] = file
+                i += 1
+            elif read_file.Modality == 'RTSTRUCT':
+                read_data_dict['rtss'] = read_file
+                file_names_dict['rtss'] = file
+            elif read_file.Modality == 'RTDOSE':
+                read_data_dict['rtdose'] = read_file
+                file_names_dict['rtdose'] = file
+            elif read_file.Modality == 'RTPLAN':
+                read_data_dict['rtplan'] = read_file
+                file_names_dict['rtplan'] = file
+
+    return read_data_dict, file_names_dict
