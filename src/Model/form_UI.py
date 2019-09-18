@@ -7,7 +7,7 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
-from PyQt5.QtCore import QStringListModel
+from PyQt5.QtCore import QStringListModel, QDate
 from PyQt5.QtWidgets import QCompleter, QLineEdit
 from country_list import countries_for_language
 from array import *
@@ -26,6 +26,7 @@ with open('src/data/ICD10_Topography.csv', 'r') as f:
 with open('src/data/ICD10_Topography_C.csv', 'r') as f:
     reader = csv.reader(f)
     icdc = list(reader)
+    icdc.pop(0)
 with open('src/data/ICD10_Morphology.csv', 'r') as f:
     reader = csv.reader(f)
     hist = list(reader)
@@ -93,6 +94,7 @@ class Ui_Form(object):
         self.label_DB.setObjectName("label_DB")
         self.date_of_birth = QtWidgets.QDateEdit(self.scrollAreaWidgetContents)
         self.date_of_birth.setDisplayFormat("dd/MM/yyyy")
+        self.date_of_birth.setDate( QDate.currentDate())
         self.date_of_birth.setGeometry(QtCore.QRect(150, 115, 171, 31))
         self.date_of_birth.setObjectName("date_of_birth")
         self.date_of_birth.setCalendarPopup(True)
@@ -103,6 +105,7 @@ class Ui_Form(object):
         self.dateEdit_2.setDisplayFormat("dd/MM/yyyy")
         self.dateEdit_2.setGeometry(QtCore.QRect(150, 165, 171, 31))
         self.dateEdit_2.setObjectName("dateEdit_2")
+        self.dateEdit_2.setDate( QDate.currentDate())
         self.dateEdit_2.setCalendarPopup(True)
         self.label_7 = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         self.label_7.setGeometry(QtCore.QRect(20, 170, 131, 21))
@@ -221,6 +224,7 @@ class Ui_Form(object):
         self.Dt_Last_Existence.setDisplayFormat("dd/MM/yyyy")
         self.Dt_Last_Existence.setGeometry(QtCore.QRect(200, 565, 171, 31))
         self.Dt_Last_Existence.setObjectName("Dt_Last_Existence")
+        self.Dt_Last_Existence.setDate( QDate.currentDate())
         self.Dt_Last_Existence.setCalendarPopup(True)
         self.Survival_dt = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         self.Survival_dt.setGeometry(QtCore.QRect(440, 565, 171, 31))
@@ -250,9 +254,10 @@ class Ui_Form(object):
         self.label_Local_control.setObjectName("label_Local_control")
         self.Save_button = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
         self.Save_button.setGeometry(QtCore.QRect(20, 820, 89, 25))
-        self.Save_button.setStyleSheet("background-color: rgb(138, 43, 226);\n"
+        self.Save_button.setStyleSheet("background-color: rgb(238, 238, 236);\n"
                                        "font: 57 11pt \"Ubuntu\";\n"
-                                       "color: rgb(238, 238, 236);")
+                                       "color:rgb(75,0,130);\n"
+                                       "font-weight: bold;\n")
         self.Save_button.setObjectName("Save_button")
         self.Death = QtWidgets.QComboBox(self.scrollAreaWidgetContents)
         self.Death.setGeometry(QtCore.QRect(150, 620, 171, 25))
@@ -369,6 +374,7 @@ class Ui_Form(object):
         self.label_Dt_Local_failure.setObjectName("label_Dt_Local_failure")
         self.Dt_local_failure = QtWidgets.QDateEdit(self.scrollAreaWidgetContents)
         self.Dt_local_failure.setDisplayFormat("dd/MM/yyyy")
+        self.Dt_local_failure.setDate( QDate.currentDate())
         self.Dt_local_failure.setGeometry(QtCore.QRect(530, 670, 171, 31))
         self.Dt_local_failure.setObjectName("Dt_local_failure")
         self.Dt_local_failure.setCalendarPopup(True)
@@ -380,12 +386,14 @@ class Ui_Form(object):
         self.Dt_REgional_failure.setDisplayFormat("dd/MM/yyyy")
         self.Dt_REgional_failure.setGeometry(QtCore.QRect(530, 720, 171, 31))
         self.Dt_REgional_failure.setObjectName("Dt_REgional_failure")
+        self.Dt_REgional_failure.setDate( QDate.currentDate())
         self.Dt_REgional_failure.setCalendarPopup(True)
         self.Dt_REgional_failure.setDisabled(True)
         self.Dt_Distant_Failure = QtWidgets.QDateEdit(self.scrollAreaWidgetContents)
         self.Dt_Distant_Failure.setDisplayFormat("dd/MM/yyyy")
         self.Dt_Distant_Failure.setGeometry(QtCore.QRect(530, 765, 171, 31))
         self.Dt_Distant_Failure.setObjectName("Dt_Distant_Failure")
+        self.Dt_Distant_Failure.setDate( QDate.currentDate())
         self.Dt_Distant_Failure.setCalendarPopup(True)
         self.Dt_Distant_Failure.setDisabled(True)
         # self.Dt_Distant_Failure.setReadOnly(True)

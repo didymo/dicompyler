@@ -26,6 +26,7 @@ with open('src/data/ICD10_Topography.csv', 'r') as f:
 with open('src/data/ICD10_Topography_C.csv', 'r') as f:
     reader = csv.reader(f)
     icdc = list(reader)
+    icdc.pop(0)
 with open('src/data/ICD10_Morphology.csv', 'r') as f:
     reader = csv.reader(f)
     hist = list(reader)
@@ -359,9 +360,10 @@ class Ui_CD_Display(object):
         self.label_Local_control.setObjectName("label_Local_control")
         self.Edit_button = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
         self.Edit_button.setGeometry(QtCore.QRect(20, 820, 89, 25))
-        self.Edit_button.setStyleSheet("background-color: rgb(138, 43, 226);\n"
+        self.Edit_button.setStyleSheet("background-color: rgb(238, 238, 236);\n"
                                        "font: 57 11pt \"Ubuntu\";\n"
-                                       "color: rgb(238, 238, 236);")
+                                       "color:rgb(75,0,130);\n"
+                                       "font-weight: bold;\n")
         self.Edit_button.setObjectName("Edit_button")
         self.Local_control = QtWidgets.QComboBox(self.scrollAreaWidgetContents)
         self.Local_control.setGeometry(QtCore.QRect(150, 670, 171, 25))

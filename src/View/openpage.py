@@ -29,9 +29,10 @@ class WelcomePage(object):
         self.label_2.setObjectName("label_2")
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton.setGeometry(QtCore.QRect(350, 410, 121, 31))
-        self.pushButton.setStyleSheet("font: 57 12pt \"Ubuntu\";color: rgb(244, 245, 245);\n"
-        "font: 57 12pt \"Ubuntu\";\n"
-        "background-color: rgb(147, 112, 219);")
+        self.pushButton.setStyleSheet("background-color: rgb(238, 238, 236);\n"
+                                       "font: 57 12pt \"Ubuntu\";\n"
+                                       "color:rgb(75,0,130);\n"
+                                       "font-weight: bold;\n")
         self.pushButton.setObjectName("pushButton")
         self.logo = QtWidgets.QLabel(self.centralwidget)
         self.logo.setGeometry(QtCore.QRect(100, 30, 671, 261))
