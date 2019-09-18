@@ -259,6 +259,7 @@ class Ui_Form(object):
                                        "color:rgb(75,0,130);\n"
                                        "font-weight: bold;\n")
         self.Save_button.setObjectName("Save_button")
+        self.Save_button.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.Death = QtWidgets.QComboBox(self.scrollAreaWidgetContents)
         self.Death.setGeometry(QtCore.QRect(150, 620, 171, 25))
         self.Death.setObjectName("Death")

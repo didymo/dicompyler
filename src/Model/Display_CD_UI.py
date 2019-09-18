@@ -365,6 +365,7 @@ class Ui_CD_Display(object):
                                        "color:rgb(75,0,130);\n"
                                        "font-weight: bold;\n")
         self.Edit_button.setObjectName("Edit_button")
+        self.Edit_button.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.Local_control = QtWidgets.QComboBox(self.scrollAreaWidgetContents)
         self.Local_control.setGeometry(QtCore.QRect(150, 670, 171, 25))
         self.Local_control.setObjectName("Local_control")

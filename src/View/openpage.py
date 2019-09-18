@@ -34,6 +34,7 @@ class WelcomePage(object):
                                        "color:rgb(75,0,130);\n"
                                        "font-weight: bold;\n")
         self.pushButton.setObjectName("pushButton")
+        self.pushButton.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.logo = QtWidgets.QLabel(self.centralwidget)
         self.logo.setGeometry(QtCore.QRect(100, 30, 671, 261))
         self.logo.setText("")
