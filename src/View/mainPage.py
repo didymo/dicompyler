@@ -989,15 +989,15 @@ import src.View.resources_rc
 
 
 
-# For Testing
-class MyWin(QtWidgets.QMainWindow):
-    def __init__(self, parent=None):
-        QtWidgets.QWidget.__init__(self, parent)
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self, path='dicom_sample')
-
-if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    myapp = MyWin()
-    myapp.show()
-    sys.exit(app.exec_())
+# # For Testing
+# class MyWin(QtWidgets.QMainWindow):
+#     def __init__(self, parent=None):
+#         QtWidgets.QWidget.__init__(self, parent)
+#         self.ui = Ui_MainWindow()
+#         self.ui.setupUi(self, path='dicom_sample')
+#
+# if __name__ == "__main__":
+#     app = QtWidgets.QApplication(sys.argv)
+#     myapp = MyWin()
+#     myapp.show()
+#     sys.exit(app.exec_())
