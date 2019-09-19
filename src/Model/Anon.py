@@ -16,45 +16,23 @@ import pandas as pd
 def hasattribute(keyword, ds):
     return keyword in ds
 
-# ## ===================================PRINTING THE HASH VALUES================================================
 
-def Print_identifiers(ds_rtss):
-    print("INSIDE PRINT================")
-    print("Patient name in dataset not hash: ", ds_rtss.PatientName)
-    print("Patient ID in dataset not hash: ", ds_rtss.PatientID)
-    print("Patient DOB in dataset not hash: ", ds_rtss.PatientBirthDate)
-    print("Patient SEX in dataset not hash: ", ds_rtss.PatientSex)
-    print("\n\n")
-
-
-# loading the dicom file 
-def LOAD_DCM(Dicom_folder_path):
-    # Dicom_folder_path = self.path  # Getting and storing the Folder path of rtss.dcm file
-    print("PATH of the dicom file is:-----", Dicom_folder_path, "\n\n")
-    # creating the .dcm filename variable that we wnat to load in dataframe
-    Dicom_filename = "rtss.dcm"
-    # concatinating the folder path and the filename
-    Full_dicom_filepath = (Dicom_folder_path + "/" + Dicom_filename)
-    print("FULL PATH of dicom file is:----", Full_dicom_filepath)
-    ds_rtss = pydicom.dcmread(Full_dicom_filepath)
-    print("rtss.dcm loaded in ds_rtss")
-    return ds_rtss
 
 ## ===================================HASH Function================================================
-def Hash_identifiers(ds_rtss):
+
+def Hash_identifiers(file_to_write, ds_rtss):
 
     # ------------------------------------Sha1 hash for patient name-------------------------------------
 
     if 'PatientName' in ds_rtss:
         patient_name = str(ds_rtss.PatientName)
-        print("Patient name - ", patient_name)
+        # print("Patient name - ", patient_name)
         # MD 5 hashing
         hash_patient_name_MD5 = uuid.uuid5(uuid.NAMESPACE_URL, patient_name)
-        # Hashing the MD5 haah again using SHA1
+        # Hashing the MD5 hash again using SHA1
         hash_patient_name_sha1 = uuid.uuid3(uuid.NAMESPACE_URL, str(hash_patient_name_MD5))
         # storing the hash to dataset
         ds_rtss.PatientName = str(hash_patient_name_sha1)
-        print("\n\n")
     else:
         print("NO patient Name found")
 
@@ -63,36 +41,33 @@ def Hash_identifiers(ds_rtss):
     # if 'PatientID' in ds_rtss:
     if hasattribute("PatientID", ds_rtss):
         patient_ID = str(ds_rtss.PatientID)
-        print("Patient ID - ", patient_ID)
+        # print("Patient ID - ", patient_ID)
         # MD 5 hashing
         hash_patient_ID_MD5 = uuid.uuid5(uuid.NAMESPACE_URL, patient_ID)
-        # Hashing the MD5 haah again using SHA1
+        # Hashing the MD5 hash again using SHA1
         hash_patient_ID_sha1 = uuid.uuid3(uuid.NAMESPACE_URL, str(hash_patient_ID_MD5))
         # storing the hash to dataset
         ds_rtss.PatientID = str(hash_patient_ID_sha1)
-        print("\n\n")
     else:
         print("NO patient ID not found")
 
-    #  storing patient_name and ID in one variable
-    if hasattribute("PatientID", ds_rtss):
-        P_name_ID = patient_name + " + " + patient_ID
-    else:
-        P_name_ID = patient_name + " + " + "PID_empty"
+    # #  storing patient_name and ID in one variable
+    # if hasattribute("PatientID", ds_rtss):
+    #     P_name_ID = patient_name + " + " + patient_ID
+    # else:
+    #     P_name_ID = patient_name + " + " + "PID_empty"
 
-    # print("\n\n")
     # ----------------------------------------------sha1 hash for patient DOB---------------------------------------
 
     if 'PatientBirthDate' in ds_rtss:
         patient_DOB = str(ds_rtss.PatientBirthDate)
-        print("Patient DOB - ", patient_DOB)
+        # print("Patient DOB - ", patient_DOB)
         # MD 5 hashing
         hash_patient_DOB_MD5 = uuid.uuid5(uuid.NAMESPACE_URL, patient_DOB)
-        # Hashing the MD5 haah again using SHA1
+        # Hashing the MD5 hash again using SHA1
         hash_patient_DOB_sha1 = uuid.uuid3(uuid.NAMESPACE_URL, str(hash_patient_DOB_MD5))
         # storing the hash to dataset
         ds_rtss.PatientBirthDate = str(hash_patient_DOB_sha1)
-        print("\n\n")
     else:
         print("Patient BirthDate not found")
 
@@ -100,18 +75,29 @@ def Hash_identifiers(ds_rtss):
 
     if 'PatientSex' in ds_rtss:
         patient_sex = str(ds_rtss.PatientSex)
-        print("Patient Sex - ", patient_sex)
+        # print("Patient Sex - ", patient_sex)
         # MD 5 hashing
         hash_patient_Sex_MD5 = uuid.uuid5(uuid.NAMESPACE_URL, patient_sex)
-        # Hashing the MD5 haah again using SHA1
+        # Hashing the MD5 hash again using SHA1
         hash_patient_Sex_sha1 = uuid.uuid3(uuid.NAMESPACE_URL, str(hash_patient_Sex_MD5))
         # storing the hash to dataset
         ds_rtss.PatientSex = str(hash_patient_Sex_sha1)
-        print('\n\n')
     else:
         print("Patient Sex not found")
 
-    return (P_name_ID, hash_patient_name_sha1)
+
+     # used to reture flag = 1 to indicate the first file is used for saving the hash in 
+     # hash_CSV file so CSV function will not be performed for rest of the files.   
+    if file_to_write == "rtss.dcm":
+        if hasattribute("PatientID", ds_rtss):
+            P_name_ID = patient_name + " + " + patient_ID
+            print("Pname and ID=   ", P_name_ID)
+        else:
+            P_name_ID = patient_name + " + " + "PID_empty"
+            print("Pname and ID=   ", P_name_ID)
+        return (P_name_ID, hash_patient_name_sha1,1)
+    else:
+        return(0,0,0)
 
 
 
@@ -189,17 +175,74 @@ def write_hash_dcm(sha1_P_name, ds_rtss, Dicom_folder_path):
     print(":::::::Write complete :::")
 
 
+# ===============================getting all file names================
+
+def get_All_files(Dicom_folder_path):
+
+    All_dcm_fileNames = os.listdir(Dicom_folder_path)
+    print("ALL files: in fuction")
+    return All_dcm_fileNames
+
+# ## ===================================PRINTING THE HASH VALUES================================================
+
+def Print_identifiers(ds_rtss):
+    print("INSIDE PRINT================")
+    print("Patient name in dataset not hash: ", ds_rtss.PatientName)
+    print("Patient ID in dataset not hash: ", ds_rtss.PatientID)
+    print("Patient DOB in dataset not hash: ", ds_rtss.PatientBirthDate)
+    print("Patient SEX in dataset not hash: ", ds_rtss.PatientSex)
+    print("\n\n")
+
+
+# loading the dicom file 
+def LOAD_DCM(Dicom_folder_path,Dicom_filename):
+    # Dicom_folder_path = self.path  # Getting and storing the Folder path of rtss.dcm file
+    print("PATH of the dicom file is:-----", Dicom_folder_path)
+
+    # concatinating the folder path and the filename
+    Full_dicom_filepath = (Dicom_folder_path + "/" + Dicom_filename)
+    print("FULL PATH of dicom file is:----", Full_dicom_filepath)
+    ds_rtss = pydicom.dcmread(Full_dicom_filepath)
+    print("rtss.dcm loaded in ds_rtss")
+    return ds_rtss
+
 # ##==========================================Anon Function==========================================
 def anon_call(path):
+    
     Dicom_folder_path = path
-    ds_rtss= LOAD_DCM(path)
-    Print_identifiers(ds_rtss)
-    pname_ID, sha1_pname = Hash_identifiers(ds_rtss)
-    print(" In main Pname and ID=  {} and SHA1_name: {}".format(pname_ID, sha1_pname))
-    csv_filename = str("Hash_map") + ".csv"
-    create_hash_csv(pname_ID, sha1_pname, csv_filename, Dicom_folder_path)
-    print("Calling WRITE FUNCTION==============")
-    write_hash_dcm(sha1_pname, ds_rtss, Dicom_folder_path)
+
+    All_dcm = get_All_files(Dicom_folder_path)
+    print("ALL files: in main ")
+
+    count = 0 
+    for eachFile in All_dcm:
+        count += 1
+
+        Dicom_filename = eachFile       # store the name of each dcm file in a variable
+        print("HASHING FILE === ",Dicom_filename)
+
+        # loading the dicom file content into the dataframe.
+        ds_rtss= LOAD_DCM(Dicom_folder_path,Dicom_filename)
+        print("loaded in ds_rtss:============ ", Dicom_filename)
+
+        # calling the HASH function and it returns the (Pname + PID), (hashvalue) and
+        # (flag = 1  will be used to restrict only one hash value per patient in the CSV file)
+        pname_ID, sha1_pname, flag = Hash_identifiers(Dicom_filename, ds_rtss)
+
+        if flag == 1:   #(flag = 1 that will be used to restrict only one hash per patient in the CSV file)
+            print("FLAG --1111111111111111111111111\n")
+            print(" In main Pname and ID=  {} and SHA1_name: {}".format(pname_ID, sha1_pname))
+
+            Print_identifiers(ds_rtss)  # calling the print to show the identifiers
+            csv_filename = str("Hash_map") + ".csv"
+            # calling create CSV to store the the hashed value
+            create_hash_csv(pname_ID, sha1_pname, csv_filename, Dicom_folder_path)
+        else:
+            print("FLAG --0000000000000000000000000\n")
+            print("CSV function not called")
+            
+
+    print("Total files hashed======", count)
 
 
 def anonymize(path):
