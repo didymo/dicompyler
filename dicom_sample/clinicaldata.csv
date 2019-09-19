@@ -1,2 +1,0 @@
-MD5Hash,Gender,Country_of_Birth,AgeAtDiagnosis,DxYear,Histology,ICD10,T_Stage,N_Stage,M_Stage,OverallStage,Tx_Intent,Surgery,Rad,Chemo,Immuno,Brachy,Hormone,Death,CancerDeath,Survival_Duration,LocalControl,DateOfLocalFailure,LC_Duration,RegionalControl,DateOfRegionalFailure,RC_Duration,DistantControl,DateOfDistantFailure,DC_Duration
-TBD,Female,afdadf,0,2000,sdafasdf,fdfafd,T0,N0,M0,O,Cure,Ref,Pri,Pri,Pri,Pri,Pri,Alive,,0,Control,,0,Control,,0,Control,,0
