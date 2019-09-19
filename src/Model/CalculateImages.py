@@ -2,6 +2,10 @@ import numpy as np
 from PyQt5 import QtCore, QtGui, QtWidgets
 from src.Model.LoadPatients import *
 
+def convert_raw_data(ds):
+    ds.convert_pixel_data()
+    np_pixels = ds._pixel_array
+    return np_pixels
 
 def get_img(dict_ds):
     dict_img = {}
@@ -9,9 +13,7 @@ def get_img(dict_ds):
     for key in dict_ds:
         if key not in non_img_list:
             ds = dict_ds[key]
-            ds.convert_pixel_data()
-
-            np_pixels = ds._pixel_array
+            np_pixels = convert_raw_data(ds)
             max_val = np.amax(np_pixels)
             min_val = np.amin(np_pixels)
             np_pixels = (np_pixels - min_val) / (max_val - min_val) * 256
@@ -57,7 +59,5 @@ def get_pixmaps(dict_ds):
 
 # if __name__ == "__main__":
 #     path = '/home/xudong/dicom_sample'
-#     ds = get_datasets(path)
-#     img_dict = get_img(ds)
-#     for key in img_dict:
-#         print(type(key))
+#     ds, path = get_datasets(path)
+#     np_data = convert_raw_data(ds[1])
