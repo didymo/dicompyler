@@ -169,7 +169,10 @@ class Ui_MainWindow(object):
         self.button_exportDVH = QtWidgets.QPushButton()
         self.button_exportDVH.setFixedSize(QtCore.QSize(100, 39))
         self.button_exportDVH.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-        self.button_exportDVH.setStyleSheet("background-color: rgb(147, 112, 219);\n""color: rgb(255, 255, 255);")
+        self.button_exportDVH.setStyleSheet("background-color: rgb(238, 238, 236);\n"
+                                       "font: 57 11pt \"Ubuntu\";\n"
+                                       "color:rgb(75,0,130);\n"
+                                       "font-weight: bold;\n")
         self.button_exportDVH.setObjectName("button_exportDVH")
 
         # self.spacer = QtWidgets.QWidget()
