@@ -237,6 +237,9 @@ def anon_call(path):
             csv_filename = str("Hash_map") + ".csv"
             # calling create CSV to store the the hashed value
             create_hash_csv(pname_ID, sha1_pname, csv_filename, Dicom_folder_path)
+            print("Calling WRITE FUNCTION when Csv not called")
+            # write_hash_dcm(sha1_pname, Dicom_filename)
+            write_hash_dcm(sha1_pname, ds_rtss, Dicom_folder_path)
         else:
             print("FLAG --0000000000000000000000000\n")
             print("CSV function not called")
