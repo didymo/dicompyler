@@ -32,6 +32,7 @@ class Ui_MainWindow(object):
         self.dvh = self.getDVH()
         self.checkingTransect = 0
         self.basicInfo = get_basic_info(self.dataset[0])
+        self.dict_windowing = {"normal": [None, None], "lung": [2152, 52], "bone": [1401, 700], "brain": [168, 34], "soft tissue": [330, -24]}
 
         self.callClass = MainPage(self.path, self.dataset, self.filepaths)
 
@@ -188,13 +189,25 @@ class Ui_MainWindow(object):
 
 
         # Main view: DICOM Tree
-        self.NAME, self.VALUE, self.TAG, self.VM, self.VR = range(5)
         self.tab2_DICOM_tree = QtWidgets.QWidget()
         self.tab2_DICOM_tree.setObjectName("tab2_DICOM_tree")
+        # Tree View tab grid layout
+        self.vboxL_Tree = QtWidgets.QVBoxLayout(self.tab2_DICOM_tree)
+        self.vboxL_Tree.setObjectName("vboxL_Tree")
+        self.vboxL_Tree.setContentsMargins(0, 0, 0, 0)
+        # Tree view selector
+        self.comboBox_TreeSelector = QtWidgets.QComboBox()
+        self.comboBox_TreeSelector.setStyleSheet("font: 75 10pt \"Laksaman\";")
+        self.comboBox_TreeSelector.addItem("Select a DICOM dataset...")
+        for i in range(len(self.pixmaps) - 1):
+            self.comboBox_TreeSelector.addItem("CT "+str(i+1))
+        self.comboBox_TreeSelector.activated.connect(self.comboTreeSelector)
+        self.comboBox_TreeSelector.setFixedSize(QtCore.QSize(180, 31))
+        self.vboxL_Tree.addWidget(self.comboBox_TreeSelector, QtCore.Qt.AlignLeft)
         # Creation of the Tree View
         self.treeView = QtWidgets.QTreeView(self.tab2_DICOM_tree)
-        self.createTreeModel()
-        self.updateTreeModel(self.slider.value())
+        self.initTree()
+        self.updateTree(self.slider.value())
         # Set parameters for the Tree View
         self.treeView.header().resizeSection(0, 280)
         self.treeView.header().resizeSection(1, 380)
@@ -207,6 +220,7 @@ class Ui_MainWindow(object):
         self.treeView.setGeometry(QtCore.QRect(0, 0, 877, 517))
         self.treeView.expandAll()
         self.treeView.setObjectName("treeView")
+        self.vboxL_Tree.addWidget(self.treeView)
         self.tab2.addTab(self.tab2_DICOM_tree, "")
 
         # Main view: Clinical Data
@@ -299,22 +313,22 @@ class Ui_MainWindow(object):
         self.widget = QtWidgets.QWidget(self.frame_struct_info)
         self.widget.setGeometry(QtCore.QRect(5, 5, 160, 28))
         self.widget.setObjectName("widget")
-        self.gridLayout_struct_info = QtWidgets.QGridLayout(self.widget)
-        self.gridLayout_struct_info.setContentsMargins(0, 0, 0, 0)
-        self.gridLayout_struct_info.setObjectName("gridLayout_struct_info")
+        self.gridL_StructInfo = QtWidgets.QGridLayout(self.widget)
+        self.gridL_StructInfo.setContentsMargins(0, 0, 0, 0)
+        self.gridL_StructInfo.setObjectName("gridL_StructInfo")
 
         # Structure Information: Information Icon
         self.label_3 = QtWidgets.QLabel(self.widget)
         self.label_3.setText("")
         self.label_3.setPixmap(QtGui.QPixmap(":/images/Icon/info.png"))
         self.label_3.setObjectName("label_3")
-        self.gridLayout_struct_info.addWidget(self.label_3, 1, 0, 1, 1)
+        self.gridL_StructInfo.addWidget(self.label_3, 1, 0, 1, 1)
 
         # Structure Information: Structure Information Label
         self.struct_info_label = QtWidgets.QLabel(self.widget)
         self.struct_info_label.setFont(QtGui.QFont("Laksaman", weight=QtGui.QFont.Bold, pointSize=10))
         self.struct_info_label.setObjectName("struct_info_label")
-        self.gridLayout_struct_info.addWidget(self.struct_info_label, 1, 1, 1, 1)
+        self.gridL_StructInfo.addWidget(self.struct_info_label, 1, 1, 1, 1)
 
         self.label_3.raise_()
         self.struct_info_label.raise_()
@@ -561,18 +575,19 @@ class Ui_MainWindow(object):
         self.actionWindowing.setIcon(iconWindowing)
         self.actionWindowing.setIconVisibleInMenu(True)
         self.actionWindowing.setObjectName("actionWindowing")
-        self.actionWindowingNormal = QtWidgets.QAction(MainWindow)
-        self.actionWindowingNormal.setObjectName("actionWindowingNormal")
-        self.actionWindowingLung = QtWidgets.QAction(MainWindow)
-        self.actionWindowingLung.setObjectName("actionWindowingLung")
-        self.actionWindowingBone = QtWidgets.QAction(MainWindow)
-        self.actionWindowingBone.setObjectName("actionWindowingBone")
-        self.actionWindowingSoftTissue = QtWidgets.QAction(MainWindow)
-        self.actionWindowingSoftTissue.setObjectName("actionWindowingSoftTissue")
-        self.actionWindowingBrain = QtWidgets.QAction(MainWindow)
-        self.actionWindowingBrain.setObjectName("actionWindowingBrain")
-        self.actionWindowingHeadNeck = QtWidgets.QAction(MainWindow)
-        self.actionWindowingHeadNeck.setObjectName("actionWindowingHeadNeck")
+        self.initWindowingMenu(MainWindow)
+        # self.actionWindowingNormal = QtWidgets.QAction(MainWindow)
+        # self.actionWindowingNormal.setObjectName("actionWindowingNormal")
+        # self.actionWindowingLung = QtWidgets.QAction(MainWindow)
+        # self.actionWindowingLung.setObjectName("actionWindowingLung")
+        # self.actionWindowingBone = QtWidgets.QAction(MainWindow)
+        # self.actionWindowingBone.setObjectName("actionWindowingBone")
+        # self.actionWindowingSoftTissue = QtWidgets.QAction(MainWindow)
+        # self.actionWindowingSoftTissue.setObjectName("actionWindowingSoftTissue")
+        # self.actionWindowingBrain = QtWidgets.QAction(MainWindow)
+        # self.actionWindowingBrain.setObjectName("actionWindowingBrain")
+        # self.actionWindowingHeadNeck = QtWidgets.QAction(MainWindow)
+        # self.actionWindowingHeadNeck.setObjectName("actionWindowingHeadNeck")
 
         # Transect Action
         self.actionTransect = QtWidgets.QAction(MainWindow)
@@ -634,12 +649,12 @@ class Ui_MainWindow(object):
         self.menuEdit.addSeparator()
         self.menuEdit.addAction(self.actionRename_ROI)
         self.menuEdit.addAction(self.actionDelete_ROI)
-        self.menuWindowing.addAction(self.actionWindowingNormal)
-        self.menuWindowing.addAction(self.actionWindowingBone)
-        self.menuWindowing.addAction(self.actionWindowingBrain)
-        self.menuWindowing.addAction(self.actionWindowingHeadNeck)
-        self.menuWindowing.addAction(self.actionWindowingLung)
-        self.menuWindowing.addAction(self.actionWindowingSoftTissue)
+        # self.menuWindowing.addAction(self.actionWindowingNormal)
+        # self.menuWindowing.addAction(self.actionWindowingBone)
+        # self.menuWindowing.addAction(self.actionWindowingBrain)
+        # self.menuWindowing.addAction(self.actionWindowingHeadNeck)
+        # self.menuWindowing.addAction(self.actionWindowingLung)
+        # self.menuWindowing.addAction(self.actionWindowingSoftTissue)
         self.menuROI_Creation.addAction(self.actionBrush)
         self.menuROI_Creation.addAction(self.actionIsodose)
         self.menuExport.addAction(self.actionDVH_Spreadsheet)
@@ -778,12 +793,12 @@ class Ui_MainWindow(object):
         self.actionZoom_In.setText(_translate("MainWindow", "Zoom In"))
         self.actionZoom_Out.setText(_translate("MainWindow", "Zoom Out"))
         self.actionWindowing.setText(_translate("MainWindow", "Windowing"))
-        self.actionWindowingNormal.setText(_translate("MainWindow", "Normal"))
-        self.actionWindowingLung.setText(_translate("MainWindow", "Lung"))
-        self.actionWindowingBone.setText(_translate("MainWindow", "Bone"))
-        self.actionWindowingSoftTissue.setText(_translate("MainWindow", "Soft Tissue"))
-        self.actionWindowingBrain.setText(_translate("MainWindow", "Brain"))
-        self.actionWindowingHeadNeck.setText(_translate("MainWindow", "Head and Neck"))
+        # self.actionWindowingNormal.setText(_translate("MainWindow", "Normal"))
+        # self.actionWindowingLung.setText(_translate("MainWindow", "Lung"))
+        # self.actionWindowingBone.setText(_translate("MainWindow", "Bone"))
+        # self.actionWindowingSoftTissue.setText(_translate("MainWindow", "Soft Tissue"))
+        # self.actionWindowingBrain.setText(_translate("MainWindow", "Brain"))
+        # self.actionWindowingHeadNeck.setText(_translate("MainWindow", "Head and Neck"))
         self.actionTransect.setText(_translate("MainWindow", "Transect"))
         self.actionBrush.setText(_translate("MainWindow", "ROI by Brush"))
         self.actionIsodose.setText(_translate("MainWindow", "ROI by Isodose"))
@@ -841,10 +856,9 @@ class Ui_MainWindow(object):
     def check(self, state, text):
         if state:
             self.selected_rois.append(text)
-            self.updateDVH_view()
         else:
             self.selected_rois.remove(text)
-            self.updateDVH_view()
+        self.updateDVH_view()
 
     # In the Model directory
     def getDVH(self):
@@ -910,7 +924,6 @@ class Ui_MainWindow(object):
     # When the value of the slider in the DICOM View changes
     def valueChangeSlider(self):
         id = self.slider.value()
-        # Update DICOM View
         pixmap = self.pixmaps[id]
         pixmap = pixmap.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
         DICOM_image_label = QtWidgets.QLabel()
@@ -918,22 +931,23 @@ class Ui_MainWindow(object):
         DICOM_image_scene = QtWidgets.QGraphicsScene()
         DICOM_image_scene.addWidget(DICOM_image_label)
         self.DICOM_view.setScene(DICOM_image_scene)
-        # # Update DICOM Tree
-        # self.modelTree.endResetModel()
-        # self.updateTreeModel(id)
         pass
 
+    def comboTreeSelector(self, index):
+        if index > 0:
+            self.updateTree(index-1)
 
-    def createTreeModel(self):
-        self.NAME, self.VALUE, self.TAG, self.VM, self.VR = range(5)
+
+    def initTree(self):
         self.modelTree = QtGui.QStandardItemModel(0, 5)
-        self.modelTree.setHeaderData(self.NAME, QtCore.Qt.Horizontal, "Name")
-        self.modelTree.setHeaderData(self.VALUE, QtCore.Qt.Horizontal, "Value")
-        self.modelTree.setHeaderData(self.TAG, QtCore.Qt.Horizontal, "Tag")
-        self.modelTree.setHeaderData(self.VM, QtCore.Qt.Horizontal, "VM")
-        self.modelTree.setHeaderData(self.VR, QtCore.Qt.Horizontal, "VR")
+        self.modelTree.setHeaderData(0, QtCore.Qt.Horizontal, "Name")
+        self.modelTree.setHeaderData(1, QtCore.Qt.Horizontal, "Value")
+        self.modelTree.setHeaderData(2, QtCore.Qt.Horizontal, "Tag")
+        self.modelTree.setHeaderData(3, QtCore.Qt.Horizontal, "VM")
+        self.modelTree.setHeaderData(4, QtCore.Qt.Horizontal, "VR")
 
-    def updateTreeModel(self, id):
+    def updateTree(self, id):
+        self.initTree()
         filename = self.filepaths[id]
         self.dicomTree = DicomTree(filename)
         ds = self.dicomTree.read_dcm(filename)
@@ -963,6 +977,16 @@ class Ui_MainWindow(object):
                         QtGui.QStandardItem(str(value[3]))]
                 parent.appendRow(item)
         return parent
+
+    def initWindowingMenu(self, MainWindow):
+        _translate = QtCore.QCoreApplication.translate
+
+        for key, value in self.dict_windowing.items():
+            text = str(key)
+            actionWindowingItem = QtWidgets.QAction(MainWindow)
+            self.menuWindowing.addAction(actionWindowingItem)
+            actionWindowingItem.setText(_translate("MainWindow", text))
+
 
     def pyradiomicsHandler(self):
         self.callClass.runPyradiomics()
