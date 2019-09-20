@@ -16,7 +16,6 @@ from src.Controller.mainPageController import MainPage
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 
 
-
 class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow, path):
@@ -31,6 +30,7 @@ class Ui_MainWindow(object):
         self.rois = get_roi_info(self.dataset_rtss)
         self.selected_rois = []
         self.dvh = self.getDVH()
+        self.checkingTransect = 0
         self.basicInfo = get_basic_info(self.dataset[0])
 
         self.callClass = MainPage(self.path, self.dataset, self.filepaths)
@@ -136,11 +136,11 @@ class Ui_MainWindow(object):
         DICOM_image = DICOM_image.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
         DICOM_image_label = QtWidgets.QLabel()
         DICOM_image_label.setPixmap(DICOM_image)
-        DICOM_image_scene = QtWidgets.QGraphicsScene()
-        DICOM_image_scene.addWidget(DICOM_image_label)
+        self.DICOM_image_scene = QtWidgets.QGraphicsScene()
+        self.DICOM_image_scene.addWidget(DICOM_image_label)
         # Introduce DICOM image into DICOM View tab
         self.DICOM_view = QtWidgets.QGraphicsView(self.tab2_view)
-        self.DICOM_view.setScene(DICOM_image_scene)
+        self.DICOM_view.setScene(self.DICOM_image_scene)
         background_brush = QtGui.QBrush(QtGui.QColor(0, 0, 0), QtCore.Qt.SolidPattern)
         self.DICOM_view.setBackgroundBrush(background_brush)
         self.DICOM_view.setGeometry(QtCore.QRect(0, 0, 877, 517))
@@ -579,6 +579,7 @@ class Ui_MainWindow(object):
         self.actionTransect.setIcon(iconTransect)
         self.actionTransect.setIconVisibleInMenu(True)
         self.actionTransect.setObjectName("actionTransect")
+        self.actionTransect.triggered.connect(self.transectHandler)
 
         # ROI by brush Action
         self.actionBrush = QtWidgets.QAction(MainWindow)
@@ -968,6 +969,16 @@ class Ui_MainWindow(object):
 
     def HandleAnonymization(self):
         self.callClass.runAnonymization()
+
+
+    def transectHandler(self):
+
+        id = self.slider.value()
+        dt = self.dataset[id]
+        rowS = dt.PixelSpacing[0]
+        colS = dt.PixelSpacing[1]
+        dt.convert_pixel_data()
+        self.callClass.runTransect(self.DICOM_view, self.pixmaps[id], dt._pixel_array, rowS, colS)
 
 import src.View.resources_rc
 
