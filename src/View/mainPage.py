@@ -198,9 +198,12 @@ class Ui_MainWindow(object):
         # Tree view selector
         self.comboBox_TreeSelector = QtWidgets.QComboBox()
         self.comboBox_TreeSelector.setStyleSheet("font: 75 10pt \"Laksaman\";")
-        self.comboBox_TreeSelector.addItem("Select...")
-        self.comboBox_TreeSelector.setGeometry(QtCore.QRect(5, 35, 188, 31))
-        self.vboxL_Tree.addWidget(self.comboBox_TreeSelector)
+        self.comboBox_TreeSelector.addItem("Select a DICOM dataset...")
+        for i in range(len(self.pixmaps) - 1):
+            self.comboBox_TreeSelector.addItem("CT "+str(i+1))
+        self.comboBox_TreeSelector.activated.connect(self.comboTreeSelector)
+        self.comboBox_TreeSelector.setFixedSize(QtCore.QSize(180, 31))
+        self.vboxL_Tree.addWidget(self.comboBox_TreeSelector, QtCore.Qt.AlignLeft)
         # Creation of the Tree View
         self.treeView = QtWidgets.QTreeView(self.tab2_DICOM_tree)
         self.initTree()
@@ -929,6 +932,10 @@ class Ui_MainWindow(object):
         self.DICOM_view.setScene(DICOM_image_scene)
         pass
 
+    def comboTreeSelector(self, index):
+        if index > 0:
+            self.updateTree(index-1)
+
 
     def initTree(self):
         self.modelTree = QtGui.QStandardItemModel(0, 5)
@@ -939,7 +946,9 @@ class Ui_MainWindow(object):
         self.modelTree.setHeaderData(4, QtCore.Qt.Horizontal, "VR")
 
     def updateTree(self, id):
+        self.initTree()
         filename = self.filepaths[id]
+        print(id)
         self.dicomTree = DicomTree(filename)
         ds = self.dicomTree.read_dcm(filename)
         dict = self.dicomTree.dataset_to_dict(ds)
@@ -989,15 +998,15 @@ import src.View.resources_rc
 
 
 
-# # For Testing
-# class MyWin(QtWidgets.QMainWindow):
-#     def __init__(self, parent=None):
-#         QtWidgets.QWidget.__init__(self, parent)
-#         self.ui = Ui_MainWindow()
-#         self.ui.setupUi(self, path='dicom_sample')
-#
-# if __name__ == "__main__":
-#     app = QtWidgets.QApplication(sys.argv)
-#     myapp = MyWin()
-#     myapp.show()
-#     sys.exit(app.exec_())
+# For Testing
+class MyWin(QtWidgets.QMainWindow):
+    def __init__(self, parent=None):
+        QtWidgets.QWidget.__init__(self, parent)
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self, path='dicom_sample')
+
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    myapp = MyWin()
+    myapp.show()
+    sys.exit(app.exec_())
