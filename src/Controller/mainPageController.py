@@ -1,6 +1,6 @@
 import glob
 import sys
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt1
 from PyQt5.QtCore import Qt, QPoint, QPointF, QRectF
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QGraphicsScene, QGraphicsRectItem, QGraphicsPixmapItem, \
     QGraphicsView
@@ -771,15 +771,17 @@ class Transect(QtWidgets.QGraphicsScene):
 
     def plotResult(self):
         newList = [(x * self.pixSpacing)/ 10 for x in self.distances]
-        fig = plt.figure(num='Transect Graph')
-        ax = fig.add_subplot(111)
-        ax.has_been_closed = False
-        ax.plot(newList, self.values)
-        plt.xlabel('Distance cm')
-        plt.ylabel('CT #')
-        plt.grid(True)
-        fig.canvas.mpl_connect('close_event', self.on_close)
-        plt.show()
+        plt1.close()
+        fig1 = plt1.figure(num='Transect Graph')
+        ax1= fig1.add_subplot(111)
+        ax1.has_been_closed = False
+        ax1.plot(newList, self.values)
+        plt1.xlabel('Distance cm')
+        plt1.ylabel('CT #')
+        plt1.grid(True)
+        fig1.canvas.mpl_connect('close_event', self.on_close)
+        plt1.show()
+
 
 
 ######################################################
