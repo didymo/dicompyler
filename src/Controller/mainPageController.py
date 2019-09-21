@@ -120,7 +120,7 @@ class ClinicalDataForm(QtWidgets.QWidget, Ui_Form):
         self.setTabOrder(self.ui.Dt_REgional_failure, self.ui.Distant_Control)
         self.setTabOrder(self.ui.Distant_Control, self.ui.Dt_Distant_Failure)
         self.setTabOrder(self.ui.Dt_Distant_Failure, self.ui.Save_button)
-        #self.setTabOrder(self.ui.Save_button, self.ui.line_LN)
+        self.setTabOrder(self.ui.Save_button, self.ui.line_LN)
 
         self.ui.Local_control.activated.connect(self.LocalControl_Failure)
         self.ui.Regional_Control.activated.connect(self.RegionalControl_Failure)
@@ -128,7 +128,8 @@ class ClinicalDataForm(QtWidgets.QWidget, Ui_Form):
         self.ui.Tx_intent.activated.connect(self.Tx_Intent_Refused)
         self.ui.Death.activated.connect(self.PatientDead)
         self.ui.Death.activated.connect(self.show_survival)
-        self.ui.Save_button.clicked.connect(self.save_ClinicalData)
+        self.ui.Save_button.clicked.connect(self.on_click)
+        #self.ui.line_LN.setFocus(QtCore.Qt.TabFocusReason)
 
     # show survival
     def show_survival(self):
@@ -534,6 +535,11 @@ class ClinicalDataForm(QtWidgets.QWidget, Ui_Form):
                self.ui.dateEdit_2.setDate(QtCore.QDate.fromString( df.at[i,'DOD'], "dd/MM/yyyy"))
                self.ui.Dt_Last_Existence.setDate(QtCore.QDate.fromString( df.at[i,'DOLE'], "dd/MM/yyyy"))
 
+    def on_click(self):
+        self.save_ClinicalData()
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Return:
+            self.on_click()
 
 
 
@@ -548,7 +554,14 @@ class ClinicalDataDisplay(QtWidgets.QWidget, Ui_CD_Display):
         self.ui = Ui_CD_Display()
         self.ui.setupUi(self)
         self.load_cd()
-        self.ui.Edit_button.clicked.connect(self.edit_mode)
+        self.ui.Edit_button.clicked.connect(self.on_click)
+
+    def on_click(self):
+        self.edit_mode()
+
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Return:
+            self.on_click()
 
     def load_cd(self):
         reg = '/[clinicaldata]*[.csv]'

@@ -2,10 +2,12 @@ import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 import matplotlib.pylab as plt
 import numpy as np
+from PyQt5.QtGui import QTransform
+
 from src.Model.LoadPatients import *
 from src.Model.CalculateDVHs import *
 from PyQt5.QtCore import QStringListModel
-from PyQt5.QtWidgets import QCompleter, QLineEdit
+from PyQt5.QtWidgets import QCompleter, QLineEdit, QGraphicsView
 from country_list import countries_for_language
 from array import *
 import numpy as np
@@ -13,7 +15,9 @@ import csv
 from src.Model.CalculateImages import *
 from src.Model.GetPatientInfo import *
 from src.Controller.mainPageController import MainPage
-from matplotlib.backends.backend_qt5agg import FigureCanvas
+#from matplotlib.backends.backend_qt5agg import FigureCanvas
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 
 class Ui_MainWindow(object):
@@ -30,9 +34,13 @@ class Ui_MainWindow(object):
         self.rois = get_roi_info(self.dataset_rtss)
         self.selected_rois = []
         self.dvh = self.getDVH()
-        self.checkingTransect = 0
         self.basicInfo = get_basic_info(self.dataset[0])
         self.dict_windowing = {"normal": [None, None], "lung": [2152, 52], "bone": [1401, 700], "brain": [168, 34], "soft tissue": [330, -24]}
+        self.zoom =1
+        #self.view
+
+
+
 
         self.callClass = MainPage(self.path, self.dataset, self.filepaths)
 
@@ -134,11 +142,12 @@ class Ui_MainWindow(object):
         #DICOM image processing
         id = self.slider.value()
         DICOM_image = self.pixmaps[id]
-        DICOM_image = DICOM_image.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
+        DICOM_image = DICOM_image.scaled(512, 512, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         DICOM_image_label = QtWidgets.QLabel()
         DICOM_image_label.setPixmap(DICOM_image)
         self.DICOM_image_scene = QtWidgets.QGraphicsScene()
         self.DICOM_image_scene.addWidget(DICOM_image_label)
+
         # Introduce DICOM image into DICOM View tab
         self.DICOM_view = QtWidgets.QGraphicsView(self.tab2_view)
         self.DICOM_view.setScene(self.DICOM_image_scene)
@@ -562,6 +571,7 @@ class Ui_MainWindow(object):
         self.actionZoom_In.setIcon(iconZoom_In)
         self.actionZoom_In.setIconVisibleInMenu(True)
         self.actionZoom_In.setObjectName("actionZoom_In")
+        self.actionZoom_In.triggered.connect(self.zoomIn)
 
         # Zoom Out Action
         self.actionZoom_Out = QtWidgets.QAction(MainWindow)
@@ -569,6 +579,7 @@ class Ui_MainWindow(object):
         self.actionZoom_Out.setIcon(iconZoom_Out)
         self.actionZoom_Out.setIconVisibleInMenu(True)
         self.actionZoom_Out.setObjectName("actionZoom_Out")
+        self.actionZoom_Out.triggered.connect(self.zoomOut)
 
         # Windowing Action
         self.actionWindowing = QtWidgets.QAction(MainWindow)
@@ -810,6 +821,18 @@ class Ui_MainWindow(object):
 
         MainWindow.update()
 
+    def zoomIn(self):
+
+        self.zoom *= 1.05
+        self.updateView()
+
+    def zoomOut(self):
+
+        self.zoom /= 1.05
+        self.updateView()
+
+    def updateView(self):
+        self.DICOM_view.setTransform(QTransform().scale(self.zoom, self.zoom))
 
     def updateStructureColumn(self):
 
@@ -868,6 +891,7 @@ class Ui_MainWindow(object):
             key_int = int(key)
             res[key_int] = value
         return res
+
 
 
     # In the View directory
