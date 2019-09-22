@@ -163,12 +163,12 @@ def create_hash_csv(pname, sha1_pname, csv_filename):
 def write_hash_dcm(ds_rtss, Dicom_folder_path , Dicom_filename, sha1_P_name):
 
     # Print_identifiers(ds_rtss)  # print the changed value
-    print("Writing the hash==========", sha1_P_name)
+    # print("Writing the hash==========", sha1_P_name)
     sha1_P_name = str(sha1_P_name)
 
-    # concatenate the file name and folder
-    full_path_new_file = Dicom_folder_path + "/" + sha1_P_name + "_" + Dicom_filename
-    print("Changing the name of file==== ",full_path_new_file)
+    # # Adding Prefix "Hashed " for each anonymized Dicom file and concat the file and folder
+    full_path_new_file = Dicom_folder_path + "/" + "Hashed" + "_" + Dicom_filename
+    print("File name prefix with (Hashed) ",full_path_new_file)
 
     ds_rtss.save_as(full_path_new_file)
     print(":::::::Write complete :::")
@@ -196,53 +196,54 @@ def Print_identifiers(ds_rtss):
 # loading the dicom file 
 def LOAD_DCM(Dicom_folder_path,Dicom_filename):
     # Dicom_folder_path = self.path  # Getting and storing the Folder path of rtss.dcm file
-    print("PATH of the dicom file is:-----", Dicom_folder_path)
+    print("\n\nIn Load_DCM function: PATH of the dicom file is:-----", Dicom_folder_path)
 
     # concatinating the folder path and the filename
     Full_dicom_filepath = (Dicom_folder_path + "/" + Dicom_filename)
-    print("FULL PATH of dicom file is:----", Full_dicom_filepath)
+    print("In Load_DCM function: FULL PATH of dicom file is:----", Full_dicom_filepath)
     ds_rtss = pydicom.dcmread(Full_dicom_filepath)
-    print("rtss.dcm loaded in ds_rtss")
+    print("In Load DCM function:",Dicom_filename,"loaded in ds_rtss")
     return ds_rtss
 
 # ##==========================================Anon Function==========================================
 def anon_call(path):
     
+    print("\n\n====Anon Called====")
     Dicom_folder_path = path
 
     All_dcm = get_All_files(Dicom_folder_path)
-    print("ALL files: in main ")
+    print("ALL files: in main \n\n")
 
     count = 0 
     for eachFile in All_dcm:
         count += 1
 
         Dicom_filename = eachFile       # store the name of each dcm file in a variable
-        print("HASHING FILE === ",Dicom_filename)
+        print("\n\nHASHING FILE === ",Dicom_filename)
 
         # loading the dicom file content into the dataframe.
         ds_rtss= LOAD_DCM(Dicom_folder_path,Dicom_filename)
-        print("loaded in ds_rtss:============ ", Dicom_filename)
+        print("\n\nloaded in ds_rtss:============ ", Dicom_filename)
 
         # calling the HASH function and it returns the (Pname + PID), (hashvalue) and
         # (flag = 1  will be used to restrict only one hash value per patient in the CSV file)
         pname_ID, sha1_pname, flag = Hash_identifiers(Dicom_filename, ds_rtss)
 
         if flag == 1:   #(flag = 1 that will be used to restrict only one hash per patient in the CSV file)
-            print("FLAG --1111111111111111111111111\n")
+            print("\n\nFLAG --1111111111111111111111111")
             print(" In main Pname and ID=  {} and SHA1_name: {}".format(pname_ID, sha1_pname))
 
             Print_identifiers(ds_rtss)  # calling the print to show the identifiers
             csv_filename = str("Hash_map") + ".csv"
             # calling create CSV to store the the hashed value
             create_hash_csv(pname_ID, sha1_pname, csv_filename) 
-            print("Calling WRITE FUNCTION when Csv not called")
+            print("Calling WRITE FUNCTION when Csv called")
             # write_hash_dcm(sha1_pname, Dicom_filename)
             write_hash_dcm(ds_rtss, Dicom_folder_path , Dicom_filename, sha1_pname)
         else:
-            print("FLAG --0000000000000000000000000\n")
+            print("\n\nFLAG --0000000000000000000000000")
             print("CSV function not called")
-            print("Calling WRITE FUNCTION when  Csv called")
+            print("Calling WRITE FUNCTION when Csv not called")
             # write_hash_dcm(sha1_pname, Dicom_filename)
             write_hash_dcm(ds_rtss, Dicom_folder_path , Dicom_filename, sha1_pname)
 
@@ -251,9 +252,9 @@ def anon_call(path):
 
 def anonymize(path):
 
-    print("   Current Work Directory is:  ==== ",os.getcwd())
+    print("\n\nCurrent Work Directory is:  ==== ",os.getcwd())
     print("IN ANON===================")
-    print("Path in Anon   ===",path)
+    print("=====Path in ANONYMIZation   ===",path)
     anon_call(path)
 
 
