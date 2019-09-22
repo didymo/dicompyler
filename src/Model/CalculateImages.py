@@ -1,11 +1,14 @@
 import numpy as np
 from PyQt5 import QtCore, QtGui, QtWidgets
 from src.Model.LoadPatients import *
+from src.Model.ROI import *
+
 
 def convert_raw_data(ds):
     ds.convert_pixel_data()
     np_pixels = ds._pixel_array
     return np_pixels
+
 
 def get_img(dict_ds):
     dict_img = {}
@@ -29,7 +32,7 @@ def get_img(dict_ds):
 def get_pixmaps(dict_ds):
     # Create a dictionary of storing pixmaps
     dict_pixmaps = {}
-    # List of non-image keys
+    # List of nons.convert_pixel_data()-image keys
     non_img_list = ['rtss', 'rtdose', 'rtplan']
     # Loop all the keys in dictionary of datasets
     for key in dict_ds:
@@ -47,6 +50,7 @@ def get_pixmaps(dict_ds):
             np_pixels = (np_pixels - min_val) / (max_val - min_val) * 255
             np_pixels[np_pixels < 0] = 0
             np_pixels[np_pixels > 255] = 255
+
             np_pixels = np_pixels.astype("int8")
             # Convert numpy array data to qimage for pyqt5
             qimage = QtGui.QImage(np_pixels, np_pixels.shape[1], np_pixels.shape[0], QtGui.QImage.Format_Indexed8)
@@ -55,6 +59,12 @@ def get_pixmaps(dict_ds):
 
             dict_pixmaps[key] = pixmap
     return dict_pixmaps
+
+
+def test():
+    path = '../../../dicom_sample'
+    dict_ds, path = get_datasets(path)
+    rtss = dict_ds['rtss']
 
 
 # if __name__ == "__main__":

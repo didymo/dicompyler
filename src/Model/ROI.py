@@ -1,6 +1,7 @@
 import pydicom
 import numpy as np
 from src.Model.LoadPatients import *
+import matplotlib.pyplot as plt
 
 # Delete ROI by name
 def delete_roi(rtss, roi_name):
@@ -98,6 +99,24 @@ def get_transform_matrix(img_ds):
 
     return (np.array(x), np.array(y))
 
+def get_contour_pixel_data(pixlut, contour, prone = False, feetfirst = False):
+    contour_pixel_data = []
+
+    for i in range(0, len(contour), 3):
+        for x, x_val in enumerate(pixlut[0]):
+            if(x_val > contour[i] and not prone and not feetfirst):
+                break
+            elif (x_val < contour[i]):
+                if feetfirst or prone:
+                    break
+        for y, y_val in enumerate(pixlut[1]):
+            if (y_val > contour[i+1] and not prone):
+                break
+            elif (y_val < contour[i+1] and prone):
+                break
+        contour_pixel_data.append((x, y))
+    return contour_pixel_data
+
 
 # pixeldata = self.GetContourPixelData(self.structurepixlut, contour['data'], prone, feetfirst)
 # def get_contour(lut, contour, prone=False, feetfirst=False):
@@ -106,10 +125,9 @@ def get_transform_matrix(img_ds):
     #     for x, x_val in enumerate(pix):
 
 
-
 def main():
     path = '../../../dicom_sample'
-    dict_ds = get_datasets(path)
+    dict_ds, path = get_datasets(path)
     rtss = dict_ds['rtss']
 
     ### GTVp is the 10th ROI in the sequence
@@ -121,7 +139,7 @@ def main():
     # (3006, 002a) ROI Display Color IS: ['255', '0', '0']
     # (3006, 0040) Contour Sequence 15 item(s) - ---
 
-    roi_name = 'GTVp'
+    roi_name = 'EYE_L'
 
     dict_contours = get_raw_contours(rtss, roi_name)
 
@@ -130,6 +148,7 @@ def main():
     # Get all the slice UID which contains the ROI
     for key in dict_contours:
         roi_slice_list.append(key)
+        # print(key)
 
     dict_transform_matrices = {}
 
@@ -142,19 +161,27 @@ def main():
 
     for key in dict_transform_matrices:
         print(key)
-        print(dict_transform_matrices[key])
-        break
 
 
 
+    pixel_contours = []
+    for key in dict_transform_matrices:
+        contour = dict_contours[key]
+        pixlut = dict_transform_matrices[key]
+        contour_pixel_data = get_contour_pixel_data(pixlut, contour)
+        # print(contour_pixel_data)
+        pixel_contours.append(contour_pixel_data)
+    print(len(pixel_contours))
+    xs = []
+    ys = []
+    for point in pixel_contours[8]:
+        xs.append(point[0])
+        ys.append(-1 * point[1])
+    plt.scatter(xs, ys)
+    plt.xlim(270, 300)
+    plt.ylim(-210, -180)
+    plt.show()
 
 
-
-    # for i in dict_contours.values():
-    #     print(i)
-    # print(dict_contours)
-    # print(len(dict_contours))
-    # print(rtss.ROIContourSequence)
-    # print(rtss)
 if __name__ == '__main__':
     main()
