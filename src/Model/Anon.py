@@ -97,18 +97,18 @@ def Hash_identifiers(file_to_write, ds_rtss):
             print("Pname and ID=   ", P_name_ID)
         return (P_name_ID, hash_patient_name_sha1,1)
     else:
-        return(0,0,0)
+        return(0,hash_patient_name_sha1,0)
 
 
 
  ## ===================================CHECK FILE EXIST================================================
 
-def checkFileExist(fileName, Dicom_folder_path):
+def checkFileExist(fileName):
     print("file name:-- ", fileName)  # printing file name
 
     if (fileName == "Hash_map.csv"):
-        # cwd = os.getcwd()  # getting the current working directory
-        file_path = Dicom_folder_path + "/" + fileName  # concatenating the current working directory with the csv filename
+        cwd = os.getcwd()  # getting the current working directory
+        file_path = cwd + "/" + fileName  # concatenating the current working directory with the csv filename
         print("Full path :  ===========", file_path)  # print the full csv file path
         print("file exist: ", os.path.isfile(file_path))  # check if the file exist in the folder
         if (os.path.isfile(file_path)) == True:  # if file exist return True
@@ -116,22 +116,18 @@ def checkFileExist(fileName, Dicom_folder_path):
             return True
         else:
             print("returning false----------------------")  # if file not exist return false
-            return False    
+            return False
 
 
  ## ===================================CTEATE CSV FILE================================================
 
-def create_hash_csv(pname, sha1_pname, csv_filename, Dicom_folder_path):
+def create_hash_csv(pname, sha1_pname, csv_filename):
 
-    # concatinating the filename and the path of patient folder.
-    csv_file_path = Dicom_folder_path + "/" + csv_filename
-    print("Csv file name is : ",csv_file_path)
+    # print("Csv file name is : ",csv_filename)
     # csv_filename = str("Hash_map") + ".csv"
-
-    if (checkFileExist(csv_filename, Dicom_folder_path)) == False:
+    if (checkFileExist(csv_filename)) == False:
         print("-----Creating CSV------")
 
-        #creating the headers for the CSV file
         csv_header = []
         csv_header.append('Pname and ID')
         csv_header.append('Hashed_Pname')
@@ -141,10 +137,10 @@ def create_hash_csv(pname, sha1_pname, csv_filename, Dicom_folder_path):
         # print("dictionary values",hash_dictionary)
 
         df_identifier_csv = pd.DataFrame(columns=csv_header).round(2)
-        df_identifier_csv.to_csv(csv_file_path, index=False) # creating the CSV
+        df_identifier_csv.to_csv(csv_filename, index=False) # creating the CVS
 
         row = [pname, sha1_pname]
-        with open(csv_file_path, 'a') as csvFile:  # inserting the hash values
+        with open(csv_filename, 'a') as csvFile:  # inserting the hash values
             writer = csv.writer(csvFile)
             writer.writerow(row)
             csvFile.close()
@@ -156,7 +152,7 @@ def create_hash_csv(pname, sha1_pname, csv_filename, Dicom_folder_path):
     else:
         print("updating csv")
         row = [pname, sha1_pname]
-        with open(csv_file_path, 'a') as csvFile: # updating the CVS with hash values
+        with open(csv_filename, 'a') as csvFile: # updating the CVS with hash values
             writer = csv.writer(csvFile)
             writer.writerow(row)
             csvFile.close()
@@ -164,14 +160,17 @@ def create_hash_csv(pname, sha1_pname, csv_filename, Dicom_folder_path):
 
 
 # ===================================Writing the hashed identifiers to DICOM FILE================================================
-def write_hash_dcm(sha1_P_name, ds_rtss, Dicom_folder_path):
+def write_hash_dcm(ds_rtss, Dicom_folder_path , Dicom_filename, sha1_P_name):
 
-    Print_identifiers(ds_rtss)  # print the changed value
+    # Print_identifiers(ds_rtss)  # print the changed value
     print("Writing the hash==========", sha1_P_name)
     sha1_P_name = str(sha1_P_name)
 
-    print("Changing the name of file==== ",Dicom_folder_path + "/" + sha1_P_name + "_" + "rtss.dcm")
-    ds_rtss.save_as(Dicom_folder_path + "/" + sha1_P_name + "_" + "rtss.dcm")
+    # concatenate the file name and folder
+    full_path_new_file = Dicom_folder_path + "/" + sha1_P_name + "_" + Dicom_filename
+    print("Changing the name of file==== ",full_path_new_file)
+
+    ds_rtss.save_as(full_path_new_file)
     print(":::::::Write complete :::")
 
 
@@ -236,14 +235,16 @@ def anon_call(path):
             Print_identifiers(ds_rtss)  # calling the print to show the identifiers
             csv_filename = str("Hash_map") + ".csv"
             # calling create CSV to store the the hashed value
-            create_hash_csv(pname_ID, sha1_pname, csv_filename, Dicom_folder_path)
+            create_hash_csv(pname_ID, sha1_pname, csv_filename) 
             print("Calling WRITE FUNCTION when Csv not called")
             # write_hash_dcm(sha1_pname, Dicom_filename)
-            write_hash_dcm(sha1_pname, ds_rtss, Dicom_folder_path)
+            write_hash_dcm(ds_rtss, Dicom_folder_path , Dicom_filename, sha1_pname)
         else:
             print("FLAG --0000000000000000000000000\n")
             print("CSV function not called")
-            
+            print("Calling WRITE FUNCTION when  Csv called")
+            # write_hash_dcm(sha1_pname, Dicom_filename)
+            write_hash_dcm(ds_rtss, Dicom_folder_path , Dicom_filename, sha1_pname)
 
     print("Total files hashed======", count)
 
