@@ -706,7 +706,7 @@ class Transect(QtWidgets.QGraphicsScene):
 
 
     def mousePressEvent(self, event):
-        if self.itemAt(event.scenePos(), QtGui.QTransform()) is not None and self.drawing == True:
+        if  self.drawing == True:
             self.pos1 = event.scenePos()
             self._current_rect_item = QtWidgets.QGraphicsLineItem()
             self._current_rect_item.setPen(QtCore.Qt.red)
@@ -739,7 +739,7 @@ class Transect(QtWidgets.QGraphicsScene):
 
     def drawDDA(self, x1, y1, x2, y2):
         x, y = x1, y1
-        length = (x2 - x1) if (x2 - x1) > (y2 - y1) else (y2 - y1)
+        length = abs(x2 - x1) if abs(x2 - x1) > abs(y2 - y1) else abs(y2 - y1)
         dx = (x2 - x1) / float(length)
         dy = (y2 - y1) / float(length)
         self.points.append((round(x), round(y)))
@@ -759,13 +759,15 @@ class Transect(QtWidgets.QGraphicsScene):
 
     def getValues(self):
         for i,j in self.points:
-            self.values.append(self.data[i][j])
+            if i in range(512) and j in range(512):
+                self.values.append(self.data[i][j])
 
         #print(self.values)
 
     def getDistances(self):
         for i, j in self.points:
-            self.distances.append(self.calculateDistance(i,j, round(self.pos2.x()), round(self.pos2.y())))
+            if i in range(512) and j in range(512):
+                self.distances.append(self.calculateDistance(i,j, round(self.pos2.x()), round(self.pos2.y())))
         self.distances.reverse()
         #print(self.distances)
 
