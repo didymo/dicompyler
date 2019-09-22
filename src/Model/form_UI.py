@@ -78,6 +78,7 @@ class Ui_Form(object):
         self.line_FN = QtWidgets.QLineEdit(self.scrollAreaWidgetContents)
         self.line_FN.setGeometry(QtCore.QRect(440, 70, 171, 25))
         self.line_FN.setObjectName("line_FN")
+        self.line_LN.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.label_FN = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         self.label_FN.setGeometry(QtCore.QRect(350, 70, 81, 21))
         self.label_FN.setObjectName("label_FN")

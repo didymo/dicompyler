@@ -1,11 +1,18 @@
+import glob
+import sys
+import matplotlib.pyplot as plt1
+from PyQt5.QtCore import Qt, QPoint, QPointF, QRectF
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QGraphicsScene, QGraphicsRectItem, QGraphicsPixmapItem, \
+    QGraphicsView
+from PyQt5.QtGui import QPixmap, QPainter, QPen, QBrush, QColor
 from PyQt5.QtCore import QDate
+import math
 from PyQt5.QtWidgets import QMessageBox
-
 from src.Model.CalculateImages import *
 from src.Model.LoadPatients import *
 from src.Model.GetPatientInfo import *
 from src.Model.Pyradiomics import pyradiomics
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 import _csv
 import csv
 from src.Model.form_UI import *
@@ -18,9 +25,11 @@ import pandas as pd
 from pathlib import Path
 from dateutil.relativedelta import relativedelta
 from src.Model.Anon import *
+from src.Model.CalculateImages import *
 
-
-
+######################################################
+#               CLINICAL DATA CODE                   #
+######################################################
 message = ""
 
 with open('src/data/ICD10_Topography.csv', 'r') as f:
@@ -111,7 +120,7 @@ class ClinicalDataForm(QtWidgets.QWidget, Ui_Form):
         self.setTabOrder(self.ui.Dt_REgional_failure, self.ui.Distant_Control)
         self.setTabOrder(self.ui.Distant_Control, self.ui.Dt_Distant_Failure)
         self.setTabOrder(self.ui.Dt_Distant_Failure, self.ui.Save_button)
-        #self.setTabOrder(self.ui.Save_button, self.ui.line_LN)
+        self.setTabOrder(self.ui.Save_button, self.ui.line_LN)
 
         self.ui.Local_control.activated.connect(self.LocalControl_Failure)
         self.ui.Regional_Control.activated.connect(self.RegionalControl_Failure)
@@ -119,7 +128,8 @@ class ClinicalDataForm(QtWidgets.QWidget, Ui_Form):
         self.ui.Tx_intent.activated.connect(self.Tx_Intent_Refused)
         self.ui.Death.activated.connect(self.PatientDead)
         self.ui.Death.activated.connect(self.show_survival)
-        self.ui.Save_button.clicked.connect(self.save_ClinicalData)
+        self.ui.Save_button.clicked.connect(self.on_click)
+        #self.ui.line_LN.setFocus(QtCore.Qt.TabFocusReason)
 
     # show survival
     def show_survival(self):
@@ -525,6 +535,11 @@ class ClinicalDataForm(QtWidgets.QWidget, Ui_Form):
                self.ui.dateEdit_2.setDate(QtCore.QDate.fromString( df.at[i,'DOD'], "dd/MM/yyyy"))
                self.ui.Dt_Last_Existence.setDate(QtCore.QDate.fromString( df.at[i,'DOLE'], "dd/MM/yyyy"))
 
+    def on_click(self):
+        self.save_ClinicalData()
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Return:
+            self.on_click()
 
 
 
@@ -539,7 +554,14 @@ class ClinicalDataDisplay(QtWidgets.QWidget, Ui_CD_Display):
         self.ui = Ui_CD_Display()
         self.ui.setupUi(self)
         self.load_cd()
-        self.ui.Edit_button.clicked.connect(self.edit_mode)
+        self.ui.Edit_button.clicked.connect(self.on_click)
+
+    def on_click(self):
+        self.edit_mode()
+
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Return:
+            self.on_click()
 
     def load_cd(self):
         reg = '/[clinicaldata]*[.csv]'
@@ -660,7 +682,124 @@ class ClinicalDataDisplay(QtWidgets.QWidget, Ui_CD_Display):
         self.tabWindow.addTab(self.tab_cd, "Clinical Data")
         self.tabWindow.setCurrentIndex(3)
 
+######################################################
+#             TRANSECT CLASS CODE                    #
+######################################################
 
+class Transect(QtWidgets.QGraphicsScene):
+    def __init__(self,imagetoPaint, dataset, rowS, colS, tabWindow):
+        super(Transect, self).__init__()
+
+        self.addItem(QGraphicsPixmapItem(imagetoPaint))
+        self.img = imagetoPaint
+        self.values = []
+        self.distances = []
+        self.data= dataset
+        self.pixSpacing = rowS / colS
+        self._start = QPointF()
+        self.drawing = True
+        self._current_rect_item = None
+        self.pos1 = QPoint()
+        self.pos2 = QPoint()
+        self.points = []
+        self.tabWindow = tabWindow
+
+
+    def mousePressEvent(self, event):
+        if self.itemAt(event.scenePos(), QtGui.QTransform()) is not None and self.drawing == True:
+            self.pos1 = event.scenePos()
+            self._current_rect_item = QtWidgets.QGraphicsLineItem()
+            self._current_rect_item.setPen(QtCore.Qt.red)
+            self._current_rect_item.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable, False)
+            self.addItem(self._current_rect_item)
+            self._start = event.scenePos()
+            r = QtCore.QLineF(self._start, self._start)
+            self._current_rect_item.setLine(r)
+        #super(Transect, self).mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        if self._current_rect_item is not None and self.drawing == True:
+            r = QtCore.QLineF(self._start, event.scenePos())#.normalized()
+            self._current_rect_item.setLine(r)
+        #super(Transect, self).mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        if self.drawing == True:
+            #print("pos1:", self.pos1.x(), self.pos1.y())
+            self.pos2 = event.scenePos()
+            #print("pos2:", self.pos2.x(), self.pos2.y())
+            self.drawDDA(round(self.pos1.x()), round(self.pos1.y()), round(self.pos2.x()), round(self.pos2.y()))
+            #print(self.calculateDistance(round(self.pos1.x()), round(self.pos1.y()), round(self.pos2.x()), round(self.pos2.y())))
+
+            self.drawing=False
+            self.plotResult()
+            self._current_rect_item = None
+        #super(Transect, self).mouseReleaseEvent(event)
+
+
+    def drawDDA(self, x1, y1, x2, y2):
+        x, y = x1, y1
+        length = (x2 - x1) if (x2 - x1) > (y2 - y1) else (y2 - y1)
+        dx = (x2 - x1) / float(length)
+        dy = (y2 - y1) / float(length)
+        self.points.append((round(x), round(y)))
+
+        for i in range(length):
+            x += dx
+            y += dy
+            self.points.append((round(x), round(y)))
+        #print(self.points)
+        self.getValues()
+        self.getDistances()
+
+
+    def calculateDistance(self, x1, y1, x2, y2):
+        dist = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+        return dist
+
+    def getValues(self):
+        for i,j in self.points:
+            self.values.append(self.data[i][j])
+
+        #print(self.values)
+
+    def getDistances(self):
+        for i, j in self.points:
+            self.distances.append(self.calculateDistance(i,j, round(self.pos2.x()), round(self.pos2.y())))
+        self.distances.reverse()
+        #print(self.distances)
+
+    def on_close(self,event):
+        event.canvas.figure.axes[0].has_been_closed = True
+        #print ('Closed Figure')
+        #self.tabWindow.setScene(self.returnValue)
+        #return True
+        pixmap = self.img
+        pixmap = pixmap.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
+        DICOM_image_label = QtWidgets.QLabel()
+        DICOM_image_label.setPixmap(pixmap)
+        DICOM_image_scene = QtWidgets.QGraphicsScene()
+        DICOM_image_scene.addWidget(DICOM_image_label)
+        self.tabWindow.setScene(DICOM_image_scene)
+
+    def plotResult(self):
+        newList = [(x * self.pixSpacing)/ 10 for x in self.distances]
+        plt1.close()
+        fig1 = plt1.figure(num='Transect Graph')
+        ax1= fig1.add_subplot(111)
+        ax1.has_been_closed = False
+        ax1.plot(newList, self.values)
+        plt1.xlabel('Distance cm')
+        plt1.ylabel('CT #')
+        plt1.grid(True)
+        fig1.canvas.mpl_connect('close_event', self.on_close)
+        plt1.show()
+
+
+
+######################################################
+#              MAIN PAGE CONTROLLER                  #
+######################################################
 class MainPage:
 
     def __init__(self, path, datasets, filepaths):
@@ -681,3 +820,8 @@ class MainPage:
     def display_cd_dat(self, tabWindow, file_path):
         self.tab_cd = ClinicalDataDisplay(tabWindow,file_path)
         tabWindow.addTab(self.tab_cd, "")
+
+    def runTransect(self, tabWindow,imagetoPaint, dataset, rowS, colS):
+        self.tab_ct = Transect(imagetoPaint, dataset, rowS, colS, tabWindow)
+        tabWindow.setScene(self.tab_ct)
+
