@@ -59,15 +59,3 @@ def get_pixmaps(dict_ds):
 
             dict_pixmaps[key] = pixmap
     return dict_pixmaps
-
-
-def test():
-    path = '../../../dicom_sample'
-    dict_ds, path = get_datasets(path)
-    rtss = dict_ds['rtss']
-
-
-# if __name__ == "__main__":
-#     path = '/home/xudong/dicom_sample'
-#     ds, path = get_datasets(path)
-#     np_data = convert_raw_data(ds[1])

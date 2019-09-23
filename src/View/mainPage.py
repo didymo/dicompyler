@@ -19,6 +19,7 @@ from src.Controller.mainPageController import MainPage
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
+from src.Model.CalculateImages import *
 
 class Ui_MainWindow(object):
 
@@ -1026,7 +1027,7 @@ class Ui_MainWindow(object):
         rowS = dt.PixelSpacing[0]
         colS = dt.PixelSpacing[1]
         dt.convert_pixel_data()
-        self.callClass.runTransect(self.DICOM_view, self.pixmaps[id], dt._pixel_array, rowS, colS)
+        self.callClass.runTransect(self.DICOM_view, self.pixmaps[id], dt._pixel_array.transpose(), rowS, colS)
 
 import src.View.resources_rc
 
