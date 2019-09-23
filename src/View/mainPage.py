@@ -42,6 +42,16 @@ class Ui_MainWindow(object):
 
 
 
+        # DICOM Tree for RTSS file
+        self.dicomTree_rtss = DicomTree(self.file_rtss)
+        self.dsDicomTree_rtss = self.dicomTree_rtss.read_dcm(self.file_rtss)
+        self.dictDicomTree_rtss = self.dicomTree_rtss.dataset_to_dict(self.dsDicomTree_rtss)
+
+        # DICOM Tree for RT Dose file
+        self.dicomTree_rtdose = DicomTree(self.file_rtdose)
+        self.dsDicomTree_rtdose = self.dicomTree_rtdose.read_dcm(self.file_rtdose)
+        self.dictDicomTree_rtdose = self.dicomTree_rtdose.dataset_to_dict(self.dsDicomTree_rtdose)
+
         self.callClass = MainPage(self.path, self.dataset, self.filepaths)
 
         # Main Window
@@ -208,15 +218,16 @@ class Ui_MainWindow(object):
         self.comboBox_TreeSelector = QtWidgets.QComboBox()
         self.comboBox_TreeSelector.setStyleSheet("font: 75 10pt \"Laksaman\";")
         self.comboBox_TreeSelector.addItem("Select a DICOM dataset...")
+        self.comboBox_TreeSelector.addItem("RT Dose")
+        self.comboBox_TreeSelector.addItem("RTSS")
         for i in range(len(self.pixmaps) - 1):
-            self.comboBox_TreeSelector.addItem("CT "+str(i+1))
+            self.comboBox_TreeSelector.addItem("CT Image Slice "+str(i+1))
         self.comboBox_TreeSelector.activated.connect(self.comboTreeSelector)
         self.comboBox_TreeSelector.setFixedSize(QtCore.QSize(180, 31))
         self.vboxL_Tree.addWidget(self.comboBox_TreeSelector, QtCore.Qt.AlignLeft)
         # Creation of the Tree View
         self.treeView = QtWidgets.QTreeView(self.tab2_DICOM_tree)
         self.initTree()
-        self.updateTree(self.slider.value())
         # Set parameters for the Tree View
         self.treeView.header().resizeSection(0, 280)
         self.treeView.header().resizeSection(1, 380)
@@ -958,8 +969,15 @@ class Ui_MainWindow(object):
         pass
 
     def comboTreeSelector(self, index):
-        if index > 0:
-            self.updateTree(index-1)
+        # CT Scans
+        if index > 2:
+            self.updateTree(True, index-3, "")
+        # RT Dose
+        elif index == 1:
+            self.updateTree(False, 0, "RT Dose")
+        # RTSS
+        elif index == 2:
+            self.updateTree(False, 0, "RTSS")
 
 
     def initTree(self):
@@ -969,13 +987,22 @@ class Ui_MainWindow(object):
         self.modelTree.setHeaderData(2, QtCore.Qt.Horizontal, "Tag")
         self.modelTree.setHeaderData(3, QtCore.Qt.Horizontal, "VM")
         self.modelTree.setHeaderData(4, QtCore.Qt.Horizontal, "VR")
+        self.treeView.setModel(self.modelTree)
 
-    def updateTree(self, id):
+
+    def updateTree(self, ct_file, id, name):
         self.initTree()
-        filename = self.filepaths[id]
-        self.dicomTree = DicomTree(filename)
-        ds = self.dicomTree.read_dcm(filename)
-        dict = self.dicomTree.dataset_to_dict(ds)
+        if ct_file:
+            filename = self.filepaths[id]
+            self.dicomTree = DicomTree(filename)
+            ds = self.dicomTree.read_dcm(filename)
+            dict = self.dicomTree.dataset_to_dict(ds)
+        elif name == "RT Dose":
+            dict = self.dictDicomTree_rtdose
+        elif name == "RTSS":
+            dict = self.dictDicomTree_rtss
+        else:
+            print("Error filename in updateTree function")
         parentItem = self.modelTree.invisibleRootItem()
         self.recurseBuildModel(dict, parentItem)
         self.treeView.setModel(self.modelTree)
@@ -1031,16 +1058,15 @@ class Ui_MainWindow(object):
 import src.View.resources_rc
 
 
+# For Testing
+class MyWin(QtWidgets.QMainWindow):
+    def __init__(self, parent=None):
+        QtWidgets.QWidget.__init__(self, parent)
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self, path='dicom_sample')
 
-# # For Testing
-# class MyWin(QtWidgets.QMainWindow):
-#     def __init__(self, parent=None):
-#         QtWidgets.QWidget.__init__(self, parent)
-#         self.ui = Ui_MainWindow()
-#         self.ui.setupUi(self, path='dicom_sample')
-#
-# if __name__ == "__main__":
-#     app = QtWidgets.QApplication(sys.argv)
-#     myapp = MyWin()
-#     myapp.show()
-#     sys.exit(app.exec_())
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    myapp = MyWin()
+    myapp.show()
+    sys.exit(app.exec_())
