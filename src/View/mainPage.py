@@ -39,9 +39,6 @@ class Ui_MainWindow(object):
         self.zoom =1
         #self.view
 
-
-
-
         # DICOM Tree for RTSS file
         self.dicomTree_rtss = DicomTree(self.file_rtss)
         self.dsDicomTree_rtss = self.dicomTree_rtss.read_dcm(self.file_rtss)
@@ -71,7 +68,6 @@ class Ui_MainWindow(object):
         self.tab1_structures = QtWidgets.QWidget()
         self.tab1_structures.setObjectName("tab1_structures")
         self.updateStructureColumn()
-
         # color1_struct = QtGui.QPixmap(10, 10)
         # color1_struct.fill(QtGui.QColor(255, 144, 3))
         # self.coloriconAnonymize_and_Save_struct = QtGui.QIcon(color1_struct)
@@ -1058,15 +1054,15 @@ class Ui_MainWindow(object):
 import src.View.resources_rc
 
 
-# For Testing
-class MyWin(QtWidgets.QMainWindow):
-    def __init__(self, parent=None):
-        QtWidgets.QWidget.__init__(self, parent)
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self, path='dicom_sample')
-
-if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    myapp = MyWin()
-    myapp.show()
-    sys.exit(app.exec_())
+# # For Testing
+# class MyWin(QtWidgets.QMainWindow):
+#     def __init__(self, parent=None):
+#         QtWidgets.QWidget.__init__(self, parent)
+#         self.ui = Ui_MainWindow()
+#         self.ui.setupUi(self, path='dicom_sample')
+#
+# if __name__ == "__main__":
+#     app = QtWidgets.QApplication(sys.argv)
+#     myapp = MyWin()
+#     myapp.show()
+#     sys.exit(app.exec_())
