@@ -8,6 +8,8 @@ from PyQt5.QtGui import QPixmap, QPainter, QPen, QBrush, QColor
 from PyQt5.QtCore import QDate
 import math
 from PyQt5.QtWidgets import QMessageBox
+from matplotlib.backends.backend_template import FigureCanvas
+
 from src.Model.CalculateImages import *
 from src.Model.LoadPatients import *
 from src.Model.GetPatientInfo import *
@@ -776,6 +778,7 @@ class Transect(QtWidgets.QGraphicsScene):
         #print ('Closed Figure')
         #self.tabWindow.setScene(self.returnValue)
         #return True
+        plt1.close()
         pixmap = self.img
         pixmap = pixmap.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
         DICOM_image_label = QtWidgets.QLabel()
@@ -785,13 +788,17 @@ class Transect(QtWidgets.QGraphicsScene):
         self.tabWindow.setScene(DICOM_image_scene)
 
     def plotResult(self):
-        newList = [(x * self.pixSpacing)/ 10 for x in self.distances]
+        newList = [(x * self.pixSpacing) for x in self.distances]
         plt1.close()
+        #adding a dummy manager
         fig1 = plt1.figure(num='Transect Graph')
+        new_manager = fig1.canvas.manager
+        new_manager.canvas.figure = fig1
+        fig1.set_canvas(new_manager.canvas)
         ax1= fig1.add_subplot(111)
         ax1.has_been_closed = False
-        ax1.plot(newList, self.values)
-        plt1.xlabel('Distance cm')
+        ax1.step(newList, self.values, where= 'mid')
+        plt1.xlabel('Distance mm')
         plt1.ylabel('CT #')
         plt1.grid(True)
         fig1.canvas.mpl_connect('close_event', self.on_close)
