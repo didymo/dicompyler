@@ -4,6 +4,7 @@ import matplotlib.pylab as plt
 import numpy as np
 from PyQt5.QtGui import QTransform
 
+from src.Controller.pluginMController import PManager
 from src.Model.LoadPatients import *
 from src.Model.CalculateDVHs import *
 from PyQt5.QtCore import QStringListModel
@@ -43,6 +44,7 @@ class Ui_MainWindow(object):
 
 
         self.callClass = MainPage(self.path, self.dataset, self.filepaths)
+        self.callManager = PManager()
 
         # Main Window
         MainWindow.setObjectName("MainWindow")
@@ -624,6 +626,7 @@ class Ui_MainWindow(object):
         self.actionPlugin_Manager.setIcon(iconPlugin_Manager)
         self.actionPlugin_Manager.setIconVisibleInMenu(True)
         self.actionPlugin_Manager.setObjectName("actionPlugin_Manager")
+        self.actionPlugin_Manager.triggered.connect(self.pluginManagerHandler)
 
         # Anonymize and Save Action
         self.actionAnonymize_and_Save = QtWidgets.QAction(MainWindow)
@@ -1026,7 +1029,10 @@ class Ui_MainWindow(object):
         rowS = dt.PixelSpacing[0]
         colS = dt.PixelSpacing[1]
         dt.convert_pixel_data()
-        self.callClass.runTransect(self.DICOM_view, self.pixmaps[id], dt._pixel_array, rowS, colS)
+        self.callClass.runTransect(self.DICOM_view, self.pixmaps[id], dt._pixel_array.transpose(), rowS, colS)
+
+    def pluginManagerHandler(self):
+        self.callManager.show_plugin_manager()
 
 import src.View.resources_rc
 

@@ -778,6 +778,7 @@ class Transect(QtWidgets.QGraphicsScene):
         #print ('Closed Figure')
         #self.tabWindow.setScene(self.returnValue)
         #return True
+        plt1.close()
         pixmap = self.img
         pixmap = pixmap.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
         DICOM_image_label = QtWidgets.QLabel()
