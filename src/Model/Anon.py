@@ -280,6 +280,7 @@ def anon_call(path):
 
 def anonymize(path):
 
+    Print(" =============Anonymise function called====================")
     print("\n\nCurrent Work Directory is:  ==== ",os.getcwd())
     print("IN ANON===================")
     print("=====Path in ANONYMIZation   ===",path)
