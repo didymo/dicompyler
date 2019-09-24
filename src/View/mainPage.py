@@ -20,6 +20,7 @@ from src.Controller.mainPageController import MainPage
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
+from src.Model.CalculateImages import *
 
 class Ui_MainWindow(object):
 
