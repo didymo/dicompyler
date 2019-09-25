@@ -16,10 +16,57 @@ class Ui_PluginManager(object):
         self.enabled = QtWidgets.QCheckBox(self.centralwidget)
         self.enabled.setGeometry(QtCore.QRect(660, 60, 92, 23))
         self.enabled.setObjectName("enabled")
-        self.content = QtWidgets.QWidget(self.centralwidget)
-        self.content.setGeometry(QtCore.QRect(290, 90, 451, 411))
-        self.content.setStyleSheet("background-color: rgb(255, 255, 255);")
-        self.content.setObjectName("content")
+        self.table_modules = QtWidgets.QTableWidget(self.centralwidget)
+        self.table_modules.setGeometry(QtCore.QRect(290, 90, 451, 370))
+        self.table_modules.setObjectName("table_modules")
+        self.table_modules.setStyleSheet("background-color: rgb(255, 255, 255);")
+        #buttons per view
+        self.add_new_window = QtWidgets.QPushButton(self.centralwidget)
+        self.add_new_window.setGeometry(QtCore.QRect(598, 470, 141, 31))
+        self.add_new_window.setStyleSheet("background-color: rgb(238, 238, 236);\n"
+                                        "                                       font: 57 11pt \\\"Ubuntu\\\";\n"
+                                        "                                       color:rgb(75,0,130);\n"
+                                        "                                       font-weight: bold;")
+        self.add_new_window.setObjectName("add_new_window")
+        self.add_new_window.setVisible(False)
+        #organ
+        self.add_standard_organ_name = QtWidgets.QPushButton(self.centralwidget)
+        self.add_standard_organ_name.setGeometry(QtCore.QRect(578, 470, 161, 31))
+        self.add_standard_organ_name.setStyleSheet("background-color: rgb(238, 238, 236);\n"
+                                          "                                       font: 57 11pt \\\"Ubuntu\\\";\n"
+                                          "                                       color:rgb(75,0,130);\n"
+                                          "                                       font-weight: bold;")
+        self.add_standard_organ_name.setObjectName("add_standard_organ_name")
+        self.add_standard_organ_name.setVisible(False)
+
+        self.import_organ_csv = QtWidgets.QPushButton(self.centralwidget)
+        self.import_organ_csv.setGeometry(QtCore.QRect(406, 470, 161, 31))
+        self.import_organ_csv.setStyleSheet("background-color: rgb(238, 238, 236);\n"
+                                                   "                                       font: 57 11pt \\\"Ubuntu\\\";\n"
+                                                   "                                       color:rgb(75,0,130);\n"
+                                                   "                                       font-weight: bold;")
+        self.import_organ_csv.setObjectName("import_organ_csv")
+        self.import_organ_csv.setVisible(False)
+
+        #volume
+        self.add_standard_volume_name = QtWidgets.QPushButton(self.centralwidget)
+        self.add_standard_volume_name.setGeometry(QtCore.QRect(578, 470, 161, 31))
+        self.add_standard_volume_name.setStyleSheet("background-color: rgb(238, 238, 236);\n"
+                                                   "                                       font: 57 11pt \\\"Ubuntu\\\";\n"
+                                                   "                                       color:rgb(75,0,130);\n"
+                                                   "                                       font-weight: bold;")
+        self.add_standard_volume_name.setObjectName("add_standard_volume_name")
+        self.add_standard_volume_name.setVisible(False)
+        #roi
+        self.add_new_roi = QtWidgets.QPushButton(self.centralwidget)
+        self.add_new_roi.setGeometry(QtCore.QRect(598, 470, 141, 31))
+        self.add_new_roi.setStyleSheet("background-color: rgb(238, 238, 236);\n"
+                                                    "                                       font: 57 11pt \\\"Ubuntu\\\";\n"
+                                                    "                                       color:rgb(75,0,130);\n"
+                                                    "                                       font-weight: bold;")
+        self.add_new_roi.setObjectName("add_new_roi")
+        self.add_new_roi.setVisible(False)
+
         self.cancel_button = QtWidgets.QPushButton(self.centralwidget)
         self.cancel_button.setGeometry(QtCore.QRect(638, 554, 101, 31))
         self.cancel_button.setStyleSheet("background-color: rgb(238, 238, 236);\n"
@@ -51,6 +98,11 @@ class Ui_PluginManager(object):
         self.enabled.setText(_translate("PluginManager", "Enabled"))
         self.cancel_button.setText(_translate("PluginManager", "Cancel"))
         self.apply_button.setText(_translate("PluginManager", "Apply"))
+        self.add_new_window.setText(_translate("PluginManager", "Add New Window"))
+        self.add_standard_organ_name.setText(_translate("PluginManager", "Add Standard Name"))
+        self.add_standard_volume_name.setText(_translate("PluginManager", "Add Standard Name"))
+        self.import_organ_csv.setText(_translate("PluginManager", "Import Spreadsheet"))
+        self.add_new_roi.setText(_translate("PluginManager", "Add new ROI"))
 
 
 if __name__ == "__main__":
