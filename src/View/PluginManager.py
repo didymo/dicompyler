@@ -20,52 +20,122 @@ class Ui_PluginManager(object):
         self.table_modules.setGeometry(QtCore.QRect(290, 90, 451, 370))
         self.table_modules.setObjectName("table_modules")
         self.table_modules.setStyleSheet("background-color: rgb(255, 255, 255);")
-        #buttons per view
+
+        # buttons per view
         self.add_new_window = QtWidgets.QPushButton(self.centralwidget)
         self.add_new_window.setGeometry(QtCore.QRect(598, 470, 141, 31))
         self.add_new_window.setStyleSheet("background-color: rgb(238, 238, 236);\n"
-                                        "                                       font: 57 11pt \\\"Ubuntu\\\";\n"
-                                        "                                       color:rgb(75,0,130);\n"
-                                        "                                       font-weight: bold;")
+                                          "font: 57 11pt \\\"Ubuntu\\\";\n"
+                                          "color:rgb(75,0,130);\n"
+                                          "font-weight: bold;")
         self.add_new_window.setObjectName("add_new_window")
         self.add_new_window.setVisible(False)
-        #organ
+        self.table_view = QtWidgets.QTableWidget(self.centralwidget)
+        self.table_view.setGeometry(QtCore.QRect(290, 90, 451, 370))
+        self.table_view.setObjectName("table_view")
+        self.table_view.setStyleSheet("background-color: rgb(255, 255, 255);")
+        self.table_view.setColumnCount(4)
+        self.table_view.setHorizontalHeaderLabels([" Window Name ", " Scan ", " Upper Value ", " Lower Value "])
+        self.table_view.horizontalHeaderItem(0).setTextAlignment(QtCore.Qt.AlignLeft)
+        self.table_view.horizontalHeaderItem(1).setTextAlignment(QtCore.Qt.AlignLeft)
+        self.table_view.horizontalHeaderItem(2).setTextAlignment(QtCore.Qt.AlignLeft)
+        self.table_view.horizontalHeaderItem(3).setTextAlignment(QtCore.Qt.AlignLeft)
+        header1 = self.table_view.horizontalHeader()
+        header1.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        header1.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
+        header1.setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
+        header1.setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeToContents)
+        self.table_view.setVisible(False)
+        # organ
         self.add_standard_organ_name = QtWidgets.QPushButton(self.centralwidget)
         self.add_standard_organ_name.setGeometry(QtCore.QRect(578, 470, 161, 31))
         self.add_standard_organ_name.setStyleSheet("background-color: rgb(238, 238, 236);\n"
-                                          "                                       font: 57 11pt \\\"Ubuntu\\\";\n"
-                                          "                                       color:rgb(75,0,130);\n"
-                                          "                                       font-weight: bold;")
+                                                   "font: 57 11pt \\\"Ubuntu\\\";\n"
+                                                   "color:rgb(75,0,130);\n"
+                                                   "font-weight: bold;")
         self.add_standard_organ_name.setObjectName("add_standard_organ_name")
+        self.table_organ = QtWidgets.QTableWidget(self.centralwidget)
+        self.table_organ.setGeometry(QtCore.QRect(290, 90, 451, 370))
+        self.table_organ.setObjectName("table_organ")
+        self.table_organ.setStyleSheet("background-color: rgb(255, 255, 255);")
+        self.table_organ.setColumnCount(3)
+        self.table_organ.setHorizontalHeaderLabels([" Standard Name ", " FMA ID ", " Organ "])
+        self.table_organ.horizontalHeaderItem(0).setTextAlignment(QtCore.Qt.AlignLeft)
+        self.table_organ.horizontalHeaderItem(1).setTextAlignment(QtCore.Qt.AlignLeft)
+        self.table_organ.horizontalHeaderItem(2).setTextAlignment(QtCore.Qt.AlignLeft)
+        header2 = self.table_organ.horizontalHeader()
+        header2.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        header2.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        header2.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
+        self.table_organ.setVisible(False)
         self.add_standard_organ_name.setVisible(False)
 
         self.import_organ_csv = QtWidgets.QPushButton(self.centralwidget)
         self.import_organ_csv.setGeometry(QtCore.QRect(406, 470, 161, 31))
         self.import_organ_csv.setStyleSheet("background-color: rgb(238, 238, 236);\n"
-                                                   "                                       font: 57 11pt \\\"Ubuntu\\\";\n"
-                                                   "                                       color:rgb(75,0,130);\n"
-                                                   "                                       font-weight: bold;")
+                                            "font: 57 11pt \\\"Ubuntu\\\";\n"
+                                            "color:rgb(75,0,130);\n"
+                                            "font-weight: bold;")
         self.import_organ_csv.setObjectName("import_organ_csv")
         self.import_organ_csv.setVisible(False)
 
-        #volume
+        # volume
         self.add_standard_volume_name = QtWidgets.QPushButton(self.centralwidget)
         self.add_standard_volume_name.setGeometry(QtCore.QRect(578, 470, 161, 31))
         self.add_standard_volume_name.setStyleSheet("background-color: rgb(238, 238, 236);\n"
-                                                   "                                       font: 57 11pt \\\"Ubuntu\\\";\n"
-                                                   "                                       color:rgb(75,0,130);\n"
-                                                   "                                       font-weight: bold;")
+                                                    "font: 57 11pt \\\"Ubuntu\\\";\n"
+                                                    "color:rgb(75,0,130);\n"
+                                                    "font-weight: bold;")
         self.add_standard_volume_name.setObjectName("add_standard_volume_name")
         self.add_standard_volume_name.setVisible(False)
-        #roi
+        self.table_volume = QtWidgets.QTableWidget(self.centralwidget)
+        self.table_volume.setGeometry(QtCore.QRect(290, 90, 451, 370))
+        self.table_volume.setObjectName("table_volume")
+        self.table_volume.setStyleSheet("background-color: rgb(255, 255, 255);")
+        self.table_volume.setColumnCount(3)
+        self.table_volume.setHorizontalHeaderLabels([" Standard Name ", " FMA ID ", " Volume "])
+        self.table_volume.horizontalHeaderItem(0).setTextAlignment(QtCore.Qt.AlignLeft)
+        self.table_volume.horizontalHeaderItem(1).setTextAlignment(QtCore.Qt.AlignLeft)
+        self.table_volume.horizontalHeaderItem(2).setTextAlignment(QtCore.Qt.AlignLeft)
+        header3 = self.table_volume.horizontalHeader()
+        header3.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        header3.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        header3.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
+        self.table_volume.setVisible(False)
+        # roi
         self.add_new_roi = QtWidgets.QPushButton(self.centralwidget)
         self.add_new_roi.setGeometry(QtCore.QRect(598, 470, 141, 31))
         self.add_new_roi.setStyleSheet("background-color: rgb(238, 238, 236);\n"
-                                                    "                                       font: 57 11pt \\\"Ubuntu\\\";\n"
-                                                    "                                       color:rgb(75,0,130);\n"
-                                                    "                                       font-weight: bold;")
+                                       "font: 57 11pt \\\"Ubuntu\\\";\n"
+                                       "color:rgb(75,0,130);\n"
+                                       "font-weight: bold;")
         self.add_new_roi.setObjectName("add_new_roi")
         self.add_new_roi.setVisible(False)
+        self.table_roi = QtWidgets.QTableWidget(self.centralwidget)
+        self.table_roi.setGeometry(QtCore.QRect(290, 90, 451, 370))
+        self.table_roi.setObjectName("table_roi")
+        self.table_roi.setStyleSheet("background-color: rgb(255, 255, 255);")
+        self.table_roi.setColumnCount(2)
+        self.table_roi.setHorizontalHeaderLabels([" Isodose Level (cGy) ", " ROI name "])
+        self.table_roi.horizontalHeaderItem(0).setTextAlignment(QtCore.Qt.AlignLeft)
+        self.table_roi.horizontalHeaderItem(1).setTextAlignment(QtCore.Qt.AlignLeft)
+        header4 = self.table_roi.horizontalHeader()
+        header4.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        header4.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        self.table_roi.setVisible(False)
+
+        self.table_Ids = QtWidgets.QTableWidget(self.centralwidget)
+        self.table_Ids.setGeometry(QtCore.QRect(290, 90, 451, 410))
+        self.table_Ids.setObjectName("table_Ids")
+        self.table_Ids.setStyleSheet("background-color: rgb(255, 255, 255);")
+        self.table_Ids.setColumnCount(2)
+        self.table_Ids.setHorizontalHeaderLabels([" Patient ID ", " Hash ID "])
+        self.table_Ids.horizontalHeaderItem(0).setTextAlignment(QtCore.Qt.AlignLeft)
+        self.table_Ids.horizontalHeaderItem(1).setTextAlignment(QtCore.Qt.AlignLeft)
+        header5 = self.table_Ids.horizontalHeader()
+        header5.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        header5.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        self.table_Ids.setVisible(False)
 
         self.cancel_button = QtWidgets.QPushButton(self.centralwidget)
         self.cancel_button.setGeometry(QtCore.QRect(638, 554, 101, 31))
@@ -78,9 +148,9 @@ class Ui_PluginManager(object):
         self.apply_button = QtWidgets.QPushButton(self.centralwidget)
         self.apply_button.setGeometry(QtCore.QRect(510, 554, 111, 31))
         self.apply_button.setStyleSheet("background-color: rgb(238, 238, 236);\n"
-                                        "                                       font: 57 11pt \\\"Ubuntu\\\";\n"
-                                        "                                       color:rgb(75,0,130);\n"
-                                        "                                       font-weight: bold;")
+                                        "font: 57 11pt \\\"Ubuntu\\\";\n"
+                                        "color:rgb(75,0,130);\n"
+                                        "font-weight: bold;")
         self.apply_button.setObjectName("apply_button")
         self.treeList = QtWidgets.QTreeView(self.centralwidget)
         self.treeList.setGeometry(QtCore.QRect(10, 40, 256, 461))
