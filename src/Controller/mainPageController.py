@@ -779,6 +779,7 @@ class Transect(QtWidgets.QGraphicsScene):
         event.canvas.figure.axes[0].has_been_closed = True
 
     def plotResult(self):
+        plt1.close('all')
         newList = [(x * self.pixSpacing) for x in self.distances]
         # adding a dummy manager
         fig1 = plt1.figure(num='Transect Graph')
