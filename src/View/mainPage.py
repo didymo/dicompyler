@@ -767,14 +767,70 @@ class Ui_MainWindow(object):
 	def updateView(self):
 		self.DICOM_view.setTransform(QTransform().scale(self.zoom, self.zoom))
 
+
+	# def colorGenerator(self, index):
+	# 	tmp1 = int(index / 6)
+	# 	tmp2 = index % 6
+	# 	if tmp1 > 30:
+	# 		print("Maximum number of ROIs reached")
+	# 		red, blue, green = 0, 0, 0
+	# 	else:
+	# 		intensity = self.intensityForColorGenerator()
+	# 		intensity_index = intensity[tmp1]
+	# 		if tmp2 == 0:
+	# 			red, green = 0, 0
+	# 			blue = intensity_index
+	#
+	# 		elif tmp2 == 1:
+	# 			red, blue = 0, 0
+	# 			green = intensity_index
+	#
+	# 		elif tmp2 == 2:
+	# 			blue, green = 0, 0
+	# 			red = intensity_index
+	#
+	# 		elif tmp2 == 3:
+	# 			red = 0
+	# 			blue, green = intensity_index, intensity_index
+	#
+	# 		elif tmp2 == 4:
+	# 			green = 0
+	# 			red, blue = intensity_index, intensity_index
+	#
+	# 		else:
+	# 			blue = 0
+	# 			red, green = intensity_index, intensity_index
+	#
+	# 	return red, green, blue
+	#
+	#
+	#
+	# def intensityForColorGenerator(self):
+	# 	res = []
+	# 	tmp = 255
+	# 	res.append(tmp)
+	# 	for i in range(10):
+	# 		tmp1 = int(tmp / 2)
+	# 		res.append(tmp1)
+	# 		tmp2 = int(tmp / 4)
+	# 		res.append(tmp2)
+	# 		tmp = tmp1 + tmp2
+	# 		res.append(tmp)
+	# 	return res
+
+
+
 	# Initialization of colors for ROIs
 	def initRoiColor(self):
+		self.allColor = HexaColor()
 		self.roiColor = dict()
+		index = 0
 		for key, val in self.rois.items():
-			tmp1 = random.randint(0, 255)
-			tmp2 = random.randint(0, 255)
-			tmp3 = random.randint(0, 255)
-			self.roiColor[key] = QtGui.QColor(tmp1, tmp2, tmp3)
+			value = dict()
+			value['R'], value['G'], value['B'] = self.allColor.getHexaColor(index)
+			value['QColor'] = QtGui.QColor(value['R'], value['G'], value['B'])
+			self.roiColor[key] = value
+			index += 1
 
 	# Initialization of the list of structures (left column of the main page)
 	def initStructCol(self):
@@ -805,7 +861,7 @@ class Ui_MainWindow(object):
 			# Color Square
 			colorSquareLabel = QtWidgets.QLabel()
 			colorSquarePix = QtGui.QPixmap(15, 15)
-			colorSquarePix.fill(self.roiColor[key])
+			colorSquarePix.fill(self.roiColor[key]['QColor'])
 			colorSquareLabel.setPixmap(colorSquarePix)
 			self.gridL_StructColumn.addWidget(colorSquareLabel, index, 0, 1, 1)
 			# QCheckbox
@@ -938,19 +994,22 @@ class Ui_MainWindow(object):
 		fig, ax = plt.subplots()
 		fig.subplots_adjust(0.1, 0.15, 1, 1)
 		max_xlim = 0
+		legend = plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 		for roi in self.selected_rois:
 			dvh = self.dvh[int(roi)]
 			if dvh.volume != 0:
-				ax.plot(dvh.bincenters, 100 * dvh.counts / dvh.volume, label=dvh.name,
-						color=None if not isinstance(dvh.color, np.ndarray) else
-						(dvh.color / 255))
+				colorRoi = self.roiColor[roi]
+				color_R = colorRoi['R']/255
+				color_G = colorRoi['G']/255
+				color_B = colorRoi['B']/255
+				plt.plot(dvh.bincenters, 100 * dvh.counts / dvh.volume, label=dvh.name,
+						color=[color_R, color_G, color_B])
 				if dvh.bincenters[-1] > max_xlim:
 					max_xlim = dvh.bincenters[-1]
 				plt.xlabel('Dose [%s]' % dvh.dose_units)
 				plt.ylabel('Volume [%s]' % '%')
 				if dvh.name:
-					plt.legend(loc='best')
-				# plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+					legend = plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 
 		ax.set_ylim([0, 105])
 		ax.set_xlim([0, max_xlim + 3])
@@ -969,7 +1028,19 @@ class Ui_MainWindow(object):
 		ax.grid(which='minor', alpha=0.2)
 		ax.grid(which='major', alpha=0.5)
 
+		# self.export_legend(legend)
+
 		return fig
+
+
+	# def export_legend(self, legend, filename="legend.png", expand=[-5, -5, 5, 5]):
+	# 	fig = legend.figure
+	# 	fig.canvas.draw()
+	# 	bbox = legend.get_window_extent()
+	# 	bbox = bbox.from_extents(*(bbox.extents + np.array(expand)))
+	# 	bbox = bbox.transformed(fig.dpi_scale_trans.inverted())
+	# 	fig.savefig(filename, dpi="figure", bbox_inches=bbox)
+
 
 	def initDVH_view(self):
 		fig = self.DVH_view()
@@ -1083,16 +1154,59 @@ class Ui_MainWindow(object):
 import src.View.resources_rc
 
 
-# For Testing
-class MyWin(QtWidgets.QMainWindow):
-	def __init__(self, parent=None):
-		QtWidgets.QWidget.__init__(self, parent)
-		self.ui = Ui_MainWindow()
-		self.ui.setupUi(self, path='dicom_sample')
+class HexaColor(object):
+	def __init__(self):
+		self.listColor = self.hexaVersionColor()
+
+	def getHexaColor(self, index):
+		return self.listColor[index][0], self.listColor[index][1], self.listColor[index][2]
 
 
-if __name__ == "__main__":
-	app = QtWidgets.QApplication(sys.argv)
-	myapp = MyWin()
-	myapp.show()
-	sys.exit(app.exec_())
+	def hexaVersionColor(self):
+		colors = [color.rstrip('\n') for color in open('src/View/color.txt')]
+		res = []
+		for color in colors:
+			hex_R = self.convertHexaToDec(color[:2])
+			hex_G = self.convertHexaToDec(color[2:4])
+			hex_B = self.convertHexaToDec(color[-2:])
+			res.append([hex_R, hex_G, hex_B])
+		return res
+
+
+	def convertHexaToDec(self, number):
+		digit1 = self.convertHexaLetterToNumber(number[:1])
+		digit2 = self.convertHexaLetterToNumber(number[-1:])
+		return int(digit1) * 16 + int(digit2)
+
+
+	def convertHexaLetterToNumber(self, digit):
+		if digit == 'A':
+			return 10
+		elif digit == 'B':
+			return 11
+		elif digit == 'C':
+			return 12
+		elif digit == 'D':
+			return 13
+		elif digit == 'E':
+			return 14
+		elif digit == 'F':
+			return 15
+		else:
+			return digit
+
+
+
+# # For Testing
+# class MyWin(QtWidgets.QMainWindow):
+# 	def __init__(self, parent=None):
+# 		QtWidgets.QWidget.__init__(self, parent)
+# 		self.ui = Ui_MainWindow()
+# 		self.ui.setupUi(self, path='dicom_sample')
+#
+#
+# if __name__ == "__main__":
+# 	app = QtWidgets.QApplication(sys.argv)
+# 	myapp = MyWin()
+# 	myapp.show()
+# 	sys.exit(app.exec_())
