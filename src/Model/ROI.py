@@ -219,7 +219,17 @@ def get_transformed_pixel_contours(dict_raw_contours, dict_matrices):
 
 
 def main():
-
+    path = '../../../dicom_sample'
+    dict_ds, dict_path = get_datasets(path)
+    rtss = dict_ds['rtss']
+    dict_matrices = get_matrices(dict_ds)
+    roi_list = get_roi_list(rtss)
+    dict_raw_contours = get_all_raw_contours(rtss, roi_list)
+    for key in dict_raw_contours:
+        print(key)
+    roi_name = 'GTVp'
+    GTVp_contour = get_roi_contours(dict_raw_contours, roi_name, dict_matrices)
+    print(GTVp_contour)
 
 # # This is for get all roi at one time
 # # Sooooo slowwwwwww
