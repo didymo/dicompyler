@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QVBoxLayout, QLayout, QAbstractItemView
 
 from src.View.PluginManager import *
 
+
 class PluginManager(QtWidgets.QMainWindow, Ui_PluginManager):
 
     def __init__(self):
@@ -58,10 +59,125 @@ class PluginManager(QtWidgets.QMainWindow, Ui_PluginManager):
     def applyChanges(self):
         pass
 
-    def display(self,index):
+    def display(self, index):
         item = self.treeList.selectedIndexes()[0]
         self.optionTitle.setText(item.model().itemFromIndex(index).text())
-        
+        self.changeDislpay(item.model().itemFromIndex(index).text())
+
+    def changeDislpay(self, type):
+        # create a file that keeps a record of the tables and call to populate the given table
+        if type == "2D View":
+            self.table_modules.setVisible(True)
+            self.table_view.setVisible(False)
+            self.table_organ.setVisible(False)
+            self.table_volume.setVisible(False)
+            self.table_roi.setVisible(False)
+            self.table_Ids.setVisible(False)
+            self.add_new_window.setVisible(False)
+            self.add_new_roi.setVisible(False)
+            self.add_standard_volume_name.setVisible(False)
+            self.add_standard_organ_name.setVisible(False)
+            self.import_organ_csv.setVisible(False)
+            self.table_modules.setColumnCount(0)
+        elif type == "Anonymize":
+            self.table_modules.setVisible(True)
+            self.table_view.setVisible(False)
+            self.table_organ.setVisible(False)
+            self.table_volume.setVisible(False)
+            self.table_roi.setVisible(False)
+            self.table_Ids.setVisible(False)
+            self.add_new_window.setVisible(False)
+            self.add_new_roi.setVisible(False)
+            self.add_standard_volume_name.setVisible(False)
+            self.add_standard_organ_name.setVisible(False)
+            self.import_organ_csv.setVisible(False)
+            self.table_modules.setColumnCount(0)
+        elif type == "DVH":
+            self.table_modules.setVisible(True)
+            self.table_view.setVisible(False)
+            self.table_organ.setVisible(False)
+            self.table_volume.setVisible(False)
+            self.table_roi.setVisible(False)
+            self.table_Ids.setVisible(False)
+            self.add_new_window.setVisible(False)
+            self.add_new_roi.setVisible(False)
+            self.add_standard_volume_name.setVisible(False)
+            self.add_standard_organ_name.setVisible(False)
+            self.import_organ_csv.setVisible(False)
+            self.table_modules.setColumnCount(0)
+        elif type == "Image Windowing":
+            self.table_modules.setVisible(False)
+            self.table_view.setVisible(True)
+            self.table_organ.setVisible(False)
+            self.table_volume.setVisible(False)
+            self.table_roi.setVisible(False)
+            self.table_Ids.setVisible(False)
+            self.add_new_window.setVisible(True)
+            self.add_new_roi.setVisible(False)
+            self.add_standard_volume_name.setVisible(False)
+            self.add_standard_organ_name.setVisible(False)
+            self.import_organ_csv.setVisible(False)
+        elif type == "Standard Organ Names":
+            self.table_modules.setVisible(False)
+            self.table_view.setVisible(False)
+            self.table_organ.setVisible(True)
+            self.table_volume.setVisible(False)
+            self.table_roi.setVisible(False)
+            self.table_Ids.setVisible(False)
+            self.add_new_window.setVisible(False)
+            self.add_new_roi.setVisible(False)
+            self.add_standard_volume_name.setVisible(False)
+            self.add_standard_organ_name.setVisible(True)
+            self.import_organ_csv.setVisible(True)
+        elif type == "Standard Volume Names":
+            self.table_modules.setVisible(False)
+            self.table_view.setVisible(False)
+            self.table_organ.setVisible(False)
+            self.table_volume.setVisible(True)
+            self.table_roi.setVisible(False)
+            self.table_Ids.setVisible(False)
+            self.add_new_window.setVisible(False)
+            self.add_new_roi.setVisible(False)
+            self.add_standard_volume_name.setVisible(True)
+            self.add_standard_organ_name.setVisible(False)
+            self.import_organ_csv.setVisible(False)
+        elif type == "Create ROI from Isodose":
+            self.table_modules.setVisible(False)
+            self.table_view.setVisible(False)
+            self.table_organ.setVisible(False)
+            self.table_volume.setVisible(False)
+            self.table_roi.setVisible(True)
+            self.table_Ids.setVisible(False)
+            self.add_new_window.setVisible(False)
+            self.add_new_roi.setVisible(True)
+            self.add_standard_volume_name.setVisible(False)
+            self.add_standard_organ_name.setVisible(False)
+            self.import_organ_csv.setVisible(False)
+        elif type == "Patient ID - Hash ID":
+            self.table_modules.setVisible(False)
+            self.table_view.setVisible(False)
+            self.table_organ.setVisible(False)
+            self.table_volume.setVisible(False)
+            self.table_roi.setVisible(False)
+            self.table_Ids.setVisible(True)
+            self.add_new_window.setVisible(False)
+            self.add_new_roi.setVisible(False)
+            self.add_standard_volume_name.setVisible(False)
+            self.add_standard_organ_name.setVisible(False)
+            self.import_organ_csv.setVisible(False)
+        elif type == "Built-In Plugins" or type == "User Plugins":
+            self.add_new_window.setVisible(False)
+            self.add_new_roi.setVisible(False)
+            self.add_standard_volume_name.setVisible(False)
+            self.add_standard_organ_name.setVisible(False)
+            self.import_organ_csv.setVisible(False)
+            self.table_modules.setVisible(True)
+            self.table_view.setVisible(False)
+            self.table_organ.setVisible(False)
+            self.table_volume.setVisible(False)
+            self.table_roi.setVisible(False)
+            self.table_Ids.setVisible(False)
+
 
 class PManager:
 
