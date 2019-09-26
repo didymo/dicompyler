@@ -13,14 +13,16 @@ from country_list import countries_for_language
 from array import *
 import numpy as np
 import csv
+import random
 from src.Model.CalculateImages import *
 from src.Model.GetPatientInfo import *
 from src.Controller.mainPageController import MainPage
-#from matplotlib.backends.backend_qt5agg import FigureCanvas
+# from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 from src.Model.CalculateImages import *
+
 
 class Ui_MainWindow(object):
 
@@ -37,9 +39,10 @@ class Ui_MainWindow(object):
         self.selected_rois = []
         self.dvh = self.getDVH()
         self.basicInfo = get_basic_info(self.dataset[0])
-        self.dict_windowing = {"normal": [None, None], "lung": [2152, 52], "bone": [1401, 700], "brain": [168, 34], "soft tissue": [330, -24]}
-        self.zoom =1
-        #self.view
+        self.dict_windowing = {"normal": [None, None], "lung": [2152, 52], "bone": [1401, 700], "brain": [168, 34],
+                               "soft tissue": [330, -24]}
+        self.zoom = 1
+        # self.view
 
         # DICOM Tree for RTSS file
         self.dicomTree_rtss = DicomTree(self.file_rtss)
@@ -68,54 +71,12 @@ class Ui_MainWindow(object):
         self.tab1.setObjectName("tab1")
 
         # Left Column: Structures tab
-        self.tab1_structures = QtWidgets.QWidget()
-        self.tab1_structures.setObjectName("tab1_structures")
-        self.updateStructureColumn()
-        # color1_struct = QtGui.QPixmap(10, 10)
-        # color1_struct.fill(QtGui.QColor(255, 144, 3))
-        # self.coloriconAnonymize_and_Save_struct = QtGui.QIcon(color1_struct)
-        # self.colorButton_struct = QtWidgets.QToolButton()
-        # self.colorButton_struct.setIcon(self.coloriconAnonymize_and_Save_struct)
-        # self.frame_structures.addWidget(self.painter, 0, 0, 1, 1)
-        # self.button1_struct = QtWidgets.QCheckBox("ROI1")
-        # self.frame_structures.addWidget(self.button1_struct)
-        # self.frame_structures.setAlignment(self.button1_struct, QtCore.Qt.AlignTop)
+        self.initStructCol()
+        self.updateStructCol()
         self.tab1.addTab(self.tab1_structures, "")
 
         # Left Column: Isodoses tab
-        self.tab1_isodoses = QtWidgets.QWidget()
-        self.tab1_isodoses.setObjectName("tab1_isodoses")
-        self.vbox_isod = QtWidgets.QVBoxLayout(self.tab1_isodoses)
-        self.box1_isod = QtWidgets.QCheckBox("90 % / 6300 cGy [Max]")
-        self.box2_isod = QtWidgets.QCheckBox("102 % / 7140 cGy")
-        self.box3_isod = QtWidgets.QCheckBox("100 % / 7000 cGy")
-        self.box4_isod = QtWidgets.QCheckBox("98 % / 6860 cGy")
-        self.box5_isod = QtWidgets.QCheckBox("95 % / 6650 cGy")
-        self.box6_isod = QtWidgets.QCheckBox("90 % / 6300 cGy")
-        self.box7_isod = QtWidgets.QCheckBox("80 % / 5600 cGy")
-        self.box8_isod = QtWidgets.QCheckBox("70 % / 4900 cGy")
-        self.box9_isod = QtWidgets.QCheckBox("50 % / 3500 cGy")
-        self.box10_isod = QtWidgets.QCheckBox("30 % / 2100 cGy")
-        self.box1_isod.setStyleSheet("font: 10pt \"Laksaman\";")
-        self.box2_isod.setStyleSheet("font: 10pt \"Laksaman\";")
-        self.box3_isod.setStyleSheet("font: 10pt \"Laksaman\";")
-        self.box4_isod.setStyleSheet("font: 10pt \"Laksaman\";")
-        self.box5_isod.setStyleSheet("font: 10pt \"Laksaman\";")
-        self.box6_isod.setStyleSheet("font: 10pt \"Laksaman\";")
-        self.box7_isod.setStyleSheet("font: 10pt \"Laksaman\";")
-        self.box8_isod.setStyleSheet("font: 10pt \"Laksaman\";")
-        self.box9_isod.setStyleSheet("font: 10pt \"Laksaman\";")
-        self.box10_isod.setStyleSheet("font: 10pt \"Laksaman\";")
-        self.vbox_isod.addWidget(self.box1_isod)
-        self.vbox_isod.addWidget(self.box2_isod)
-        self.vbox_isod.addWidget(self.box3_isod)
-        self.vbox_isod.addWidget(self.box4_isod)
-        self.vbox_isod.addWidget(self.box5_isod)
-        self.vbox_isod.addWidget(self.box6_isod)
-        self.vbox_isod.addWidget(self.box7_isod)
-        self.vbox_isod.addWidget(self.box8_isod)
-        self.vbox_isod.addWidget(self.box9_isod)
-        self.vbox_isod.addWidget(self.box10_isod)
+        self.initIsodColumn()
         self.tab1.addTab(self.tab1_isodoses, "")
 
         # Main view
@@ -148,7 +109,7 @@ class Ui_MainWindow(object):
         self.slider.setGeometry(QtCore.QRect(0, 0, 50, 500))
         self.gridLayout_view.addWidget(self.slider, 0, 1, 1, 1)
 
-        #DICOM image processing
+        # DICOM image processing
         id = self.slider.value()
         DICOM_image = self.pixmaps[id]
         DICOM_image = DICOM_image.scaled(512, 512, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
@@ -169,7 +130,6 @@ class Ui_MainWindow(object):
 
         self.tab2.addTab(self.tab2_view, "")
 
-
         # Main view: DVH
         self.tab2_DVH = QtWidgets.QWidget()
         self.tab2_DVH.setObjectName("tab2_DVH")
@@ -184,27 +144,17 @@ class Ui_MainWindow(object):
         self.initDVH_view()
 
         # DVH: Export DVH Button
-        self.vbox_DVH = QtWidgets.QVBoxLayout()
         self.button_exportDVH = QtWidgets.QPushButton()
         self.button_exportDVH.setFixedSize(QtCore.QSize(100, 39))
         self.button_exportDVH.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.button_exportDVH.setStyleSheet("background-color: rgb(238, 238, 236);\n"
-                                       "font: 57 11pt \"Ubuntu\";\n"
-                                       "color:rgb(75,0,130);\n"
-                                       "font-weight: bold;\n")
+                                            "font: 57 11pt \"Ubuntu\";\n"
+                                            "color:rgb(75,0,130);\n"
+                                            "font-weight: bold;\n")
         self.button_exportDVH.setObjectName("button_exportDVH")
-
-        # self.spacer = QtWidgets.QWidget()
-        # self.spacer.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        # self.vbox_DVH.addWidget(self.spacer)
-        self.vbox_DVH.addWidget(self.button_exportDVH)
-
-        # self.vbox_DVH.setAlignment(self.button_exportDVH, QtCore.Qt.AlignBottom)
-        # self.vbox_DVH.addStretch(30)
-        self.gridL_DVH.addLayout(self.vbox_DVH, 1, 1, 1, 1)
+        self.gridL_DVH.addWidget(self.button_exportDVH, 1, 1, 1, 1, QtCore.Qt.AlignBottom)
 
         self.tab2.addTab(self.tab2_DVH, "")
-
 
         # Main view: DICOM Tree
         self.tab2_DICOM_tree = QtWidgets.QWidget()
@@ -215,12 +165,14 @@ class Ui_MainWindow(object):
         self.vboxL_Tree.setContentsMargins(0, 0, 0, 0)
         # Tree view selector
         self.comboBox_TreeSelector = QtWidgets.QComboBox()
-        self.comboBox_TreeSelector.setStyleSheet("font: 75 10pt \"Laksaman\";")
+        self.comboBox_TreeSelector.setStyleSheet("QComboBox {font: 75 10pt \"Laksaman\";"
+                                                 "combobox-popup: 0;"
+                                                 "background-color: #efefef; }")
         self.comboBox_TreeSelector.addItem("Select a DICOM dataset...")
         self.comboBox_TreeSelector.addItem("RT Dose")
         self.comboBox_TreeSelector.addItem("RTSS")
         for i in range(len(self.pixmaps) - 1):
-            self.comboBox_TreeSelector.addItem("CT Image Slice "+str(i+1))
+            self.comboBox_TreeSelector.addItem("CT Image Slice " + str(i + 1))
         self.comboBox_TreeSelector.activated.connect(self.comboTreeSelector)
         self.comboBox_TreeSelector.setFixedSize(QtCore.QSize(180, 31))
         self.vboxL_Tree.addWidget(self.comboBox_TreeSelector, QtCore.Qt.AlignLeft)
@@ -247,9 +199,9 @@ class Ui_MainWindow(object):
         # check for csv data
         reg = '/[clinicaldata]*[.csv]'
         if not glob.glob(self.path + reg):
-            self.callClass.display_cd_form(self.tab2,self.path)
+            self.callClass.display_cd_form(self.tab2, self.path)
         else:
-            self.callClass.display_cd_dat(self.tab2,self.path)
+            self.callClass.display_cd_dat(self.tab2, self.path)
 
         # Bottom Layer
         self.frame_bottom = QtWidgets.QFrame(self.centralwidget)
@@ -273,7 +225,9 @@ class Ui_MainWindow(object):
 
         # Structure Information: "Select Structure" combobox
         self.comboBox = QtWidgets.QComboBox(self.frame_struct_info)
-        self.comboBox.setStyleSheet("font: 75 10pt \"Laksaman\";")
+        self.comboBox.setStyleSheet("font: 75 10pt \"Laksaman\";"
+                                    "combobox-popup: 0;"
+                                    "background-color: #efefef;")
         self.comboBox.addItem("Select...")
         for key, value in self.rois.items():
             self.comboBox.addItem(value['name'])
@@ -486,7 +440,6 @@ class Ui_MainWindow(object):
         self.menuHelp = QtWidgets.QMenu(self.menubar)
         self.menuHelp.setObjectName("menuHelp")
 
-
         # All icons used for menu bar and toolbar
         iconOpen = QtGui.QIcon()
         iconOpen.addPixmap(QtGui.QPixmap(":/images/Icon/open_patient.png"),
@@ -519,7 +472,6 @@ class Ui_MainWindow(object):
         iconExport.addPixmap(QtGui.QPixmap(":/images/Icon/export.png"),
                              QtGui.QIcon.Normal, QtGui.QIcon.On)
 
-
         # Set Menu Bar (Tools tab)
         self.menuWindowing = QtWidgets.QMenu(self.menuTools)
         self.menuWindowing.setObjectName("menuWindowing")
@@ -536,7 +488,6 @@ class Ui_MainWindow(object):
         self.toolBar.setMovable(False)
         self.toolBar.setObjectName("toolBar")
         MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
-
 
         # Open Patient Action
         self.actionOpen = QtWidgets.QAction(MainWindow)
@@ -597,18 +548,6 @@ class Ui_MainWindow(object):
         self.actionWindowing.setIconVisibleInMenu(True)
         self.actionWindowing.setObjectName("actionWindowing")
         self.initWindowingMenu(MainWindow)
-        # self.actionWindowingNormal = QtWidgets.QAction(MainWindow)
-        # self.actionWindowingNormal.setObjectName("actionWindowingNormal")
-        # self.actionWindowingLung = QtWidgets.QAction(MainWindow)
-        # self.actionWindowingLung.setObjectName("actionWindowingLung")
-        # self.actionWindowingBone = QtWidgets.QAction(MainWindow)
-        # self.actionWindowingBone.setObjectName("actionWindowingBone")
-        # self.actionWindowingSoftTissue = QtWidgets.QAction(MainWindow)
-        # self.actionWindowingSoftTissue.setObjectName("actionWindowingSoftTissue")
-        # self.actionWindowingBrain = QtWidgets.QAction(MainWindow)
-        # self.actionWindowingBrain.setObjectName("actionWindowingBrain")
-        # self.actionWindowingHeadNeck = QtWidgets.QAction(MainWindow)
-        # self.actionWindowingHeadNeck.setObjectName("actionWindowingHeadNeck")
 
         # Transect Action
         self.actionTransect = QtWidgets.QAction(MainWindow)
@@ -643,7 +582,6 @@ class Ui_MainWindow(object):
         self.actionAnonymize_and_Save.setObjectName("actionAnonymize_and_Save")
         self.actionAnonymize_and_Save.triggered.connect(self.HandleAnonymization)
 
-
         # Export DVH Spreadsheet Action
         self.actionDVH_Spreadsheet = QtWidgets.QAction(MainWindow)
         self.actionDVH_Spreadsheet.setObjectName("actionDVH_Spreadsheet")
@@ -656,7 +594,6 @@ class Ui_MainWindow(object):
         self.actionPyradiomics = QtWidgets.QAction(MainWindow)
         self.actionPyradiomics.setObjectName("actionPyradiomics")
         self.actionPyradiomics.triggered.connect(self.pyradiomicsHandler)
-
 
         # Build menu bar
         self.menuFile.addAction(self.actionOpen)
@@ -671,12 +608,6 @@ class Ui_MainWindow(object):
         self.menuEdit.addSeparator()
         self.menuEdit.addAction(self.actionRename_ROI)
         self.menuEdit.addAction(self.actionDelete_ROI)
-        # self.menuWindowing.addAction(self.actionWindowingNormal)
-        # self.menuWindowing.addAction(self.actionWindowingBone)
-        # self.menuWindowing.addAction(self.actionWindowingBrain)
-        # self.menuWindowing.addAction(self.actionWindowingHeadNeck)
-        # self.menuWindowing.addAction(self.actionWindowingLung)
-        # self.menuWindowing.addAction(self.actionWindowingSoftTissue)
         self.menuROI_Creation.addAction(self.actionBrush)
         self.menuROI_Creation.addAction(self.actionIsodose)
         self.menuExport.addAction(self.actionDVH_Spreadsheet)
@@ -741,8 +672,6 @@ class Ui_MainWindow(object):
         self.tab2.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-
-
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
 
@@ -757,8 +686,7 @@ class Ui_MainWindow(object):
         self.tab2.setTabText(self.tab2.indexOf(self.tab2_DICOM_tree), _translate("MainWindow", "DICOM Tree"))
         self.tab2.setTabText(3, "Clinical Data")
 
-
-       # self.tab2.setTabText(self.tab2.indexOf(self.tab2_clinical_data), _translate("MainWindow", "Clinical Data"))
+        # self.tab2.setTabText(self.tab2.indexOf(self.tab2_clinical_data), _translate("MainWindow", "Clinical Data"))
 
         # Set "export DVH" button label
         self.button_exportDVH.setText(_translate("MainWindow", "Export DVH"))
@@ -815,12 +743,6 @@ class Ui_MainWindow(object):
         self.actionZoom_In.setText(_translate("MainWindow", "Zoom In"))
         self.actionZoom_Out.setText(_translate("MainWindow", "Zoom Out"))
         self.actionWindowing.setText(_translate("MainWindow", "Windowing"))
-        # self.actionWindowingNormal.setText(_translate("MainWindow", "Normal"))
-        # self.actionWindowingLung.setText(_translate("MainWindow", "Lung"))
-        # self.actionWindowingBone.setText(_translate("MainWindow", "Bone"))
-        # self.actionWindowingSoftTissue.setText(_translate("MainWindow", "Soft Tissue"))
-        # self.actionWindowingBrain.setText(_translate("MainWindow", "Brain"))
-        # self.actionWindowingHeadNeck.setText(_translate("MainWindow", "Head and Neck"))
         self.actionTransect.setText(_translate("MainWindow", "Transect"))
         self.actionBrush.setText(_translate("MainWindow", "ROI by Brush"))
         self.actionIsodose.setText(_translate("MainWindow", "ROI by Isodose"))
@@ -845,54 +767,215 @@ class Ui_MainWindow(object):
     def updateView(self):
         self.DICOM_view.setTransform(QTransform().scale(self.zoom, self.zoom))
 
-    def updateStructureColumn(self):
+    # def colorGenerator(self, index):
+    # 	tmp1 = int(index / 6)
+    # 	tmp2 = index % 6
+    # 	if tmp1 > 30:
+    # 		print("Maximum number of ROIs reached")
+    # 		red, blue, green = 0, 0, 0
+    # 	else:
+    # 		intensity = self.intensityForColorGenerator()
+    # 		intensity_index = intensity[tmp1]
+    # 		if tmp2 == 0:
+    # 			red, green = 0, 0
+    # 			blue = intensity_index
+    #
+    # 		elif tmp2 == 1:
+    # 			red, blue = 0, 0
+    # 			green = intensity_index
+    #
+    # 		elif tmp2 == 2:
+    # 			blue, green = 0, 0
+    # 			red = intensity_index
+    #
+    # 		elif tmp2 == 3:
+    # 			red = 0
+    # 			blue, green = intensity_index, intensity_index
+    #
+    # 		elif tmp2 == 4:
+    # 			green = 0
+    # 			red, blue = intensity_index, intensity_index
+    #
+    # 		else:
+    # 			blue = 0
+    # 			red, green = intensity_index, intensity_index
+    #
+    # 	return red, green, blue
+    #
+    #
+    #
+    # def intensityForColorGenerator(self):
+    # 	res = []
+    # 	tmp = 255
+    # 	res.append(tmp)
+    # 	for i in range(10):
+    # 		tmp1 = int(tmp / 2)
+    # 		res.append(tmp1)
+    # 		tmp2 = int(tmp / 4)
+    # 		res.append(tmp2)
+    # 		tmp = tmp1 + tmp2
+    # 		res.append(tmp)
+    # 	return res
 
-        self.scrollAreaStruct = QtWidgets.QScrollArea(self.tab1_structures)
+    # Initialization of colors for ROIs
+    def initRoiColor(self):
+        self.allColor = HexaColor()
+        self.roiColor = dict()
+        index = 0
+        for key, val in self.rois.items():
+            value = dict()
+            value['R'], value['G'], value['B'] = self.allColor.getHexaColor(index)
+            value['QColor'] = QtGui.QColor(value['R'], value['G'], value['B'])
+            self.roiColor[key] = value
+            index += 1
+
+    # Initialization of the list of structures (left column of the main page)
+    def initStructCol(self):
+        # Color squares initialization for each ROI
+        self.initRoiColor()
+        # Scroll Area
+        self.tab1_structures = QtWidgets.QWidget()
+        self.tab1_structures.setObjectName("tab1_structures")
+        self.structColumnWidget = QtWidgets.QWidget(self.tab1_structures)
+        self.scrollAreaStruct = QtWidgets.QScrollArea(self.structColumnWidget)
+        self.scrollAreaStruct.setGeometry(QtCore.QRect(0, 0, 198, 320))
         self.scrollAreaStruct.setWidgetResizable(True)
-        self.scrollAreaStruct.setGeometry(QtCore.QRect(0, 0, 200, 333))
+        # Scroll Area Content
+        self.scrollAreaStructContents = QtWidgets.QWidget(self.scrollAreaStruct)
+        self.scrollAreaStructContents.setGeometry(QtCore.QRect(0, 0, 198, 550))
+        self.scrollAreaStruct.ensureWidgetVisible(self.scrollAreaStructContents)
+        # Grid Layout containing the color squares and the checkboxes
+        self.gridL_StructColumn = QtWidgets.QGridLayout(self.scrollAreaStructContents)
+        self.gridL_StructColumn.setContentsMargins(5, 5, 5, 5)
+        self.gridL_StructColumn.setVerticalSpacing(0)
+        self.gridL_StructColumn.setHorizontalSpacing(10)
+        self.gridL_StructColumn.setObjectName("gridL_StructColumn")
 
-        # self.scrollAreaStruct = QtWidgets.QScrollArea(self.tab1_structures)
-        # self.scrollAreaStruct.setWidgetResizable(False)
-        self.scrollAreaStruct.setGeometry(QtCore.QRect(0, 0, 198, 333))
-        # self.scrollAreaStruct.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
-        # self.scrollAreaStruct.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-
-        # self.scrollContentsStruct = QtWidgets.QWidget()
-        # self.scrollContentsStruct.setGeometry(QtCore.QRect(0, 0, 200, 633))
-        # self.scrollContentsStruct.setObjectName("scrollContentsStruct")
-        # self.scrollAreaStruct.ensureWidgetVisible(self.scrollContentsStruct)
-
-        self.frame_structures = QtWidgets.QFrame(self.scrollAreaStruct)
-        self.frame_structures.setLayout(QtWidgets.QVBoxLayout())
-        self.scrollAreaStruct.setWidget(self.frame_structures)
-        self.frame_structures.layout().setContentsMargins(0, 0, 0, 0)
-
+    # Add the contents in the list of structures (left column of the main page)
+    def updateStructCol(self):
+        index = 0
         for key, value in self.rois.items():
+            # Color Square
+            colorSquareLabel = QtWidgets.QLabel()
+            colorSquarePix = QtGui.QPixmap(15, 15)
+            colorSquarePix.fill(self.roiColor[key]['QColor'])
+            colorSquareLabel.setPixmap(colorSquarePix)
+            self.gridL_StructColumn.addWidget(colorSquareLabel, index, 0, 1, 1)
+            # QCheckbox
             text = value['name']
             checkBoxStruct = QtWidgets.QCheckBox()
             checkBoxStruct.clicked.connect(
-                lambda state, text=key: self.check(state, text))
+                lambda state, text=key: self.checkedStruct(state, text))
             checkBoxStruct.setStyleSheet("font: 10pt \"Laksaman\";")
             checkBoxStruct.setText(text)
             checkBoxStruct.setObjectName(text)
-            self.frame_structures.layout().addWidget(checkBoxStruct)
+            self.gridL_StructColumn.addWidget(checkBoxStruct, index, 1, 1, 1)
+            # self.frame_structures.layout().addWidget(checkBoxStruct)
+            index += 1
+        self.scrollAreaStruct.setStyleSheet("QScrollArea {background-color: #ffffff; border-style: none;}")
+        self.scrollAreaStructContents.setStyleSheet("QWidget {background-color: #ffffff; border-style: none;}")
 
-        # text="text"
-        # boxTest = QtWidgets.QCheckBox()
-        # boxTest.clicked.connect(
-        #     lambda ch, text=text: print(self.selected_rois))
-        # boxTest.setStyleSheet("font: 10pt \"Laksaman\";")
-        # boxTest.setText("Test")
-        # boxTest.setObjectName("Test")
-        # self.frame_structures.layout().addWidget(boxTest)
+        vspacer = QtWidgets.QSpacerItem(
+            QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.gridL_StructColumn.addItem(vspacer, index + 1, 0, 1, -1)
 
+        hspacer = QtWidgets.QSpacerItem(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.gridL_StructColumn.addItem(hspacer, 0, 2, -1, 1)
 
-    def check(self, state, text):
+        self.scrollAreaStruct.setWidget(self.scrollAreaStructContents)
+
+    # Update the list of selected structures and DVH view
+    def checkedStruct(self, state, text):
         if state:
             self.selected_rois.append(text)
         else:
             self.selected_rois.remove(text)
         self.updateDVH_view()
+
+    # Initialize the list of isodoses (left column of the main page)
+    def initIsodColumn(self):
+        self.tab1_isodoses = QtWidgets.QWidget()
+        self.tab1_isodoses.setGeometry(QtCore.QRect(0, 0, 198, 320))
+        self.gridL_IsodCol = QtWidgets.QGridLayout(self.tab1_isodoses)
+        self.gridL_IsodCol.setContentsMargins(5, 1, 0, 0)
+        self.gridL_IsodCol.setVerticalSpacing(1)
+        self.gridL_IsodCol.setHorizontalSpacing(10)
+        self.gridL_IsodCol.setObjectName("gridL_IsodCol")
+        # Color squares
+        self.color1_isod = self.colorSquareDraw(131, 0, 0)
+        self.color2_isod = self.colorSquareDraw(185, 0, 0)
+        self.color3_isod = self.colorSquareDraw(255, 46, 0)
+        self.color4_isod = self.colorSquareDraw(255, 161, 0)
+        self.color5_isod = self.colorSquareDraw(253, 255, 0)
+        self.color6_isod = self.colorSquareDraw(0, 255, 0)
+        self.color7_isod = self.colorSquareDraw(0, 143, 0)
+        self.color8_isod = self.colorSquareDraw(0, 255, 255)
+        self.color9_isod = self.colorSquareDraw(33, 0, 255)
+        self.color10_isod = self.colorSquareDraw(11, 0, 134)
+        self.gridL_IsodCol.addWidget(self.color1_isod, 0, 0, 1, 1)
+        self.gridL_IsodCol.addWidget(self.color2_isod, 1, 0, 1, 1)
+        self.gridL_IsodCol.addWidget(self.color3_isod, 2, 0, 1, 1)
+        self.gridL_IsodCol.addWidget(self.color4_isod, 3, 0, 1, 1)
+        self.gridL_IsodCol.addWidget(self.color5_isod, 4, 0, 1, 1)
+        self.gridL_IsodCol.addWidget(self.color6_isod, 5, 0, 1, 1)
+        self.gridL_IsodCol.addWidget(self.color7_isod, 6, 0, 1, 1)
+        self.gridL_IsodCol.addWidget(self.color8_isod, 7, 0, 1, 1)
+        self.gridL_IsodCol.addWidget(self.color9_isod, 8, 0, 1, 1)
+        self.gridL_IsodCol.addWidget(self.color10_isod, 9, 0, 1, 1)
+        # Checkboxes
+        self.isodose_patient = 7000
+        val_isod1 = int(1.07 * self.isodose_patient)
+        val_isod2 = int(1.05 * self.isodose_patient)
+        val_isod3 = int(1.00 * self.isodose_patient)
+        val_isod4 = int(0.95 * self.isodose_patient)
+        val_isod5 = int(0.90 * self.isodose_patient)
+        val_isod6 = int(0.80 * self.isodose_patient)
+        val_isod7 = int(0.70 * self.isodose_patient)
+        val_isod8 = int(0.60 * self.isodose_patient)
+        val_isod9 = int(0.30 * self.isodose_patient)
+        val_isod10 = int(0.10 * self.isodose_patient)
+        self.box1_isod = QtWidgets.QCheckBox("107 % / " + str(val_isod1) + " cGy [Max]")
+        self.box2_isod = QtWidgets.QCheckBox("105 % / " + str(val_isod2) + " cGy")
+        self.box3_isod = QtWidgets.QCheckBox("100 % / " + str(val_isod3) + " cGy")
+        self.box4_isod = QtWidgets.QCheckBox("95 % / " + str(val_isod4) + " cGy")
+        self.box5_isod = QtWidgets.QCheckBox("90 % / " + str(val_isod5) + " cGy")
+        self.box6_isod = QtWidgets.QCheckBox("80 % / " + str(val_isod6) + " cGy")
+        self.box7_isod = QtWidgets.QCheckBox("70 % / " + str(val_isod7) + " cGy")
+        self.box8_isod = QtWidgets.QCheckBox("60 % / " + str(val_isod8) + " cGy")
+        self.box9_isod = QtWidgets.QCheckBox("30 % / " + str(val_isod9) + " cGy")
+        self.box10_isod = QtWidgets.QCheckBox("10 % / " + str(val_isod10) + " cGy")
+        self.box1_isod.setStyleSheet("font: 10pt \"Laksaman\";")
+        self.box2_isod.setStyleSheet("font: 10pt \"Laksaman\";")
+        self.box3_isod.setStyleSheet("font: 10pt \"Laksaman\";")
+        self.box4_isod.setStyleSheet("font: 10pt \"Laksaman\";")
+        self.box5_isod.setStyleSheet("font: 10pt \"Laksaman\";")
+        self.box6_isod.setStyleSheet("font: 10pt \"Laksaman\";")
+        self.box7_isod.setStyleSheet("font: 10pt \"Laksaman\";")
+        self.box8_isod.setStyleSheet("font: 10pt \"Laksaman\";")
+        self.box9_isod.setStyleSheet("font: 10pt \"Laksaman\";")
+        self.box10_isod.setStyleSheet("font: 10pt \"Laksaman\";")
+        self.gridL_IsodCol.addWidget(self.box1_isod, 0, 1, 1, 1)
+        self.gridL_IsodCol.addWidget(self.box2_isod, 1, 1, 1, 1)
+        self.gridL_IsodCol.addWidget(self.box3_isod, 2, 1, 1, 1)
+        self.gridL_IsodCol.addWidget(self.box4_isod, 3, 1, 1, 1)
+        self.gridL_IsodCol.addWidget(self.box5_isod, 4, 1, 1, 1)
+        self.gridL_IsodCol.addWidget(self.box6_isod, 5, 1, 1, 1)
+        self.gridL_IsodCol.addWidget(self.box7_isod, 6, 1, 1, 1)
+        self.gridL_IsodCol.addWidget(self.box8_isod, 7, 1, 1, 1)
+        self.gridL_IsodCol.addWidget(self.box9_isod, 8, 1, 1, 1)
+        self.gridL_IsodCol.addWidget(self.box10_isod, 9, 1, 1, 1)
+
+        vspacer = QtWidgets.QSpacerItem(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.gridL_IsodCol.addItem(vspacer, 10, 0, 2, -1)
+
+    def colorSquareDraw(self, a, b, c):
+        colorSquareLabel = QtWidgets.QLabel()
+        colorSquarePix = QtGui.QPixmap(15, 15)
+        colorSquarePix.fill(QtGui.QColor(a, b, c))
+        colorSquareLabel.setPixmap(colorSquarePix)
+        return colorSquareLabel
 
     # In the Model directory
     def getDVH(self):
@@ -903,26 +986,27 @@ class Ui_MainWindow(object):
             res[key_int] = value
         return res
 
-
-
     # In the View directory
     def DVH_view(self):
         fig, ax = plt.subplots()
         fig.subplots_adjust(0.1, 0.15, 1, 1)
         max_xlim = 0
+        legend = plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         for roi in self.selected_rois:
             dvh = self.dvh[int(roi)]
             if dvh.volume != 0:
-                ax.plot(dvh.bincenters, 100 * dvh.counts / dvh.volume, label=dvh.name,
-                        color=None if not isinstance(dvh.color, np.ndarray) else
-                        (dvh.color / 255))
+                colorRoi = self.roiColor[roi]
+                color_R = colorRoi['R'] / 255
+                color_G = colorRoi['G'] / 255
+                color_B = colorRoi['B'] / 255
+                plt.plot(dvh.bincenters, 100 * dvh.counts / dvh.volume, label=dvh.name,
+                         color=[color_R, color_G, color_B])
                 if dvh.bincenters[-1] > max_xlim:
                     max_xlim = dvh.bincenters[-1]
                 plt.xlabel('Dose [%s]' % dvh.dose_units)
                 plt.ylabel('Volume [%s]' % '%')
                 if dvh.name:
-                    plt.legend(loc='best')
-                    # plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+                    legend = plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 
         ax.set_ylim([0, 105])
         ax.set_xlim([0, max_xlim + 3])
@@ -941,20 +1025,28 @@ class Ui_MainWindow(object):
         ax.grid(which='minor', alpha=0.2)
         ax.grid(which='major', alpha=0.5)
 
+        # self.export_legend(legend)
+
         return fig
+
+    # def export_legend(self, legend, filename="legend.png", expand=[-5, -5, 5, 5]):
+    # 	fig = legend.figure
+    # 	fig.canvas.draw()
+    # 	bbox = legend.get_window_extent()
+    # 	bbox = bbox.from_extents(*(bbox.extents + np.array(expand)))
+    # 	bbox = bbox.transformed(fig.dpi_scale_trans.inverted())
+    # 	fig.savefig(filename, dpi="figure", bbox_inches=bbox)
 
     def initDVH_view(self):
         fig = self.DVH_view()
         self.plotWidget = FigureCanvas(fig)
         self.gridL_DVH.addWidget(self.plotWidget, 1, 0, 1, 1)
 
-
     def updateDVH_view(self):
         self.gridL_DVH.removeWidget(self.plotWidget)
         fig = self.DVH_view()
         self.plotWidget = FigureCanvas(fig)
         self.gridL_DVH.addWidget(self.plotWidget, 1, 0, 1, 1)
-
 
     # When the value of the slider in the DICOM View changes
     def valueChangeSlider(self):
@@ -971,14 +1063,13 @@ class Ui_MainWindow(object):
     def comboTreeSelector(self, index):
         # CT Scans
         if index > 2:
-            self.updateTree(True, index-3, "")
+            self.updateTree(True, index - 3, "")
         # RT Dose
         elif index == 1:
             self.updateTree(False, 0, "RT Dose")
         # RTSS
         elif index == 2:
             self.updateTree(False, 0, "RTSS")
-
 
     def initTree(self):
         self.modelTree = QtGui.QStandardItemModel(0, 5)
@@ -988,7 +1079,6 @@ class Ui_MainWindow(object):
         self.modelTree.setHeaderData(3, QtCore.Qt.Horizontal, "VM")
         self.modelTree.setHeaderData(4, QtCore.Qt.Horizontal, "VR")
         self.treeView.setModel(self.modelTree)
-
 
     def updateTree(self, ct_file, id, name):
         self.initTree()
@@ -1006,7 +1096,6 @@ class Ui_MainWindow(object):
         parentItem = self.modelTree.invisibleRootItem()
         self.recurseBuildModel(dict, parentItem)
         self.treeView.setModel(self.modelTree)
-
 
     def recurseBuildModel(self, dict, parent):
         # For every key in the dictionary
@@ -1038,13 +1127,11 @@ class Ui_MainWindow(object):
             self.menuWindowing.addAction(actionWindowingItem)
             actionWindowingItem.setText(_translate("MainWindow", text))
 
-
     def pyradiomicsHandler(self):
         self.callClass.runPyradiomics()
 
     def HandleAnonymization(self):
         self.callClass.runAnonymization()
-
 
     def transectHandler(self):
 
@@ -1058,18 +1145,44 @@ class Ui_MainWindow(object):
     def pluginManagerHandler(self):
         self.callManager.show_plugin_manager()
 
+
 import src.View.resources_rc
 
 
-# # For Testing
-# class MyWin(QtWidgets.QMainWindow):
-#     def __init__(self, parent=None):
-#         QtWidgets.QWidget.__init__(self, parent)
-#         self.ui = Ui_MainWindow()
-#         self.ui.setupUi(self, path='dicom_sample')
-#
-# if __name__ == "__main__":
-#     app = QtWidgets.QApplication(sys.argv)
-#     myapp = MyWin()
-#     myapp.show()
-#     sys.exit(app.exec_())
+class HexaColor(object):
+    def __init__(self):
+        self.listColor = self.hexaVersionColor()
+
+    def getHexaColor(self, index):
+        return self.listColor[index][0], self.listColor[index][1], self.listColor[index][2]
+
+    def hexaVersionColor(self):
+        colors = [color.rstrip('\n') for color in open('src/View/color.txt')]
+        res = []
+        for color in colors:
+            hex_R = self.convertHexaToDec(color[:2])
+            hex_G = self.convertHexaToDec(color[2:4])
+            hex_B = self.convertHexaToDec(color[-2:])
+            res.append([hex_R, hex_G, hex_B])
+        return res
+
+    def convertHexaToDec(self, number):
+        digit1 = self.convertHexaLetterToNumber(number[:1])
+        digit2 = self.convertHexaLetterToNumber(number[-1:])
+        return int(digit1) * 16 + int(digit2)
+
+    def convertHexaLetterToNumber(self, digit):
+        if digit == 'A':
+            return 10
+        elif digit == 'B':
+            return 11
+        elif digit == 'C':
+            return 12
+        elif digit == 'D':
+            return 13
+        elif digit == 'E':
+            return 14
+        elif digit == 'F':
+            return 15
+        else:
+            return digit
