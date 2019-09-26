@@ -28,6 +28,7 @@ from pathlib import Path
 from dateutil.relativedelta import relativedelta
 from src.Model.Anon import *
 from src.Model.CalculateImages import *
+from src.Model.ROI import *
 
 ######################################################
 #               CLINICAL DATA CODE                   #
@@ -803,7 +804,6 @@ class Transect(QtWidgets.QGraphicsScene):
         plt1.grid(True)
         fig1.canvas.mpl_connect('close_event', self.on_close)
         plt1.show()
-
 
 
 ######################################################
