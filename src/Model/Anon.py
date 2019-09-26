@@ -158,25 +158,24 @@ def create_hash_csv(pname, sha1_pname, csv_filename):
             csvFile.close()
         print("------CSV updated -----")
 
+#====================== getting Modality and Instance_number for new dicom file name=========
+def get_modality_ins_num(ds):
+
+    modality = ds.Modality
+    if modality == "RTSTRUCT" or (modality == "RTPLAN"):
+        return modality,0
+    else:
+        Inum = str(ds.InstanceNumber)
+        return modality,Inum
+
 
 # ===================================Writing the hashed identifiers to DICOM FILE================================================
 def write_hash_dcm(ds_rtss, Dicom_folder_path , Dicom_filename, sha1_P_name):
 
-    # Print_identifiers(ds_rtss)  # print the changed value
-    # print("Writing the hash==========", sha1_P_name)
-
-    # if ds_rtss.Modality != "RTSTRUCT" and ds_rtss.Modality != "RTPLAN":
-    #     print("THE FILE IS =====================",Dicom_filename)
-    #     print("MOdality=====", ds_rtss.Modality)
-    #     print("Instance Number=====", ds_rtss.InstanceNumber )
-    # else: 
-            
-
-
-    ds = ds_rtss
-    modality = ds.Modality
-    sha1_P_name = str(sha1_P_name)
-
+    
+    modality, Inum = get_modality_ins_num(ds_rtss)  
+    
+    # writing the New hashed dicom file with new name "Modality_Instance-Number_Hashed.dcm"
     if (modality == "RTSTRUCT"):
         # # Adding Prefix "Hashed " for each anonymized Dicom file and concat the file and folder
         full_path_new_file = Dicom_folder_path + "/" + modality + "_" + "Hashed" +  ".dcm"
@@ -193,7 +192,7 @@ def write_hash_dcm(ds_rtss, Dicom_folder_path , Dicom_filename, sha1_P_name):
         print(":::::::Write complete :::")
     else:
          # # Adding Prefix "Hashed " for each anonymized Dicom file and concat the file and folder
-        full_path_new_file = Dicom_folder_path + "/" + modality + "_" + str(ds.InstanceNumber) + "_" + "Hashed" +  ".dcm"
+        full_path_new_file = Dicom_folder_path + "/" + modality + "_" + str(Inum) + "_" + "Hashed" +  ".dcm"
         print("File name prefix with (Hashed) ",full_path_new_file)
 
         ds_rtss.save_as(full_path_new_file)
@@ -249,15 +248,6 @@ def anon_call(path):
     All_dcm = get_All_files(Dicom_folder_path)
     print("ALL files: in main \n\n")
 
-    # for eachFile in All_dcm:
-    #     # if eachFile != "rtdose.dcm" and eachFile != "rtss.dcm":
-    #     ds_rtss= LOAD_DCM(Dicom_folder_path,eachFile)
-    #     if ds_rtss.Modality != "RTSTRUCT" and ds_rtss.Modality != "RTPLAN":
-    #         print("THE FILE IS =====================",eachFile)
-    #         print("MOdality=====", ds_rtss.Modality)
-    #         print("Instance Number=====", ds_rtss.InstanceNumber )
-    #     else: 
-    #         continue
     count = 0 
     for eachFile in All_dcm:
         count += 1
