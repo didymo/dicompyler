@@ -1,6 +1,6 @@
 import glob
 import sys
-from tkinter import Tk
+
 
 import matplotlib.pyplot as plt1
 from PyQt5.QtCore import Qt, QPoint, QPointF, QRectF
@@ -19,6 +19,7 @@ from pathlib import Path
 from dateutil.relativedelta import relativedelta
 from src.Model.Anon import *
 from src.Model.CalculateImages import *
+from src.Model.ROI import *
 
 import matplotlib.cbook
 
@@ -794,7 +795,6 @@ class Transect(QtWidgets.QGraphicsScene):
         plt1.grid(True)
         fig1.canvas.mpl_connect('close_event', self.on_close)
         plt1.show()
-
 
 
 ######################################################
