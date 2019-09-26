@@ -179,21 +179,21 @@ def write_hash_dcm(ds_rtss, Dicom_folder_path , Dicom_filename, sha1_P_name):
 
     if (modality == "RTSTRUCT"):
         # # Adding Prefix "Hashed " for each anonymized Dicom file and concat the file and folder
-        full_path_new_file = Dicom_folder_path + "/" + "Hashed" + "_" + modality
+        full_path_new_file = Dicom_folder_path + "/" + modality + "_" + "Hashed" +  ".dcm"
         print("File name prefix with (Hashed) ",full_path_new_file)
 
         ds_rtss.save_as(full_path_new_file)
         print(":::::::Write complete :::")
     elif (modality == "RTPLAN"):
         # # Adding Prefix "Hashed " for each anonymized Dicom file and concat the file and folder
-        full_path_new_file = Dicom_folder_path + "/" + "Hashed" + "_" + modality
+        full_path_new_file = Dicom_folder_path + "/" + modality + "_" + "Hashed" +  ".dcm"
         print("File name prefix with (Hashed) ",full_path_new_file)
 
         ds_rtss.save_as(full_path_new_file)
         print(":::::::Write complete :::")
     else:
          # # Adding Prefix "Hashed " for each anonymized Dicom file and concat the file and folder
-        full_path_new_file = Dicom_folder_path + "/" + "Hashed" + "_" + modality + str(ds.InstanceNumber)
+        full_path_new_file = Dicom_folder_path + "/" + modality + "_" + str(ds.InstanceNumber) + "_" + "Hashed" +  ".dcm"
         print("File name prefix with (Hashed) ",full_path_new_file)
 
         ds_rtss.save_as(full_path_new_file)
