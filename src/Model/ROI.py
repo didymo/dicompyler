@@ -227,9 +227,56 @@ def main():
     dict_raw_contours = get_all_raw_contours(rtss, roi_list)
     for key in dict_raw_contours:
         print(key)
+
+    ### GTVp is the 10th ROI in the sequence
+    # (3006, 0022) ROI Number                          IS: "10"
+    # (3006, 0024) Referenced Frame of Reference UID   UI: 1.3.12.2.1107.5.1.4.100020.30000018082923183405900000003
+    # (3006, 0026) ROI Name                            LO: 'GTVp'
+    # (3006, 0036) ROI Generation Algorithm            CS: 'SEMIAUTOMATIC'
+
+    # (3006, 002a) ROI Display Color IS: ['255', '0', '0']
+    # (3006, 0040) Contour Sequence 15 item(s) - ---
     roi_name = 'GTVp'
     GTVp_contour = get_roi_contours(dict_raw_contours, roi_name, dict_matrices)
     print(GTVp_contour)
+
+    xs = []
+    ys = []
+    for slice in GTVp_contour:
+        points = GTVp_contour[slice]
+        for point in points:
+            xs.append(point[0])
+            ys.append(511 - point[1])
+        break
+    plt.scatter(xs, ys)
+    plt.show()
+
+
+    temp_list = []
+    for x, y in zip(xs, ys):
+        temp_list.append([x, y])
+
+    polygon = np.array(temp_list)
+    left = np.min(polygon, axis=0)
+    right = np.max(polygon, axis=0)
+    x = np.arange(math.ceil(left[0]), math.floor(right[0]) + 1)
+    y = np.arange(math.ceil(left[1]), math.floor(right[1]) + 1)
+    xv, yv = np.meshgrid(x, y, indexing='xy')
+    points = np.hstack((xv.reshape((-1, 1)), yv.reshape((-1, 1))))
+
+    path = matplotlib.path.Path(polygon)
+    mask = path.contains_points(points)
+    mask.shape = xv.shape
+
+    plt.plot(xs, ys)
+    plt.show()
+    plt.imshow(mask)
+    plt.show()
+
+
+
+
+
 
 # # This is for get all roi at one time
 # # Sooooo slowwwwwww
