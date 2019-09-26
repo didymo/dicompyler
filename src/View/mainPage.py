@@ -13,15 +13,10 @@ from country_list import countries_for_language
 from array import *
 import numpy as np
 import csv
-import random
 from src.Model.CalculateImages import *
 from src.Model.GetPatientInfo import *
 from src.Controller.mainPageController import MainPage
-# from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-
-from src.Model.CalculateImages import *
 
 
 class Ui_MainWindow(object):
@@ -36,13 +31,15 @@ class Ui_MainWindow(object):
 		self.dataset_rtss = pydicom.dcmread(self.file_rtss)
 		self.dataset_rtdose = pydicom.dcmread(self.file_rtdose)
 		self.rois = get_roi_info(self.dataset_rtss)
+		self.listRoisID = self.orderedListRoiID()
 		self.selected_rois = []
 		self.dvh = self.getDVH()
+		self.roi_info = StructureInformation(self)
 		self.basicInfo = get_basic_info(self.dataset[0])
 		self.dict_windowing = {"normal": [None, None], "lung": [2152, 52], "bone": [1401, 700], "brain": [168, 34],
 							   "soft tissue": [330, -24]}
 		self.zoom = 1
-        # self.view
+
 
 		# DICOM Tree for RTSS file
 		self.dicomTree_rtss = DicomTree(self.file_rtss)
@@ -231,8 +228,10 @@ class Ui_MainWindow(object):
 		self.comboBox.addItem("Select...")
 		for key, value in self.rois.items():
 			self.comboBox.addItem(value['name'])
+		self.comboBox.activated.connect(self.comboStructInfo)
 		self.comboBox.setGeometry(QtCore.QRect(5, 35, 188, 31))
 		self.comboBox.setObjectName("comboBox")
+
 
 		# Structure Information: "Volume" label
 		self.struct_volume_label = QtWidgets.QLabel(self.frame_struct_info)
@@ -260,27 +259,55 @@ class Ui_MainWindow(object):
 
 		# Structure Information: "Volume" box
 		self.struct_volume_box = QtWidgets.QLabel(self.frame_struct_info)
-		self.struct_volume_box.setGeometry(QtCore.QRect(90, 70, 81, 31))
+		self.struct_volume_box.setGeometry(QtCore.QRect(95, 70, 81, 31))
 		self.struct_volume_box.setStyleSheet("font: 10pt \"Laksaman\";")
 		self.struct_volume_box.setObjectName("struct_volume_box")
 
 		# Structure Information: "Min Dose" box
 		self.struct_minDose_box = QtWidgets.QLabel(self.frame_struct_info)
-		self.struct_minDose_box.setGeometry(QtCore.QRect(90, 100, 81, 31))
+		self.struct_minDose_box.setGeometry(QtCore.QRect(95, 100, 81, 31))
 		self.struct_minDose_box.setStyleSheet("font: 10pt \"Laksaman\";")
 		self.struct_minDose_box.setObjectName("struct_minDose_box")
 
 		# Structure Information: "Max Dose" box
 		self.struct_maxDose_box = QtWidgets.QLabel(self.frame_struct_info)
-		self.struct_maxDose_box.setGeometry(QtCore.QRect(90, 130, 81, 31))
+		self.struct_maxDose_box.setGeometry(QtCore.QRect(95, 130, 81, 31))
 		self.struct_maxDose_box.setStyleSheet("font: 10pt \"Laksaman\";")
 		self.struct_maxDose_box.setObjectName("struct_maxDose_box")
 
 		# Structure Information: "Mean Dose" box
 		self.struct_meanDose_box = QtWidgets.QLabel(self.frame_struct_info)
-		self.struct_meanDose_box.setGeometry(QtCore.QRect(90, 160, 81, 31))
+		self.struct_meanDose_box.setGeometry(QtCore.QRect(95, 160, 81, 31))
 		self.struct_meanDose_box.setStyleSheet("font: 10pt \"Laksaman\";")
 		self.struct_meanDose_box.setObjectName("struct_meanDose_box")
+
+
+
+
+		# Structure Information: "Volume" unit
+		self.struct_volume_unit = QtWidgets.QLabel(self.frame_struct_info)
+		self.struct_volume_unit.setGeometry(QtCore.QRect(160, 70, 81, 31))
+		self.struct_volume_unit.setStyleSheet("font: 10pt \"Laksaman\";")
+		self.struct_volume_unit.setObjectName("struct_volume_unit")
+
+		# Structure Information: "Min Dose" unit
+		self.struct_minDose_unit = QtWidgets.QLabel(self.frame_struct_info)
+		self.struct_minDose_unit.setGeometry(QtCore.QRect(160, 100, 81, 31))
+		self.struct_minDose_unit.setStyleSheet("font: 10pt \"Laksaman\";")
+		self.struct_minDose_unit.setObjectName("struct_minDose_unit")
+
+		# Structure Information: "Max Dose" unit
+		self.struct_maxDose_unit = QtWidgets.QLabel(self.frame_struct_info)
+		self.struct_maxDose_unit.setGeometry(QtCore.QRect(160, 130, 81, 31))
+		self.struct_maxDose_unit.setStyleSheet("font: 10pt \"Laksaman\";")
+		self.struct_maxDose_unit.setObjectName("struct_maxDose_unit")
+
+		# Structure Information: "Mean Dose" unit
+		self.struct_meanDose_unit = QtWidgets.QLabel(self.frame_struct_info)
+		self.struct_meanDose_unit.setGeometry(QtCore.QRect(160, 160, 81, 31))
+		self.struct_meanDose_unit.setStyleSheet("font: 10pt \"Laksaman\";")
+		self.struct_meanDose_unit.setObjectName("struct_meanDose_unit")
+
 
 		# Layout Icon and Text "Structure Information"
 		self.widget = QtWidgets.QWidget(self.frame_struct_info)
@@ -314,6 +341,10 @@ class Ui_MainWindow(object):
 		self.struct_minDose_box.raise_()
 		self.struct_maxDose_box.raise_()
 		self.struct_meanDose_box.raise_()
+		self.struct_volume_unit.raise_()
+		self.struct_minDose_unit.raise_()
+		self.struct_maxDose_unit.raise_()
+		self.struct_meanDose_unit.raise_()
 
 		# Patient Bar
 
@@ -341,9 +372,8 @@ class Ui_MainWindow(object):
 		# Name Patient (box)
 		self.patient_name_box = QtWidgets.QLabel(self.widget3)
 		self.patient_name_box.setObjectName("patient_name_box")
-		self.patient_name_box.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
 		self.patient_name_box.setFont(QtGui.QFont("Laksaman", pointSize=10))
-		self.gridLayout_name.addWidget(self.patient_name_box, 0, 1, 1, 1)
+		self.gridLayout_name.addWidget(self.patient_name_box, 0, 1, 1, 1, QtCore.Qt.AlignLeft)
 
 		# Patient ID (layout)
 		self.widget4 = QtWidgets.QWidget(self.centralwidget)
@@ -357,13 +387,13 @@ class Ui_MainWindow(object):
 		self.patient_ID = QtWidgets.QLabel(self.widget4)
 		self.patient_ID.setObjectName("patient_ID")
 		self.patient_ID.setFont(QtGui.QFont("Laksaman", weight=QtGui.QFont.Bold, pointSize=10))
-		self.gridLayout_ID.addWidget(self.patient_ID, 0, 0, 1, 1)
+		self.gridLayout_ID.addWidget(self.patient_ID, 0, 0, 1, 1, QtCore.Qt.AlignLeft)
 
 		# Patient ID (box)
 		self.patient_ID_box = QtWidgets.QLabel(self.widget4)
 		self.patient_ID_box.setObjectName("patient_ID_box")
 		self.patient_ID_box.setFont(QtGui.QFont("Laksaman", pointSize=10))
-		self.gridLayout_ID.addWidget(self.patient_ID_box, 0, 1, 1, 1)
+		self.gridLayout_ID.addWidget(self.patient_ID_box, 0, 1, 1, 1, QtCore.Qt.AlignLeft)
 
 		# Gender (layout)
 		self.widget2 = QtWidgets.QWidget(self.centralwidget)
@@ -377,7 +407,7 @@ class Ui_MainWindow(object):
 		self.patient_gender = QtWidgets.QLabel(self.widget2)
 		self.patient_gender.setObjectName("patient_gender")
 		self.patient_gender.setFont(QtGui.QFont("Laksaman", weight=QtGui.QFont.Bold, pointSize=10))
-		self.gridLayout_gender.addWidget(self.patient_gender, 0, 0, 1, 1)
+		self.gridLayout_gender.addWidget(self.patient_gender, 0, 0, 1, 1, QtCore.Qt.AlignLeft)
 
 		# Gender (box)
 		self.patient_gender_box = QtWidgets.QLabel(self.widget2)
@@ -695,17 +725,17 @@ class Ui_MainWindow(object):
 		self.label.setText(_translate("MainWindow", "@Onko 2019"))
 
 		# Set structure information labels
-		self.struct_volume_label.setText(_translate("MainWindow", "Volume"))
-		self.struct_minDose_label.setText(_translate("MainWindow", "Min Dose"))
-		self.struct_maxDose_label.setText(_translate("MainWindow", "Max Dose"))
-		self.struct_meanDose_label.setText(_translate("MainWindow", "Mean Dose"))
+		self.struct_volume_label.setText(_translate("MainWindow", "Volume:"))
+		self.struct_minDose_label.setText(_translate("MainWindow", "Min Dose:"))
+		self.struct_maxDose_label.setText(_translate("MainWindow", "Max Dose:"))
+		self.struct_meanDose_label.setText(_translate("MainWindow", "Mean Dose:"))
 		self.struct_info_label.setText(_translate("MainWindow", "Structure Information"))
 
-		# Set structure information boxes
-		self.struct_volume_box.setText(_translate("MainWindow", "123465"))
-		self.struct_minDose_box.setText(_translate("MainWindow", "796542"))
-		self.struct_maxDose_box.setText(_translate("MainWindow", "889542"))
-		self.struct_meanDose_box.setText(_translate("MainWindow", "816857"))
+		# # Set structure information units
+		self.struct_volume_unit.setText(_translate("MainWindow", "cm³"))
+		self.struct_minDose_unit.setText(_translate("MainWindow", "cGy"))
+		self.struct_maxDose_unit.setText(_translate("MainWindow", "cGy"))
+		self.struct_meanDose_unit.setText(_translate("MainWindow", "cGy"))
 
 		# Set patient bar labels
 		self.patient_DOB.setText(_translate("MainWindow", "DOB"))
@@ -754,6 +784,13 @@ class Ui_MainWindow(object):
 
 		MainWindow.update()
 
+
+	def orderedListRoiID(self):
+		res = []
+		for id, value in self.rois.items():
+			res.append(id)
+		return sorted(res)
+
 	def zoomIn(self):
 
 		self.zoom *= 1.05
@@ -766,58 +803,6 @@ class Ui_MainWindow(object):
 
 	def updateView(self):
 		self.DICOM_view.setTransform(QTransform().scale(self.zoom, self.zoom))
-
-
-	# def colorGenerator(self, index):
-	# 	tmp1 = int(index / 6)
-	# 	tmp2 = index % 6
-	# 	if tmp1 > 30:
-	# 		print("Maximum number of ROIs reached")
-	# 		red, blue, green = 0, 0, 0
-	# 	else:
-	# 		intensity = self.intensityForColorGenerator()
-	# 		intensity_index = intensity[tmp1]
-	# 		if tmp2 == 0:
-	# 			red, green = 0, 0
-	# 			blue = intensity_index
-	#
-	# 		elif tmp2 == 1:
-	# 			red, blue = 0, 0
-	# 			green = intensity_index
-	#
-	# 		elif tmp2 == 2:
-	# 			blue, green = 0, 0
-	# 			red = intensity_index
-	#
-	# 		elif tmp2 == 3:
-	# 			red = 0
-	# 			blue, green = intensity_index, intensity_index
-	#
-	# 		elif tmp2 == 4:
-	# 			green = 0
-	# 			red, blue = intensity_index, intensity_index
-	#
-	# 		else:
-	# 			blue = 0
-	# 			red, green = intensity_index, intensity_index
-	#
-	# 	return red, green, blue
-	#
-	#
-	#
-	# def intensityForColorGenerator(self):
-	# 	res = []
-	# 	tmp = 255
-	# 	res.append(tmp)
-	# 	for i in range(10):
-	# 		tmp1 = int(tmp / 2)
-	# 		res.append(tmp1)
-	# 		tmp2 = int(tmp / 4)
-	# 		res.append(tmp2)
-	# 		tmp = tmp1 + tmp2
-	# 		res.append(tmp)
-	# 	return res
-
 
 
 	# Initialization of colors for ROIs
@@ -973,12 +958,34 @@ class Ui_MainWindow(object):
 			QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 		self.gridL_IsodCol.addItem(vspacer, 10, 0, 2, -1)
 
+
 	def colorSquareDraw(self, a, b, c):
 		colorSquareLabel = QtWidgets.QLabel()
 		colorSquarePix = QtGui.QPixmap(15, 15)
 		colorSquarePix.fill(QtGui.QColor(a, b, c))
 		colorSquareLabel.setPixmap(colorSquarePix)
 		return colorSquareLabel
+
+
+	def comboStructInfo(self, index):
+		_translate = QtCore.QCoreApplication.translate
+
+		if index == 0:
+			self.struct_volume_box.setText(_translate("MainWindow", "-"))
+			self.struct_minDose_box.setText(_translate("MainWindow", "-"))
+			self.struct_maxDose_box.setText(_translate("MainWindow", "-"))
+			self.struct_meanDose_box.setText(_translate("MainWindow", "-"))
+
+		else:
+			structID = self.listRoisID[index-1]
+
+			# Set structure information boxes
+			self.struct_volume_box.setText(_translate("MainWindow", str(self.roi_info.getVolume(structID))))
+			self.struct_minDose_box.setText(_translate("MainWindow", str(self.roi_info.getMin(structID))))
+			self.struct_maxDose_box.setText(_translate("MainWindow", str(self.roi_info.getMax(structID))))
+			self.struct_meanDose_box.setText(_translate("MainWindow", str(self.roi_info.getMean(structID))))
+
+
 
 	# In the Model directory
 	def getDVH(self):
@@ -994,7 +1001,6 @@ class Ui_MainWindow(object):
 		fig, ax = plt.subplots()
 		fig.subplots_adjust(0.1, 0.15, 1, 1)
 		max_xlim = 0
-		legend = plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 		for roi in self.selected_rois:
 			dvh = self.dvh[int(roi)]
 			if dvh.volume != 0:
@@ -1002,23 +1008,22 @@ class Ui_MainWindow(object):
 				color_R = colorRoi['R']/255
 				color_G = colorRoi['G']/255
 				color_B = colorRoi['B']/255
-				plt.plot(dvh.bincenters, 100 * dvh.counts / dvh.volume, label=dvh.name,
+				plt.plot(100 * dvh.bincenters, 100 * dvh.counts / dvh.volume, label=dvh.name,
 						color=[color_R, color_G, color_B])
-				if dvh.bincenters[-1] > max_xlim:
-					max_xlim = dvh.bincenters[-1]
-				plt.xlabel('Dose [%s]' % dvh.dose_units)
+				if (100 * dvh.bincenters[-1]) > max_xlim:
+					max_xlim = 100 * dvh.bincenters[-1]
+				plt.xlabel('Dose [%s]' % 'cGy')
 				plt.ylabel('Volume [%s]' % '%')
 				if dvh.name:
-					legend = plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+					plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 
 		ax.set_ylim([0, 105])
 		ax.set_xlim([0, max_xlim + 3])
 
-		# Major ticks every 20, minor ticks every 5
 		major_ticks_y = np.arange(0, 105, 20)
 		minor_ticks_y = np.arange(0, 105, 5)
-		major_ticks_x = np.arange(0, max_xlim + 3, 20)
-		minor_ticks_x = np.arange(0, max_xlim + 3, 5)
+		major_ticks_x = np.arange(0, max_xlim + 250, 1000)
+		minor_ticks_x = np.arange(0, max_xlim + 250, 250)
 
 		ax.set_xticks(major_ticks_x)
 		ax.set_xticks(minor_ticks_x, minor=True)
@@ -1196,17 +1201,77 @@ class HexaColor(object):
 			return digit
 
 
+class StructureInformation(object):
+	def __init__(self, mainWindow):
+		self.window = mainWindow
+		self.listInfo = self.getStructInfo()
 
-# # For Testing
-# class MyWin(QtWidgets.QMainWindow):
-# 	def __init__(self, parent=None):
-# 		QtWidgets.QWidget.__init__(self, parent)
-# 		self.ui = Ui_MainWindow()
-# 		self.ui.setupUi(self, path='dicom_sample')
-#
-#
-# if __name__ == "__main__":
-# 	app = QtWidgets.QApplication(sys.argv)
-# 	myapp = MyWin()
-# 	myapp.show()
-# 	sys.exit(app.exec_())
+	# Return a dictionary containing volume, min, max and mean doses for all the ROIs
+	def getStructInfo(self):
+		res = dict()
+		for id, value in self.window.rois.items():
+			dvh = self.window.dvh[id]
+
+			structInfo = dict()
+			structInfo['volume'] = float("{0:.3f}".format(dvh.volume))
+
+			# The volume of the ROI is equal to 0
+			if dvh.volume == 0:
+				structInfo['min'] = '-'
+				structInfo['max'] = '-'
+				structInfo['mean'] = '-'
+
+			# The volume of the ROI is greater than 0
+			else:
+				value_DVH = 100 * dvh.counts / dvh.volume
+				index = 0
+
+				# Get the min dose of the ROI
+				while value_DVH.item(index) == 100:
+					index += 1
+				if index == 0:
+					structInfo['min'] = 0
+				else:
+					structInfo['min'] = index-1
+
+				# Get the max dose of the ROI
+				while index < len(value_DVH) and value_DVH.item(index) > 0.01:
+					index += 1
+				if index == 0:
+					structInfo['max'] = 0
+				else:
+					structInfo['max'] = index-1
+
+				# Get the mean dose of the ROI
+				mean = structInfo['min'] + structInfo['max']
+				structInfo['mean'] = mean/2
+
+			res[id] = structInfo
+
+		return res
+
+	def getVolume(self, index):
+		return self.listInfo[index]['volume']
+
+	def getMin(self, index):
+		return self.listInfo[index]['min']
+
+	def getMax(self, index):
+		return self.listInfo[index]['max']
+
+	def getMean(self, index):
+		return self.listInfo[index]['mean']
+
+# For Testing
+class MyWin(QtWidgets.QMainWindow):
+	def __init__(self, parent=None):
+		QtWidgets.QWidget.__init__(self, parent)
+		self.ui = Ui_MainWindow()
+		self.ui.setupUi(self, path='dicom_sample')
+
+
+if __name__ == "__main__":
+	app = QtWidgets.QApplication(sys.argv)
+	myapp = MyWin()
+	myapp.show()
+	sys.exit(app.exec_())
