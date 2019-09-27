@@ -8,6 +8,11 @@ import matplotlib.pyplot as plt
 import math
 import matplotlib.path
 
+from PyQt5.QtWidgets import QWidget, QApplication
+from PyQt5.QtGui import QPainter, QPainterPath, QPolygon, QPolygonF, QColor
+from PyQt5.QtCore import Qt, QPoint
+import sys
+
 # Delete ROI by name
 def delete_roi(rtss, roi_name):
     # ROINumber
@@ -218,7 +223,7 @@ def get_transformed_pixel_contours(dict_raw_contours, dict_matrices):
     return dict_transformed_pixel_contours
 
 
-def main():
+def test():
     path = '../../../dicom_sample'
     dict_ds, dict_path = get_datasets(path)
     rtss = dict_ds['rtss']
@@ -240,41 +245,86 @@ def main():
     GTVp_contour = get_roi_contours(dict_raw_contours, roi_name, dict_matrices)
     print(GTVp_contour)
 
-    xs = []
-    ys = []
-    for slice in GTVp_contour:
-        points = GTVp_contour[slice]
-        for point in points:
-            xs.append(point[0])
-            ys.append(511 - point[1])
+    qpoints = []
+    for key in GTVp_contour:
+        contour = GTVp_contour[key]
+        for point in contour:
+            curr_point = QPoint(point[0], point[1])
+            qpoints.append(curr_point)
         break
-    plt.scatter(xs, ys)
-    plt.show()
+    polygon = QPolygonF(qpoints)
+
+    return polygon
 
 
-    temp_list = []
-    for x, y in zip(xs, ys):
-        temp_list.append([x, y])
+    # xs = []
+    # ys = []
+    # for slice in GTVp_contour:
+    #     points = GTVp_contour[slice]
+    #     for point in points:
+    #         xs.append(point[0])
+    #         ys.append(511 - point[1])
+    #     break
+    # plt.scatter(xs, ys)
+    # plt.show()
+    #
+    #
+    # temp_list = []
+    # for x, y in zip(xs, ys):
+    #     temp_list.append([x, y])
+    #
+    # polygon = np.array(temp_list)
+    # left = np.min(polygon, axis=0)
+    # right = np.max(polygon, axis=0)
+    # x = np.arange(math.ceil(left[0]), math.floor(right[0]) + 1)
+    # y = np.arange(math.ceil(left[1]), math.floor(right[1]) + 1)
+    # xv, yv = np.meshgrid(x, y, indexing='xy')
+    # points = np.hstack((xv.reshape((-1, 1)), yv.reshape((-1, 1))))
+    #
+    # path = matplotlib.path.Path(polygon)
+    # mask = path.contains_points(points)
+    # mask.shape = xv.shape
+    #
+    # plt.plot(xs, ys)
+    # plt.show()
+    # plt.imshow(mask)
+    # plt.show()
 
-    polygon = np.array(temp_list)
-    left = np.min(polygon, axis=0)
-    right = np.max(polygon, axis=0)
-    x = np.arange(math.ceil(left[0]), math.floor(right[0]) + 1)
-    y = np.arange(math.ceil(left[1]), math.floor(right[1]) + 1)
-    xv, yv = np.meshgrid(x, y, indexing='xy')
-    points = np.hstack((xv.reshape((-1, 1)), yv.reshape((-1, 1))))
 
-    path = matplotlib.path.Path(polygon)
-    mask = path.contains_points(points)
-    mask.shape = xv.shape
+class Example(QWidget):
 
-    plt.plot(xs, ys)
-    plt.show()
-    plt.imshow(mask)
-    plt.show()
+    def __init__(self, polygon):
+        super().__init__()
+        self.polygon = polygon
+        self.initUI()
+
+    def initUI(self):
+        self.setGeometry(10, 10, 512, 512)
+        self.setWindowTitle('Hi')
+        self.show()
+
+    def paintEvent(self, e):
+        qp = QPainter()
+        qp.begin(self)
+        qp.setBrush(QColor(122, 163, 39, 128))
+        qp.setRenderHint(QPainter.Antialiasing)
+        self.drawContour(qp)
+        qp.end()
+
+    def drawContour(self, qp):
+        path = QPainterPath()
+        path.addPolygon(self.polygon)
+        path.moveTo(30, 30)
+        # path.cubicTo(30, 30, 200, 350, 350, 30)
+
+        qp.drawPath(path)
 
 
-
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    polygon = test()
+    ex = Example(polygon)
+    sys.exit(app.exec_())
 
 
 
@@ -368,6 +418,3 @@ def main():
 #     plt.show()
 #     plt.imshow(mask)
 #     plt.show()
-
-if __name__ == '__main__':
-    main()

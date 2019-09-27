@@ -1,6 +1,8 @@
 import glob
 import sys
-from tkinter import Tk
+
+import warnings
+warnings.filterwarnings("ignore")
 
 import matplotlib.pyplot as plt1
 from PyQt5.QtCore import Qt, QPoint, QPointF, QRectF

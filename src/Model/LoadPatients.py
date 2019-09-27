@@ -12,11 +12,6 @@ import logging
 import pydicom
 import os
 
-# Create a logger for displaying info in the console.
-logging.basicConfig(format='%(message)s', level=logging.DEBUG)
-load_logger = logging.getLogger()
-# Change the logger level here, level WARN by default
-load_logger.setLevel(logging.DEBUG)
 
 
 # For sorting dicom file names by numbers
@@ -26,7 +21,7 @@ load_logger.setLevel(logging.DEBUG)
 
 def natural_sort(file_list):
     # Logger info
-    load_logger.info('Natural Sorting...')
+    print('Natural Sorting...')
     convert = lambda text: int(text) if text.isdigit() else text.lower()
     alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ]
     return sorted(file_list, key=alphanum_key)
