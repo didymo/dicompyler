@@ -1,4 +1,5 @@
 import matplotlib.pylab as plt
+from copy import deepcopy
 from PyQt5.QtGui import QTransform
 from src.Controller.pluginMController import PManager
 from src.Model.CalculateDVHs import *
@@ -18,7 +19,17 @@ class Ui_MainWindow(object):
 
         self.path = path
         self.dataset, self.filepaths = get_datasets(path)
-        self.pixmaps = get_pixmaps(self.dataset)
+
+        self.window = self.dataset[0].WindowWidth[1]
+        self.level = self.dataset[0].WindowCenter[1]
+        self.x1, self.y1 = 256, 256
+        self.dict_windowing = {"normal": [self.window, self.level], "lung": [1600, -300], "bone": [1400, 700],
+                               "brain": [180, 950],
+                               "soft tissue": [400, 800], "head and neck": [275, 900]}
+
+        self.pixel_values = convert_raw_data(self.dataset)
+        self.pixmaps = get_pixmaps(self.pixel_values, self.window, self.level)
+
         self.file_rtss = self.filepaths['rtss']
         self.file_rtdose = self.filepaths['rtdose']
         self.dataset_rtss = pydicom.dcmread(self.file_rtss)
@@ -29,8 +40,7 @@ class Ui_MainWindow(object):
         self.dvh = self.getDVH()
         self.roi_info = StructureInformation(self)
         self.basicInfo = get_basic_info(self.dataset[0])
-        self.dict_windowing = {"normal": [None, None], "lung": [2152, 52], "bone": [1401, 700], "brain": [168, 34],
-                               "soft tissue": [330, -24]}
+
         self.zoom = 1
 
         # DICOM Tree for RTSS file
@@ -1055,6 +1065,7 @@ class Ui_MainWindow(object):
         self.DICOM_view.setBackgroundBrush(background_brush)
         self.DICOM_view.setGeometry(QtCore.QRect(0, 0, 877, 517))
         self.DICOM_view.setObjectName("DICOM_view")
+        self.DICOM_view.viewport().installEventFilter(self)
 
 
     def DICOM_image_display(self):
@@ -1098,7 +1109,7 @@ class Ui_MainWindow(object):
         text_WL = QtWidgets.QGraphicsTextItem()
         text_WL.adjustSize()
         text_WL.setPos(QtCore.QPoint(475, 0))
-        text_WL.setPlainText("W/L: (in pending)")
+        text_WL.setPlainText(f'W/L: {self.window}/{self.level}')
         text_WL.setDefaultTextColor(QtGui.QColor(255, 255, 255))
 
         text_imageSize = QtWidgets.QGraphicsTextItem()
@@ -1133,6 +1144,37 @@ class Ui_MainWindow(object):
         self.textOnDICOM_View()
         self.DICOM_view.setScene(self.DICOM_image_scene)
         pass
+
+    def eventFilter(self, source, event):
+        if event.type() == QtCore.QEvent.MouseMove and event.type() == QtCore.QEvent.MouseButtonPress:
+            if event.buttons() == QtCore.Qt.RightButton:
+                if event.x() > self.x1:
+                    self.window += 5
+                elif event.x() < self.x1:
+                    self.window -= 5
+
+                if event.y() > self.y1:
+                    self.level -= 5
+                elif event.y() < self.y1:
+                    self.level += 5
+
+                self.x1 = event.x()
+                self.y1 = event.y()
+
+                id = self.slider.value()
+                np_pixels = deepcopy(self.pixel_values[id])
+                pixmap = scaled_pixmap(np_pixels, self.window, self.level)
+
+                DICOM_image_label = QtWidgets.QLabel()
+                DICOM_image_label.setPixmap(pixmap)
+                DICOM_image_scene = QtWidgets.QGraphicsScene()
+                DICOM_image_scene.addWidget(DICOM_image_label)
+                self.DICOM_view.setScene(DICOM_image_scene)
+        elif event.type() == QtCore.QEvent.MouseButtonRelease:
+            img_data = deepcopy(self.pixel_values)
+            self.pixmaps = get_pixmaps(img_data, self.window, self.level)
+
+        return QtCore.QObject.event(source, event)
 
 
     ###################################
@@ -1249,6 +1291,8 @@ class Ui_MainWindow(object):
         for key, value in self.dict_windowing.items():
             text = str(key)
             actionWindowingItem = QtWidgets.QAction(MainWindow)
+            actionWindowingItem.triggered.connect(
+                lambda state, text=key: self.setWindowingLimits(state, text))
             self.menuWindowing.addAction(actionWindowingItem)
             actionWindowingItem.setText(_translate("MainWindow", text))
 
@@ -1257,6 +1301,24 @@ class Ui_MainWindow(object):
 
     def HandleAnonymization(self):
         self.callClass.runAnonymization()
+
+    def setWindowingLimits(self, state, text):
+        windowing_limits = self.dict_windowing[text]
+        self.window = windowing_limits[0]
+        self.level = windowing_limits[1]
+        img_data = deepcopy(self.pixel_values)
+
+        id = self.slider.value()
+        np_pixels = img_data[id]
+        pixmap = scaled_pixmap(np_pixels, self.window, self.level)
+
+        DICOM_image_label = QtWidgets.QLabel()
+        DICOM_image_label.setPixmap(pixmap)
+        DICOM_image_scene = QtWidgets.QGraphicsScene()
+        DICOM_image_scene.addWidget(DICOM_image_label)
+        self.DICOM_view.setScene(DICOM_image_scene)
+
+        self.pixmaps = get_pixmaps(img_data, self.window, self.level)
 
     def transectHandler(self):
 
