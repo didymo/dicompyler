@@ -1,7 +1,7 @@
 import matplotlib.pylab as plt
 from PyQt5.QtGui import QTransform
 from src.Controller.pluginMController import PManager
-from src.Model.CalculateDVHs import *
+from src.Model.CalculateDVHs import calc_dvhs
 from src.Model.CalculateImages import *
 from src.Model.GetPatientInfo import *
 from src.Controller.mainPageController import MainPage
@@ -26,7 +26,7 @@ class Ui_MainWindow(object):
         self.rois = get_roi_info(self.dataset_rtss)
         self.listRoisID = self.orderedListRoiID()
         self.selected_rois = []
-        self.dvh = self.getDVH()
+        self.dvh = calc_dvhs(self.dataset_rtss, self.dataset_rtdose, self.rois)
         self.roi_info = StructureInformation(self)
         self.basicInfo = get_basic_info(self.dataset[0])
         self.dict_windowing = {"normal": [None, None], "lung": [2152, 52], "bone": [1401, 700], "brain": [168, 34],
@@ -732,7 +732,10 @@ class Ui_MainWindow(object):
         self.updateView()
 
     def updateView(self):
+        self.DICOM_image_display()
+        self.textOnDICOM_View()
         self.DICOM_view.setTransform(QTransform().scale(self.zoom, self.zoom))
+        self.DICOM_view.setScene(self.DICOM_image_scene)
 
 
     #################################
@@ -907,9 +910,9 @@ class Ui_MainWindow(object):
     # Initialize the selector for structure information
     def initStructInfoSelector(self):
         self.comboBox = QtWidgets.QComboBox(self.frame_struct_info)
-        self.comboBox.setStyleSheet("font: 75 10pt \"Laksaman\";"
-                                    "combobox-popup: 0;"
-                                    "background-color: #efefef;")
+        self.comboBox.setStyleSheet("QComboBox {font: 75 10pt \"Laksaman\";"
+                                                 "combobox-popup: 0;"
+                                                 "background-color: #efefef; }")
         self.comboBox.addItem("Select...")
         for key, value in self.rois.items():
             self.comboBox.addItem(value['name'])
@@ -941,17 +944,6 @@ class Ui_MainWindow(object):
     #  DVH FUNCTIONALITY  #
     #######################
 
-    # In the Model directory
-    def getDVH(self):
-        res = dict()
-        tmp = calc_dvhs(self.dataset_rtss, self.dataset_rtdose, self.rois)
-        for key, value in tmp.items():
-            key_int = int(key)
-            res[key_int] = value
-        return res
-
-
-    # In the View directory
     def DVH_view(self):
         fig, ax = plt.subplots()
         fig.subplots_adjust(0.1, 0.15, 1, 1)
@@ -959,9 +951,6 @@ class Ui_MainWindow(object):
         for roi in self.selected_rois:
             dvh = self.dvh[int(roi)]
             if dvh.volume != 0:
-                if roi == 29:
-                    print(dvh.counts.shape)
-                    print(dvh.bincenters.shape)
                 colorRoi = self.roiColor[roi]
                 color_R = colorRoi['R'] / 255
                 color_G = colorRoi['G'] / 255
@@ -1074,13 +1063,19 @@ class Ui_MainWindow(object):
         dicomTreeSlice = DicomTree(filename)
         self.dictSlice = dicomTreeSlice.dict
 
-        # Informations
+        # Information to display
         current_slice = self.dictSlice['Instance Number'][0]
         total_slices = len(self.pixmaps)
         slice_pos = self.dictSlice['Slice Location'][0]
         row_image = self.dictSlice['Rows'][0]
         col_image = self.dictSlice['Columns'][0]
         patient_pos = self.dictSlice['Patient Position'][0]
+
+        # For formatting
+        if self.zoom == 1:
+            zoom = 1
+        else:
+            zoom = float("{0:.2f}".format(self.zoom))
 
         # Add text on DICOM View
         text_imageID = QtWidgets.QGraphicsTextItem()
@@ -1110,7 +1105,7 @@ class Ui_MainWindow(object):
         text_zoom = QtWidgets.QGraphicsTextItem()
         text_zoom.adjustSize()
         text_zoom.setPos(QtCore.QPoint(-100, 470))
-        text_zoom.setPlainText("Zoom: 1:1")
+        text_zoom.setPlainText("Zoom: " + str(zoom) + ":" + str(zoom))
         text_zoom.setDefaultTextColor(QtGui.QColor(255, 255, 255))
 
         text_patientPos = QtWidgets.QGraphicsTextItem()
