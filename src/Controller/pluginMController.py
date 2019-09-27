@@ -35,6 +35,112 @@ class PluginManager(QtWidgets.QMainWindow, Ui_PluginManager):
         self.cancel_button.clicked.connect(self.close)
         self.apply_button.clicked.connect(self.applyChanges)
         self.treeList.clicked.connect(self.display)
+        #adding the menus
+        self.table_view.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.table_view.customContextMenuRequested.connect(self.on_customContextMenuRequested_Window)
+        self.table_organ.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.table_organ.customContextMenuRequested.connect(self.on_customContextMenuRequested_Organ)
+        self.table_volume.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.table_volume.customContextMenuRequested.connect(self.on_customContextMenuRequested_Volume)
+        self.table_roi.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.table_roi.customContextMenuRequested.connect(self.on_customContextMenuRequested_Roi)
+        self.table_Ids.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.table_Ids.customContextMenuRequested.connect(self.on_customContextMenuRequested_Ids)
+
+    #windowing
+    @QtCore.pyqtSlot(QtCore.QPoint)
+    def on_customContextMenuRequested_Window(self, pos):
+        it = self.table_view.itemAt(pos)
+        if it is None: return
+        c = it.row()
+        item_range = QtWidgets.QTableWidgetSelectionRange(c,0,c,self.table_view.columnCount()-1)
+        self.table_view.setRangeSelected(item_range, True)
+
+        menu = QtWidgets.QMenu()
+        modify_row_action = menu.addAction("Modify")
+        menu.addSeparator()
+        delete_row_action = menu.addAction("Delete")
+        action = menu.exec_(self.table_view.viewport().mapToGlobal(pos))
+        if action == delete_row_action:
+            self.table_view.removeRow(c)
+        if action == modify_row_action:
+            pass
+    #organ
+    @QtCore.pyqtSlot(QtCore.QPoint)
+    def on_customContextMenuRequested_Organ(self, pos):
+        it = self.table_organ.itemAt(pos)
+        if it is None: return
+        c = it.row()
+        item_range = QtWidgets.QTableWidgetSelectionRange(c, 0, c, self.table_organ.columnCount() - 1)
+        self.table_organ.setRangeSelected(item_range, True)
+
+        menu = QtWidgets.QMenu()
+        modify_row_action = menu.addAction("Modify")
+        menu.addSeparator()
+        delete_row_action = menu.addAction("Delete")
+        action = menu.exec_(self.table_organ.viewport().mapToGlobal(pos))
+        if action == delete_row_action:
+            self.table_organ.removeRow(c)
+        if action == modify_row_action:
+            pass
+
+    #volume
+    @QtCore.pyqtSlot(QtCore.QPoint)
+    def on_customContextMenuRequested_Volume(self, pos):
+        it = self.table_volume.itemAt(pos)
+        print(pos)
+        if it is None: return
+        c = it.row()
+        item_range = QtWidgets.QTableWidgetSelectionRange(c, 0, c, self.table_volume.columnCount() - 1)
+        self.table_volume.setRangeSelected(item_range, True)
+
+        menu = QtWidgets.QMenu()
+        modify_row_action = menu.addAction("Modify")
+        menu.addSeparator()
+        delete_row_action = menu.addAction("Delete")
+        action = menu.exec_(self.table_volume.viewport().mapToGlobal(pos))
+        if action == delete_row_action:
+            self.table_volume.removeRow(c)
+        if action == modify_row_action:
+            pass
+
+    #ROI
+    @QtCore.pyqtSlot(QtCore.QPoint)
+    def on_customContextMenuRequested_Roi(self, pos):
+        it = self.table_roi.itemAt(pos)
+        if it is None: return
+        c = it.row()
+        item_range = QtWidgets.QTableWidgetSelectionRange(c, 0, c, self.table_roi.columnCount() - 1)
+        self.table_roi.setRangeSelected(item_range, True)
+
+        menu = QtWidgets.QMenu()
+        modify_row_action = menu.addAction("Modify")
+        menu.addSeparator()
+        delete_row_action = menu.addAction("Delete")
+        action = menu.exec_(self.table_roi.viewport().mapToGlobal(pos))
+        if action == delete_row_action:
+            self.table_roi.removeRow(c)
+        if action == modify_row_action:
+            pass
+
+    @QtCore.pyqtSlot(QtCore.QPoint)
+    def on_customContextMenuRequested_Ids(self, pos):
+        it = self.table_Ids.itemAt(pos)
+        if it is None: return
+        c = it.row()
+        item_range = QtWidgets.QTableWidgetSelectionRange(c, 0, c, self.table_Ids.columnCount() - 1)
+        self.table_Ids.setRangeSelected(item_range, True)
+
+        menu = QtWidgets.QMenu()
+        modify_row_action = menu.addAction("Modify")
+        menu.addSeparator()
+        delete_row_action = menu.addAction("Delete")
+        action = menu.exec_(self.table_Ids.viewport().mapToGlobal(pos))
+        if action == delete_row_action:
+            self.table_Ids.removeRow(c)
+        if action == modify_row_action:
+            pass
+
 
     def importData(self, data, root=None):
         self.model.setRowCount(0)

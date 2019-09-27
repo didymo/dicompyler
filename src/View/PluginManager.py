@@ -58,8 +58,8 @@ class Ui_PluginManager(object):
         header1 = self.table_view.horizontalHeader()
         header1.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         header1.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
-        header1.setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
-        header1.setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeToContents)
+        header1.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
+        header1.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
         self.table_view.setVisible(False)
         # organ
         self.add_standard_organ_name = QtWidgets.QPushButton(self.centralwidget)
@@ -183,6 +183,13 @@ class Ui_PluginManager(object):
         self.enabledWindow.setVisible(False)
         self.enabledOrgan.setVisible(False)
         self.enabledVolume.setVisible(False)
+        self.table_modules.setEditTriggers(QtWidgets.QTreeView.NoEditTriggers)
+        self.table_view.setEditTriggers(QtWidgets.QTreeView.NoEditTriggers)
+        self.table_organ.setEditTriggers(QtWidgets.QTreeView.NoEditTriggers)
+        self.table_volume.setEditTriggers(QtWidgets.QTreeView.NoEditTriggers)
+        self.table_roi.setEditTriggers(QtWidgets.QTreeView.NoEditTriggers)
+        self.table_Ids.setEditTriggers(QtWidgets.QTreeView.NoEditTriggers)
+
         self.retranslateUi(PluginManager)
         QtCore.QMetaObject.connectSlotsByName(PluginManager)
 
