@@ -22,7 +22,11 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow, path):
-        # Load all information from the patient
+
+        ##############################
+        #  LOAD PATIENT INFORMATION  #
+        ##############################
+
         self.path = path
         self.dataset, self.filepaths = get_datasets(path)
         self.pixmaps = get_pixmaps(self.dataset)
@@ -42,16 +46,19 @@ class Ui_MainWindow(object):
 
         # DICOM Tree for RTSS file
         self.dicomTree_rtss = DicomTree(self.file_rtss)
-        self.dsDicomTree_rtss = self.dicomTree_rtss.read_dcm(self.file_rtss)
-        self.dictDicomTree_rtss = self.dicomTree_rtss.dataset_to_dict(self.dsDicomTree_rtss)
+        self.dictDicomTree_rtss = self.dicomTree_rtss.dict
 
         # DICOM Tree for RT Dose file
         self.dicomTree_rtdose = DicomTree(self.file_rtdose)
-        self.dsDicomTree_rtdose = self.dicomTree_rtdose.read_dcm(self.file_rtdose)
-        self.dictDicomTree_rtdose = self.dicomTree_rtdose.dataset_to_dict(self.dsDicomTree_rtdose)
+        self.dictDicomTree_rtdose = self.dicomTree_rtdose.dict
 
         self.callClass = MainPage(self.path, self.dataset, self.filepaths)
         self.callManager = PManager()
+
+
+        ##########################################
+        #  IMPLEMENTATION OF THE MAIN PAGE VIEW  #
+        ##########################################
 
         # Main Window
         MainWindow.setObjectName("MainWindow")
@@ -106,21 +113,14 @@ class Ui_MainWindow(object):
         self.gridLayout_view.addWidget(self.slider, 0, 1, 1, 1)
 
         # DICOM image processing
-        id = self.slider.value()
-        DICOM_image = self.pixmaps[id]
-        DICOM_image = DICOM_image.scaled(512, 512, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
-        DICOM_image_label = QtWidgets.QLabel()
-        DICOM_image_label.setPixmap(DICOM_image)
-        self.DICOM_image_scene = QtWidgets.QGraphicsScene()
-        self.DICOM_image_scene.addWidget(DICOM_image_label)
-
-        # Introduce DICOM image into DICOM View tab
         self.DICOM_view = QtWidgets.QGraphicsView(self.tab2_view)
-        self.DICOM_view.setScene(self.DICOM_image_scene)
         background_brush = QtGui.QBrush(QtGui.QColor(0, 0, 0), QtCore.Qt.SolidPattern)
         self.DICOM_view.setBackgroundBrush(background_brush)
         self.DICOM_view.setGeometry(QtCore.QRect(0, 0, 877, 517))
         self.DICOM_view.setObjectName("DICOM_view")
+        self.DICOM_image_display()
+        self.textOnDICOM_View()
+        self.DICOM_view.setScene(self.DICOM_image_scene)
 
         self.gridLayout_view.addWidget(self.DICOM_view, 0, 0, 1, 1)
 
@@ -787,6 +787,9 @@ class Ui_MainWindow(object):
             res.append(id)
         return sorted(res)
 
+    ########################
+    #  ZOOM FUNCTIONALITY  #
+    ########################
 
     def zoomIn(self):
 
@@ -801,6 +804,10 @@ class Ui_MainWindow(object):
     def updateView(self):
         self.DICOM_view.setTransform(QTransform().scale(self.zoom, self.zoom))
 
+
+    #################################
+    #  STRUCTURES AND ISODOSES TAB  #
+    #################################
 
     # Initialization of colors for ROIs
     def initRoiColor(self):
@@ -855,7 +862,6 @@ class Ui_MainWindow(object):
             checkBoxStruct.setText(text)
             checkBoxStruct.setObjectName(text)
             self.gridL_StructColumn.addWidget(checkBoxStruct, index, 1, 1, 1)
-            # self.frame_structures.layout().addWidget(checkBoxStruct)
             index += 1
         self.scrollAreaStruct.setStyleSheet("QScrollArea {background-color: #ffffff; border-style: none;}")
         self.scrollAreaStructContents.setStyleSheet("QWidget {background-color: #ffffff; border-style: none;}")
@@ -963,6 +969,10 @@ class Ui_MainWindow(object):
         return colorSquareLabel
 
 
+    ###########################
+    #  STRUCTURE INFORMATION  #
+    ###########################
+
     def comboStructInfo(self, index):
         _translate = QtCore.QCoreApplication.translate
 
@@ -982,7 +992,9 @@ class Ui_MainWindow(object):
             self.struct_meanDose_box.setText(_translate("MainWindow", str(self.roi_info.getMean(structID))))
 
 
-
+    #######################
+    #  DVH FUNCTIONALITY  #
+    #######################
 
     # In the Model directory
     def getDVH(self):
@@ -1002,6 +1014,9 @@ class Ui_MainWindow(object):
         for roi in self.selected_rois:
             dvh = self.dvh[int(roi)]
             if dvh.volume != 0:
+                if roi == 29:
+                    print(dvh.counts.shape)
+                    print(dvh.bincenters.shape)
                 colorRoi = self.roiColor[roi]
                 color_R = colorRoi['R'] / 255
                 color_G = colorRoi['G'] / 255
@@ -1045,6 +1060,10 @@ class Ui_MainWindow(object):
     #     fig.savefig(filename, dpi="figure", bbox_inches=bbox)
 
 
+    ####################################
+    #  DICOM IMAGE VIEW FUNCTIONALITY  #
+    ####################################
+
     def initDVH_view(self):
         fig = self.DVH_view()
         self.plotWidget = FigureCanvas(fig)
@@ -1058,17 +1077,87 @@ class Ui_MainWindow(object):
         self.gridL_DVH.addWidget(self.plotWidget, 1, 0, 1, 1)
 
 
+    def DICOM_image_display(self):
+        slider_id = self.slider.value()
+        DICOM_image = self.pixmaps[slider_id]
+        DICOM_image = DICOM_image.scaled(512, 512, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+        DICOM_image_label = QtWidgets.QLabel()
+        DICOM_image_label.setPixmap(DICOM_image)
+        self.DICOM_image_scene = QtWidgets.QGraphicsScene()
+        self.DICOM_image_scene.addWidget(DICOM_image_label)
+
+
+    def textOnDICOM_View(self):
+        # Dictionary from the dataset associated to the slice
+        id = self.slider.value()
+        filename = self.filepaths[id]
+        dicomTreeSlice = DicomTree(filename)
+        self.dictSlice = dicomTreeSlice.dict
+
+        # Informations
+        current_slice = self.dictSlice['Instance Number'][0]
+        total_slices = len(self.pixmaps)
+        slice_pos = self.dictSlice['Slice Location'][0]
+        row_image = self.dictSlice['Rows'][0]
+        col_image = self.dictSlice['Columns'][0]
+        patient_pos = self.dictSlice['Patient Position'][0]
+
+        # Add text on DICOM View
+        text_imageID = QtWidgets.QGraphicsTextItem()
+        text_imageID.adjustSize()
+        text_imageID.setPos(QtCore.QPoint(-100, 0))
+        text_imageID.setPlainText("Image: " + str(current_slice) + " / " + str(total_slices))
+        text_imageID.setDefaultTextColor(QtGui.QColor(255, 255, 255))
+
+        text_imagePos = QtWidgets.QGraphicsTextItem()
+        text_imagePos.adjustSize()
+        text_imagePos.setPos(QtCore.QPoint(-100, 20))
+        text_imagePos.setPlainText("Position: " + str(slice_pos) + " mm")
+        text_imagePos.setDefaultTextColor(QtGui.QColor(255, 255, 255))
+
+        text_WL = QtWidgets.QGraphicsTextItem()
+        text_WL.adjustSize()
+        text_WL.setPos(QtCore.QPoint(475, 0))
+        text_WL.setPlainText("W/L: (in pending)")
+        text_WL.setDefaultTextColor(QtGui.QColor(255, 255, 255))
+
+        text_imageSize = QtWidgets.QGraphicsTextItem()
+        text_imageSize.adjustSize()
+        text_imageSize.setPos(QtCore.QPoint(-100, 450))
+        text_imageSize.setPlainText("Image Size: " + str(row_image) + "x" + str(col_image) + "px")
+        text_imageSize.setDefaultTextColor(QtGui.QColor(255, 255, 255))
+
+        text_zoom = QtWidgets.QGraphicsTextItem()
+        text_zoom.adjustSize()
+        text_zoom.setPos(QtCore.QPoint(-100, 470))
+        text_zoom.setPlainText("Zoom: 1:1")
+        text_zoom.setDefaultTextColor(QtGui.QColor(255, 255, 255))
+
+        text_patientPos = QtWidgets.QGraphicsTextItem()
+        text_patientPos.adjustSize()
+        text_patientPos.setPos(QtCore.QPoint(475, 470))
+        text_patientPos.setPlainText("Position: " + patient_pos)
+        text_patientPos.setDefaultTextColor(QtGui.QColor(255, 255, 255))
+
+        self.DICOM_image_scene.addItem(text_imageID)
+        self.DICOM_image_scene.addItem(text_imagePos)
+        self.DICOM_image_scene.addItem(text_WL)
+        self.DICOM_image_scene.addItem(text_imageSize)
+        self.DICOM_image_scene.addItem(text_patientPos)
+        self.DICOM_image_scene.addItem(text_zoom)
+
+
     # When the value of the slider in the DICOM View changes
     def valueChangeSlider(self):
-        id = self.slider.value()
-        pixmap = self.pixmaps[id]
-        pixmap = pixmap.scaled(512, 512, QtCore.Qt.KeepAspectRatio)
-        DICOM_image_label = QtWidgets.QLabel()
-        DICOM_image_label.setPixmap(pixmap)
-        DICOM_image_scene = QtWidgets.QGraphicsScene()
-        DICOM_image_scene.addWidget(DICOM_image_label)
-        self.DICOM_view.setScene(DICOM_image_scene)
+        self.DICOM_image_display()
+        self.textOnDICOM_View()
+        self.DICOM_view.setScene(self.DICOM_image_scene)
         pass
+
+
+    ###################################
+    #  DICOM TREE VIEW FUNCTIONALITY  #
+    ###################################
 
     def comboTreeSelector(self, index):
         # CT Scans
@@ -1092,17 +1181,25 @@ class Ui_MainWindow(object):
 
     def updateTree(self, ct_file, id, name):
         self.initTree()
+
+        # The selected DICOM Dataset is a CT file
         if ct_file:
+            # id is the index of the selected CT file
             filename = self.filepaths[id]
-            self.dicomTree = DicomTree(filename)
-            ds = self.dicomTree.read_dcm(filename)
-            dict = self.dicomTree.dataset_to_dict(ds)
+            dicomTreeSlice = DicomTree(filename)
+            dict = dicomTreeSlice.dict
+
+        # The selected DICOM Dataset is a RT Dose file
         elif name == "RT Dose":
             dict = self.dictDicomTree_rtdose
+
+        # The selected DICOM Dataset is a RTSS file
         elif name == "RTSS":
             dict = self.dictDicomTree_rtss
+
         else:
             print("Error filename in updateTree function")
+
         parentItem = self.modelTree.invisibleRootItem()
         self.recurseBuildModel(dict, parentItem)
         self.treeView.setModel(self.modelTree)
@@ -1127,6 +1224,11 @@ class Ui_MainWindow(object):
                         QtGui.QStandardItem(str(value[3]))]
                 parent.appendRow(item)
         return parent
+
+
+    #############################
+    #  TOOLBAR FUNCTI0NALITIES  #
+    #############################
 
     def initWindowingMenu(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -1262,16 +1364,18 @@ class StructureInformation(object):
     def getMean(self, index):
         return self.listInfo[index]['mean']
 
-# For Testing
-class MyWin(QtWidgets.QMainWindow):
-    def __init__(self, parent=None):
-        QtWidgets.QWidget.__init__(self, parent)
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self, path='dicom_sample')
 
 
-if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    myapp = MyWin()
-    myapp.show()
-    sys.exit(app.exec_())
+# # For Testing
+# class MyWin(QtWidgets.QMainWindow):
+# 	def __init__(self, parent=None):
+# 		QtWidgets.QWidget.__init__(self, parent)
+# 		self.ui = Ui_MainWindow()
+# 		self.ui.setupUi(self, path='DicompylerDICOM')
+#
+#
+# if __name__ == "__main__":
+#     app = QtWidgets.QApplication(sys.argv)
+#     myapp = MyWin()
+#     myapp.show()
+#     sys.exit(app.exec_())

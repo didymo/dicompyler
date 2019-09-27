@@ -1,11 +1,12 @@
+import csv
 import sys
 from collections import deque
 
-from PyQt5 import Qt
-from PyQt5.QtCore import QObject
-from PyQt5.QtWidgets import QVBoxLayout, QLayout, QAbstractItemView
+from PyQt5.QtGui import QStandardItem
+from PyQt5.QtWidgets import QTableWidgetItem
 
 from src.View.PluginManager import *
+from src.data.csv import *
 
 
 class PluginManager(QtWidgets.QMainWindow, Ui_PluginManager):
@@ -29,10 +30,117 @@ class PluginManager(QtWidgets.QMainWindow, Ui_PluginManager):
         self.treeList.setModel(self.model)
         self.importData(data)
         self.treeList.expandAll()
+        self.fillTables()
         self.treeList.setEditTriggers(QtWidgets.QTreeView.NoEditTriggers)
         self.cancel_button.clicked.connect(self.close)
         self.apply_button.clicked.connect(self.applyChanges)
         self.treeList.clicked.connect(self.display)
+        #adding the menus
+        self.table_view.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.table_view.customContextMenuRequested.connect(self.on_customContextMenuRequested_Window)
+        self.table_organ.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.table_organ.customContextMenuRequested.connect(self.on_customContextMenuRequested_Organ)
+        self.table_volume.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.table_volume.customContextMenuRequested.connect(self.on_customContextMenuRequested_Volume)
+        self.table_roi.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.table_roi.customContextMenuRequested.connect(self.on_customContextMenuRequested_Roi)
+        self.table_Ids.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.table_Ids.customContextMenuRequested.connect(self.on_customContextMenuRequested_Ids)
+
+    #windowing
+    @QtCore.pyqtSlot(QtCore.QPoint)
+    def on_customContextMenuRequested_Window(self, pos):
+        it = self.table_view.itemAt(pos)
+        if it is None: return
+        c = it.row()
+        item_range = QtWidgets.QTableWidgetSelectionRange(c,0,c,self.table_view.columnCount()-1)
+        self.table_view.setRangeSelected(item_range, True)
+
+        menu = QtWidgets.QMenu()
+        modify_row_action = menu.addAction("Modify")
+        menu.addSeparator()
+        delete_row_action = menu.addAction("Delete")
+        action = menu.exec_(self.table_view.viewport().mapToGlobal(pos))
+        if action == delete_row_action:
+            self.table_view.removeRow(c)
+        if action == modify_row_action:
+            pass
+    #organ
+    @QtCore.pyqtSlot(QtCore.QPoint)
+    def on_customContextMenuRequested_Organ(self, pos):
+        it = self.table_organ.itemAt(pos)
+        if it is None: return
+        c = it.row()
+        item_range = QtWidgets.QTableWidgetSelectionRange(c, 0, c, self.table_organ.columnCount() - 1)
+        self.table_organ.setRangeSelected(item_range, True)
+
+        menu = QtWidgets.QMenu()
+        modify_row_action = menu.addAction("Modify")
+        menu.addSeparator()
+        delete_row_action = menu.addAction("Delete")
+        action = menu.exec_(self.table_organ.viewport().mapToGlobal(pos))
+        if action == delete_row_action:
+            self.table_organ.removeRow(c)
+        if action == modify_row_action:
+            pass
+
+    #volume
+    @QtCore.pyqtSlot(QtCore.QPoint)
+    def on_customContextMenuRequested_Volume(self, pos):
+        it = self.table_volume.itemAt(pos)
+        print(pos)
+        if it is None: return
+        c = it.row()
+        item_range = QtWidgets.QTableWidgetSelectionRange(c, 0, c, self.table_volume.columnCount() - 1)
+        self.table_volume.setRangeSelected(item_range, True)
+
+        menu = QtWidgets.QMenu()
+        modify_row_action = menu.addAction("Modify")
+        menu.addSeparator()
+        delete_row_action = menu.addAction("Delete")
+        action = menu.exec_(self.table_volume.viewport().mapToGlobal(pos))
+        if action == delete_row_action:
+            self.table_volume.removeRow(c)
+        if action == modify_row_action:
+            pass
+
+    #ROI
+    @QtCore.pyqtSlot(QtCore.QPoint)
+    def on_customContextMenuRequested_Roi(self, pos):
+        it = self.table_roi.itemAt(pos)
+        if it is None: return
+        c = it.row()
+        item_range = QtWidgets.QTableWidgetSelectionRange(c, 0, c, self.table_roi.columnCount() - 1)
+        self.table_roi.setRangeSelected(item_range, True)
+
+        menu = QtWidgets.QMenu()
+        modify_row_action = menu.addAction("Modify")
+        menu.addSeparator()
+        delete_row_action = menu.addAction("Delete")
+        action = menu.exec_(self.table_roi.viewport().mapToGlobal(pos))
+        if action == delete_row_action:
+            self.table_roi.removeRow(c)
+        if action == modify_row_action:
+            pass
+
+    @QtCore.pyqtSlot(QtCore.QPoint)
+    def on_customContextMenuRequested_Ids(self, pos):
+        it = self.table_Ids.itemAt(pos)
+        if it is None: return
+        c = it.row()
+        item_range = QtWidgets.QTableWidgetSelectionRange(c, 0, c, self.table_Ids.columnCount() - 1)
+        self.table_Ids.setRangeSelected(item_range, True)
+
+        menu = QtWidgets.QMenu()
+        modify_row_action = menu.addAction("Modify")
+        menu.addSeparator()
+        delete_row_action = menu.addAction("Delete")
+        action = menu.exec_(self.table_Ids.viewport().mapToGlobal(pos))
+        if action == delete_row_action:
+            self.table_Ids.removeRow(c)
+        if action == modify_row_action:
+            pass
+
 
     def importData(self, data, root=None):
         self.model.setRowCount(0)
@@ -67,6 +175,12 @@ class PluginManager(QtWidgets.QMainWindow, Ui_PluginManager):
     def changeDislpay(self, type):
         # create a file that keeps a record of the tables and call to populate the given table
         if type == "2D View":
+            self.enabled.setVisible(True)
+            self.enabledHash.setVisible(False)
+            self.enabledROI.setVisible(False)
+            self.enabledWindow.setVisible(False)
+            self.enabledOrgan.setVisible(False)
+            self.enabledVolume.setVisible(False)
             self.table_modules.setVisible(True)
             self.table_view.setVisible(False)
             self.table_organ.setVisible(False)
@@ -80,6 +194,12 @@ class PluginManager(QtWidgets.QMainWindow, Ui_PluginManager):
             self.import_organ_csv.setVisible(False)
             self.table_modules.setColumnCount(0)
         elif type == "Anonymize":
+            self.enabled.setVisible(True)
+            self.enabledHash.setVisible(False)
+            self.enabledROI.setVisible(False)
+            self.enabledWindow.setVisible(False)
+            self.enabledOrgan.setVisible(False)
+            self.enabledVolume.setVisible(False)
             self.table_modules.setVisible(True)
             self.table_view.setVisible(False)
             self.table_organ.setVisible(False)
@@ -93,6 +213,12 @@ class PluginManager(QtWidgets.QMainWindow, Ui_PluginManager):
             self.import_organ_csv.setVisible(False)
             self.table_modules.setColumnCount(0)
         elif type == "DVH":
+            self.enabled.setVisible(True)
+            self.enabledHash.setVisible(False)
+            self.enabledROI.setVisible(False)
+            self.enabledWindow.setVisible(False)
+            self.enabledOrgan.setVisible(False)
+            self.enabledVolume.setVisible(False)
             self.table_modules.setVisible(True)
             self.table_view.setVisible(False)
             self.table_organ.setVisible(False)
@@ -106,6 +232,12 @@ class PluginManager(QtWidgets.QMainWindow, Ui_PluginManager):
             self.import_organ_csv.setVisible(False)
             self.table_modules.setColumnCount(0)
         elif type == "Image Windowing":
+            self.enabled.setVisible(False)
+            self.enabledHash.setVisible(False)
+            self.enabledROI.setVisible(False)
+            self.enabledWindow.setVisible(True)
+            self.enabledOrgan.setVisible(False)
+            self.enabledVolume.setVisible(False)
             self.table_modules.setVisible(False)
             self.table_view.setVisible(True)
             self.table_organ.setVisible(False)
@@ -118,6 +250,12 @@ class PluginManager(QtWidgets.QMainWindow, Ui_PluginManager):
             self.add_standard_organ_name.setVisible(False)
             self.import_organ_csv.setVisible(False)
         elif type == "Standard Organ Names":
+            self.enabled.setVisible(False)
+            self.enabledHash.setVisible(False)
+            self.enabledROI.setVisible(False)
+            self.enabledWindow.setVisible(False)
+            self.enabledOrgan.setVisible(True)
+            self.enabledVolume.setVisible(False)
             self.table_modules.setVisible(False)
             self.table_view.setVisible(False)
             self.table_organ.setVisible(True)
@@ -130,6 +268,12 @@ class PluginManager(QtWidgets.QMainWindow, Ui_PluginManager):
             self.add_standard_organ_name.setVisible(True)
             self.import_organ_csv.setVisible(True)
         elif type == "Standard Volume Names":
+            self.enabled.setVisible(False)
+            self.enabledHash.setVisible(False)
+            self.enabledROI.setVisible(False)
+            self.enabledWindow.setVisible(False)
+            self.enabledOrgan.setVisible(False)
+            self.enabledVolume.setVisible(True)
             self.table_modules.setVisible(False)
             self.table_view.setVisible(False)
             self.table_organ.setVisible(False)
@@ -142,6 +286,12 @@ class PluginManager(QtWidgets.QMainWindow, Ui_PluginManager):
             self.add_standard_organ_name.setVisible(False)
             self.import_organ_csv.setVisible(False)
         elif type == "Create ROI from Isodose":
+            self.enabled.setVisible(False)
+            self.enabledHash.setVisible(False)
+            self.enabledROI.setVisible(True)
+            self.enabledWindow.setVisible(False)
+            self.enabledOrgan.setVisible(False)
+            self.enabledVolume.setVisible(False)
             self.table_modules.setVisible(False)
             self.table_view.setVisible(False)
             self.table_organ.setVisible(False)
@@ -154,6 +304,12 @@ class PluginManager(QtWidgets.QMainWindow, Ui_PluginManager):
             self.add_standard_organ_name.setVisible(False)
             self.import_organ_csv.setVisible(False)
         elif type == "Patient ID - Hash ID":
+            self.enabled.setVisible(False)
+            self.enabledHash.setVisible(True)
+            self.enabledROI.setVisible(False)
+            self.enabledWindow.setVisible(False)
+            self.enabledOrgan.setVisible(False)
+            self.enabledVolume.setVisible(False)
             self.table_modules.setVisible(False)
             self.table_view.setVisible(False)
             self.table_organ.setVisible(False)
@@ -177,6 +333,120 @@ class PluginManager(QtWidgets.QMainWindow, Ui_PluginManager):
             self.table_volume.setVisible(False)
             self.table_roi.setVisible(False)
             self.table_Ids.setVisible(False)
+            self.enabled.setVisible(False)
+            self.enabledHash.setVisible(False)
+            self.enabledROI.setVisible(False)
+            self.enabledWindow.setVisible(False)
+            self.enabledOrgan.setVisible(False)
+            self.enabledVolume.setVisible(False)
+
+    def fillTables(self):
+        with open('src/data/csv/imageWindowing.csv', "r") as fileInput:
+            enabled = next(fileInput)
+            enabled = enabled.replace(',', '')
+            enabled = enabled.replace('\n','')
+            if (str(enabled) == 'Enabled'):
+                self.enabledWindow.setChecked(True)
+            else:
+                self.enabledWindow.setChecked(False)
+            i=0;
+            for row in fileInput:
+                items = [
+                    QTableWidgetItem(str(item))
+                    for item in row.split(',')
+                ]
+
+                self.table_view.insertRow(i)
+                self.table_view.setItem(i, 0, items[0])
+                self.table_view.setItem(i, 1, items[1])
+                self.table_view.setItem(i, 2, items[2])
+                self.table_view.setItem(i, 3, items[3])
+                i+=1
+
+        #organ names
+        with open('src/data/csv/organName.csv', "r") as fileInput:
+            enabled = next(fileInput)
+            enabled = enabled.replace(',', '')
+            enabled = enabled.replace('\n','')
+            if (enabled == 'Enabled'):
+                self.enabledOrgan.setChecked(True)
+            else:
+                self.enabledOrgan.setChecked(False)
+            i = 0;
+            for row in fileInput:
+                items = [
+                    QTableWidgetItem(str(item.replace('\n', '')))
+                    for item in row.split(',')
+                ]
+
+                self.table_organ.insertRow(i)
+                self.table_organ.setItem(i, 0, items[0])
+                self.table_organ.setItem(i, 1, items[1])
+                self.table_organ.setItem(i, 2, items[2])
+                i += 1
+
+        #volume name
+        with open('src/data/csv/volumeName.csv', "r") as fileInput:
+            enabled = next(fileInput)
+            enabled = enabled.replace(',', '')
+            enabled = enabled.replace('\n','')
+            if (enabled == 'Enabled'):
+                self.enabledVolume.setChecked(True)
+            else:
+                self.enabledVolume.setChecked(False)
+            i = 0;
+            for row in fileInput:
+                items = [
+                    QTableWidgetItem(str(item.replace('\n', '')))
+                    for item in row.split(',')
+                ]
+                self.table_volume.insertRow(i)
+                self.table_volume.setItem(i, 0, items[0])
+                self.table_volume.setItem(i, 1, items[1])
+                self.table_volume.setItem(i, 2, items[2])
+                i += 1
+
+        #roi isodose
+        with open('src/data/csv/isodoseRoi.csv', "r") as fileInput:
+            enabled = next(fileInput)
+            enabled = enabled.replace(',', '')
+            enabled = enabled.replace('\n','')
+            if (enabled == 'Enabled'):
+                self.enabledROI.setChecked(True)
+            else:
+                self.enabledROI.setChecked(False)
+            i = 0;
+            for row in fileInput:
+                items = [
+                    QTableWidgetItem(str(item.replace('\n', '')))
+                    for item in row.split(',')
+                ]
+
+                self.table_roi.insertRow(i)
+                self.table_roi.setItem(i, 0, items[0])
+                self.table_roi.setItem(i, 1, items[1])
+                i += 1
+        #patient hash
+        with open('src/data/csv/patientHash.csv', "r") as fileInput:
+            enabled = next(fileInput)
+            enabled = enabled.replace(',', '')
+            enabled = enabled.replace('\n','')
+            if (enabled == 'Enabled'):
+                self.enabledHash.setChecked(True)
+            else:
+                self.enabledHash.setChecked(False)
+            i = 0;
+            for row in fileInput:
+                items = [
+                    QTableWidgetItem(str(item.replace('\n', '')))
+                    for item in row.split(',')
+                ]
+
+                self.table_Ids.insertRow(i)
+                self.table_Ids.setItem(i, 0, items[0])
+                self.table_Ids.setItem(i, 1, items[1])
+                i += 1
+
 
 
 class PManager:

@@ -1,8 +1,11 @@
 import glob
 import sys
 
+<<<<<<< HEAD
 import warnings
 warnings.filterwarnings("ignore")
+=======
+>>>>>>> 4104d2f7d8b2369d05b43b106a4e2e68f9214b5f
 
 import matplotlib.pyplot as plt1
 from PyQt5.QtCore import Qt, QPoint, QPointF, QRectF
