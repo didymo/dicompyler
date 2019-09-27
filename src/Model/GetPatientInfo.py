@@ -56,6 +56,8 @@ def get_basic_info(ds):
 class DicomTree(object):
     def __init__(self, filename):
         self.filename = filename
+        self.dataset = self.read_dcm(filename)
+        self.dict = self.dataset_to_dict(self.dataset)
 
     # Read dicom file to dataset
     def read_dcm(self, filename):
