@@ -36,7 +36,7 @@ class WelcomePage(object):
         self.pushButton.setObjectName("pushButton")
         self.pushButton.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.logo = QtWidgets.QLabel(self.centralwidget)
-        self.logo.setGeometry(QtCore.QRect(100, 30, 671, 261))
+        self.logo.setGeometry(QtCore.QRect(185, 30, 480, 261))
         self.logo.setText("")
         self.logo.setPixmap(QtGui.QPixmap("src/Icon/logo.png"))
         self.logo.setScaledContents(True)
@@ -55,7 +55,7 @@ class WelcomePage(object):
 
     def retranslateUi(self, WelcomePage):
         _translate = QtCore.QCoreApplication.translate
-        WelcomePage.setWindowTitle(_translate("WelcomePage", "WelcomePage"))
+        WelcomePage.setWindowTitle(_translate("WelcomePage", "Onko"))
         self.welcomeLabel.setText(_translate("WelcomePage", "Welcome to Onko!"))
         self.label_2.setText(_translate("WelcomePage", "To get started, upload a patient file and a clinical spreadsheet (optional)."))
         self.pushButton.setText(_translate("WelcomePage", "Open Patient"))

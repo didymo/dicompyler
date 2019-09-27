@@ -2,8 +2,9 @@ import csv
 import sys
 from collections import deque
 
-from PyQt5.QtGui import QStandardItem
-from PyQt5.QtWidgets import QTableWidgetItem
+from PyQt5.QtCore import Qt, QModelIndex
+from PyQt5.QtGui import QStandardItem, QDropEvent
+from PyQt5.QtWidgets import QTableWidgetItem, QMessageBox, QAbstractItemView, QTableView, QTableWidget
 
 from src.View.PluginManager import *
 from src.data.csv import *
@@ -42,6 +43,7 @@ class PluginManager(QtWidgets.QMainWindow, Ui_PluginManager):
         self.table_roi.customContextMenuRequested.connect(self.on_customContextMenuRequested_Roi)
         self.table_Ids.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.table_Ids.customContextMenuRequested.connect(self.on_customContextMenuRequested_Ids)
+
 
     #windowing
     @QtCore.pyqtSlot(QtCore.QPoint)
