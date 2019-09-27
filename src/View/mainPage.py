@@ -1,18 +1,7 @@
-import sys
-from PyQt5 import QtCore, QtGui, QtWidgets
 import matplotlib.pylab as plt
-import numpy as np
 from PyQt5.QtGui import QTransform
-
 from src.Controller.pluginMController import PManager
-from src.Model.LoadPatients import *
 from src.Model.CalculateDVHs import *
-from PyQt5.QtCore import QStringListModel
-from PyQt5.QtWidgets import QCompleter, QLineEdit, QGraphicsView
-from country_list import countries_for_language
-from array import *
-import numpy as np
-import csv
 from src.Model.CalculateImages import *
 from src.Model.GetPatientInfo import *
 from src.Controller.mainPageController import MainPage
@@ -96,32 +85,13 @@ class Ui_MainWindow(object):
         self.gridLayout_view.setHorizontalSpacing(0)
 
         # Vertical Slider
-        self.slider = QtWidgets.QSlider(QtCore.Qt.Vertical)
-        self.slider.setMinimum(0)
-        self.slider.setMaximum(len(self.pixmaps) - 1)
-        self.slider.setValue(int(len(self.pixmaps) / 2))
-        self.slider.setTickPosition(QtWidgets.QSlider.TicksLeft)
-        self.slider.setTickInterval(1)
-        self.slider.setStyleSheet("QSlider::handle:vertical:hover {background: qlineargradient(x1:0, y1:0, x2:1, "
-                                  "y2:1, stop:0 #fff, stop:1 #ddd);border: 1px solid #444;border-radius: 4px;}")
-        # self.slider.setAutoFillBackground(True)
-        # p = self.slider.palette()
-        # p.setColor(self.slider.backgroundRole(), QtCore.Qt.black)
-        # self.slider.setPalette(p)
-        self.slider.valueChanged.connect(self.valueChangeSlider)
-        self.slider.setGeometry(QtCore.QRect(0, 0, 50, 500))
+        self.initSlider()
         self.gridLayout_view.addWidget(self.slider, 0, 1, 1, 1)
-
         # DICOM image processing
-        self.DICOM_view = QtWidgets.QGraphicsView(self.tab2_view)
-        background_brush = QtGui.QBrush(QtGui.QColor(0, 0, 0), QtCore.Qt.SolidPattern)
-        self.DICOM_view.setBackgroundBrush(background_brush)
-        self.DICOM_view.setGeometry(QtCore.QRect(0, 0, 877, 517))
-        self.DICOM_view.setObjectName("DICOM_view")
+        self.initDICOM_view()
         self.DICOM_image_display()
         self.textOnDICOM_View()
         self.DICOM_view.setScene(self.DICOM_image_scene)
-
         self.gridLayout_view.addWidget(self.DICOM_view, 0, 0, 1, 1)
 
         self.tab2.addTab(self.tab2_view, "")
@@ -138,17 +108,8 @@ class Ui_MainWindow(object):
 
         # DVH Processing
         self.initDVH_view()
-
         # DVH: Export DVH Button
-        self.button_exportDVH = QtWidgets.QPushButton()
-        self.button_exportDVH.setFixedSize(QtCore.QSize(100, 39))
-        self.button_exportDVH.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-        self.button_exportDVH.setStyleSheet("background-color: rgb(238, 238, 236);\n"
-                                            "font: 57 11pt \"Ubuntu\";\n"
-                                            "color:rgb(75,0,130);\n"
-                                            "font-weight: bold;\n")
-        self.button_exportDVH.setObjectName("button_exportDVH")
-        self.gridL_DVH.addWidget(self.button_exportDVH, 1, 1, 1, 1, QtCore.Qt.AlignBottom)
+        self.initExportDVH()
 
         self.tab2.addTab(self.tab2_DVH, "")
 
@@ -159,35 +120,13 @@ class Ui_MainWindow(object):
         self.vboxL_Tree = QtWidgets.QVBoxLayout(self.tab2_DICOM_tree)
         self.vboxL_Tree.setObjectName("vboxL_Tree")
         self.vboxL_Tree.setContentsMargins(0, 0, 0, 0)
+
         # Tree view selector
-        self.comboBox_TreeSelector = QtWidgets.QComboBox()
-        self.comboBox_TreeSelector.setStyleSheet("QComboBox {font: 75 10pt \"Laksaman\";"
-                                                 "combobox-popup: 0;"
-                                                 "background-color: #efefef; }")
-        self.comboBox_TreeSelector.addItem("Select a DICOM dataset...")
-        self.comboBox_TreeSelector.addItem("RT Dose")
-        self.comboBox_TreeSelector.addItem("RTSS")
-        for i in range(len(self.pixmaps) - 1):
-            self.comboBox_TreeSelector.addItem("CT Image Slice " + str(i + 1))
-        self.comboBox_TreeSelector.activated.connect(self.comboTreeSelector)
-        self.comboBox_TreeSelector.setFixedSize(QtCore.QSize(180, 31))
-        self.vboxL_Tree.addWidget(self.comboBox_TreeSelector, QtCore.Qt.AlignLeft)
+        self.initTreeViewSelector()
         # Creation of the Tree View
         self.treeView = QtWidgets.QTreeView(self.tab2_DICOM_tree)
         self.initTree()
-        # Set parameters for the Tree View
-        self.treeView.header().resizeSection(0, 280)
-        self.treeView.header().resizeSection(1, 380)
-        self.treeView.header().resizeSection(2, 100)
-        self.treeView.header().resizeSection(3, 50)
-        self.treeView.header().resizeSection(4, 50)
-        self.treeView.header().setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
-        self.treeView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.treeView.setAlternatingRowColors(True)
-        self.treeView.setGeometry(QtCore.QRect(0, 0, 877, 517))
-        self.treeView.expandAll()
-        self.treeView.setObjectName("treeView")
-        self.vboxL_Tree.addWidget(self.treeView)
+        self.initTreeParameters()
         self.tab2.addTab(self.tab2_DICOM_tree, "")
 
         # Main view: Clinical Data
@@ -220,16 +159,7 @@ class Ui_MainWindow(object):
         self.frame_struct_info.setObjectName("frame_struct_info")
 
         # Structure Information: "Select Structure" combobox
-        self.comboBox = QtWidgets.QComboBox(self.frame_struct_info)
-        self.comboBox.setStyleSheet("font: 75 10pt \"Laksaman\";"
-                                    "combobox-popup: 0;"
-                                    "background-color: #efefef;")
-        self.comboBox.addItem("Select...")
-        for key, value in self.rois.items():
-            self.comboBox.addItem(value['name'])
-        self.comboBox.activated.connect(self.comboStructInfo)
-        self.comboBox.setGeometry(QtCore.QRect(5, 35, 188, 31))
-        self.comboBox.setObjectName("comboBox")
+        self.initStructInfoSelector()
 
         # Structure Information: "Volume" label
         self.struct_volume_label = QtWidgets.QLabel(self.frame_struct_info)
@@ -961,6 +891,7 @@ class Ui_MainWindow(object):
             QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         self.gridL_IsodCol.addItem(vspacer, 10, 0, 2, -1)
 
+    # Draw color squares
     def colorSquareDraw(self, a, b, c):
         colorSquareLabel = QtWidgets.QLabel()
         colorSquarePix = QtGui.QPixmap(15, 15)
@@ -973,6 +904,20 @@ class Ui_MainWindow(object):
     #  STRUCTURE INFORMATION  #
     ###########################
 
+    # Initialize the selector for structure information
+    def initStructInfoSelector(self):
+        self.comboBox = QtWidgets.QComboBox(self.frame_struct_info)
+        self.comboBox.setStyleSheet("font: 75 10pt \"Laksaman\";"
+                                    "combobox-popup: 0;"
+                                    "background-color: #efefef;")
+        self.comboBox.addItem("Select...")
+        for key, value in self.rois.items():
+            self.comboBox.addItem(value['name'])
+        self.comboBox.activated.connect(self.comboStructInfo)
+        self.comboBox.setGeometry(QtCore.QRect(5, 35, 188, 31))
+        self.comboBox.setObjectName("comboBox")
+
+    # Function triggered when an item is selected
     def comboStructInfo(self, index):
         _translate = QtCore.QCoreApplication.translate
 
@@ -1050,7 +995,6 @@ class Ui_MainWindow(object):
 
         return fig
 
-
     # def export_legend(self, legend, filename="legend.png", expand=[-5, -5, 5, 5]):
     #     fig = legend.figure
     #     fig.canvas.draw()
@@ -1058,11 +1002,6 @@ class Ui_MainWindow(object):
     #     bbox = bbox.from_extents(*(bbox.extents + np.array(expand)))
     #     bbox = bbox.transformed(fig.dpi_scale_trans.inverted())
     #     fig.savefig(filename, dpi="figure", bbox_inches=bbox)
-
-
-    ####################################
-    #  DICOM IMAGE VIEW FUNCTIONALITY  #
-    ####################################
 
     def initDVH_view(self):
         fig = self.DVH_view()
@@ -1075,6 +1014,47 @@ class Ui_MainWindow(object):
         fig = self.DVH_view()
         self.plotWidget = FigureCanvas(fig)
         self.gridL_DVH.addWidget(self.plotWidget, 1, 0, 1, 1)
+
+
+    def initExportDVH(self):
+        self.button_exportDVH = QtWidgets.QPushButton()
+        self.button_exportDVH.setFixedSize(QtCore.QSize(100, 39))
+        self.button_exportDVH.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.button_exportDVH.setStyleSheet("background-color: rgb(238, 238, 236);\n"
+                                            "font: 57 11pt \"Ubuntu\";\n"
+                                            "color:rgb(75,0,130);\n"
+                                            "font-weight: bold;\n")
+        self.button_exportDVH.setObjectName("button_exportDVH")
+        self.gridL_DVH.addWidget(self.button_exportDVH, 1, 1, 1, 1, QtCore.Qt.AlignBottom)
+
+
+    ####################################
+    #  DICOM IMAGE VIEW FUNCTIONALITY  #
+    ####################################
+
+    def initSlider(self):
+        self.slider = QtWidgets.QSlider(QtCore.Qt.Vertical)
+        self.slider.setMinimum(0)
+        self.slider.setMaximum(len(self.pixmaps) - 1)
+        self.slider.setValue(int(len(self.pixmaps) / 2))
+        self.slider.setTickPosition(QtWidgets.QSlider.TicksLeft)
+        self.slider.setTickInterval(1)
+        self.slider.setStyleSheet("QSlider::handle:vertical:hover {background: qlineargradient(x1:0, y1:0, x2:1, "
+                                  "y2:1, stop:0 #fff, stop:1 #ddd);border: 1px solid #444;border-radius: 4px;}")
+        # self.slider.setAutoFillBackground(True)
+        # p = self.slider.palette()
+        # p.setColor(self.slider.backgroundRole(), QtCore.Qt.black)
+        # self.slider.setPalette(p)
+        self.slider.valueChanged.connect(self.valueChangeSlider)
+        self.slider.setGeometry(QtCore.QRect(0, 0, 50, 500))
+
+
+    def initDICOM_view(self):
+        self.DICOM_view = QtWidgets.QGraphicsView(self.tab2_view)
+        background_brush = QtGui.QBrush(QtGui.QColor(0, 0, 0), QtCore.Qt.SolidPattern)
+        self.DICOM_view.setBackgroundBrush(background_brush)
+        self.DICOM_view.setGeometry(QtCore.QRect(0, 0, 877, 517))
+        self.DICOM_view.setObjectName("DICOM_view")
 
 
     def DICOM_image_display(self):
@@ -1159,6 +1139,21 @@ class Ui_MainWindow(object):
     #  DICOM TREE VIEW FUNCTIONALITY  #
     ###################################
 
+    def initTreeViewSelector(self):
+        self.comboBox_TreeSelector = QtWidgets.QComboBox()
+        self.comboBox_TreeSelector.setStyleSheet("QComboBox {font: 75 10pt \"Laksaman\";"
+                                                 "combobox-popup: 0;"
+                                                 "background-color: #efefef; }")
+        self.comboBox_TreeSelector.addItem("Select a DICOM dataset...")
+        self.comboBox_TreeSelector.addItem("RT Dose")
+        self.comboBox_TreeSelector.addItem("RTSS")
+        for i in range(len(self.pixmaps) - 1):
+            self.comboBox_TreeSelector.addItem("CT Image Slice " + str(i + 1))
+        self.comboBox_TreeSelector.activated.connect(self.comboTreeSelector)
+        self.comboBox_TreeSelector.setFixedSize(QtCore.QSize(180, 31))
+        self.vboxL_Tree.addWidget(self.comboBox_TreeSelector, QtCore.Qt.AlignLeft)
+
+
     def comboTreeSelector(self, index):
         # CT Scans
         if index > 2:
@@ -1171,6 +1166,7 @@ class Ui_MainWindow(object):
             self.updateTree(False, 0, "RTSS")
 
     def initTree(self):
+        # Create the model for the tree
         self.modelTree = QtGui.QStandardItemModel(0, 5)
         self.modelTree.setHeaderData(0, QtCore.Qt.Horizontal, "Name")
         self.modelTree.setHeaderData(1, QtCore.Qt.Horizontal, "Value")
@@ -1178,6 +1174,22 @@ class Ui_MainWindow(object):
         self.modelTree.setHeaderData(3, QtCore.Qt.Horizontal, "VM")
         self.modelTree.setHeaderData(4, QtCore.Qt.Horizontal, "VR")
         self.treeView.setModel(self.modelTree)
+
+    def initTreeParameters(self):
+        # Set parameters for the Tree View
+        self.treeView.header().resizeSection(0, 280)
+        self.treeView.header().resizeSection(1, 380)
+        self.treeView.header().resizeSection(2, 100)
+        self.treeView.header().resizeSection(3, 50)
+        self.treeView.header().resizeSection(4, 50)
+        self.treeView.header().setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
+        self.treeView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.treeView.setAlternatingRowColors(True)
+        self.treeView.setGeometry(QtCore.QRect(0, 0, 877, 517))
+        self.treeView.expandAll()
+        self.treeView.setObjectName("treeView")
+        self.vboxL_Tree.addWidget(self.treeView)
+
 
     def updateTree(self, ct_file, id, name):
         self.initTree()
@@ -1203,6 +1215,7 @@ class Ui_MainWindow(object):
         parentItem = self.modelTree.invisibleRootItem()
         self.recurseBuildModel(dict, parentItem)
         self.treeView.setModel(self.modelTree)
+        self.vboxL_Tree.addWidget(self.treeView)
 
     def recurseBuildModel(self, dict, parent):
         # For every key in the dictionary
