@@ -1,8 +1,8 @@
-import numpy as np
+# import numpy as np
 from dicompylercore import dvhcalc, dicomparser
-import pydicom
-import matplotlib.pyplot as plt
-from dicompylercore.dicomparser import DicomParser
+# import pydicom
+# import matplotlib.pyplot as plt
+# from dicompylercore.dicomparser import DicomParser
 
 
 # Retrieve a dictionary of basic info of all ROIs
@@ -40,33 +40,33 @@ def calc_dvhs(rtss, dose, dict_roi, dose_limit=None):
     return dict_dvh
 
 
-# For the demo example
-def dvh_plot(dvh):
-    plt.plot(dvh.bincenters, 100*dvh.counts/dvh.volume, label=dvh.name,
-             color=None if not isinstance(dvh.color, np.ndarray) else
-             (dvh.color / 255))
-    plt.xlabel('Dose [%s]' % dvh.dose_units)
-    plt.ylabel('Volume [%s]' % '%')
-    if dvh.name:
-        plt.legend(loc='best')
-    plt.show()
-
-
-# Example of usage
-if __name__ == '__main__':
-    path = '/home/xudong/dicom_sample/'
-    rtss_path = path + 'rtss.dcm'
-    rtdose_path = path + 'rtdose.dcm'
-
-    ds_rtdose = pydicom.dcmread(rtdose_path)
-    ds_rtss = pydicom.dcmread(rtss_path)
-
-    rois = get_roi_info(ds_rtss)
-    print(rois)
-
-    # for roi in rois:
-    #     print(rois[roi]['name'])
-
-    dvhs = calc_dvhs(ds_rtss, ds_rtdose, rois)
-    for i in dvhs:
-        print(dvhs[i])
+# # For the demo example
+# def dvh_plot(dvh):
+#     plt.plot(dvh.bincenters, 100*dvh.counts/dvh.volume, label=dvh.name,
+#              color=None if not isinstance(dvh.color, np.ndarray) else
+#              (dvh.color / 255))
+#     plt.xlabel('Dose [%s]' % dvh.dose_units)
+#     plt.ylabel('Volume [%s]' % '%')
+#     if dvh.name:
+#         plt.legend(loc='best')
+#     plt.show()
+#
+#
+# # Example of usage
+# if __name__ == '__main__':
+#     path = '/home/xudong/dicom_sample/'
+#     rtss_path = path + 'rtss.dcm'
+#     rtdose_path = path + 'rtdose.dcm'
+#
+#     ds_rtdose = pydicom.dcmread(rtdose_path)
+#     ds_rtss = pydicom.dcmread(rtss_path)
+#
+#     rois = get_roi_info(ds_rtss)
+#     print(rois)
+#
+#     # for roi in rois:
+#     #     print(rois[roi]['name'])
+#
+#     dvhs = calc_dvhs(ds_rtss, ds_rtdose, rois)
+#     for i in dvhs:
+#         print(dvhs[i])
